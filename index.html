@@ -748,21 +748,61 @@ if (counterEl) cObs.observe(counterEl);
 
 // Signup
 var signups = [];
-function handleSignup(inputId, successId, microId) {
+async function handleSignup(inputId, successId, microId) {
   var input = document.getElementById(inputId);
   var success = document.getElementById(successId);
   var micro = document.getElementById(microId);
   var email = input.value.trim();
-  if (!email || email.indexOf('@') === -1) {
+
+  // Basic validation
+  if (!email || email.indexOf('@') === -1 || email.indexOf('.') === -1) {
     input.parentElement.style.borderColor = '#B8704E';
     input.focus();
     return;
   }
-  signups.push(email);
-  input.parentElement.style.display = 'none';
-  if (micro) micro.style.display = 'none';
-  success.style.display = 'block';
-  if (counterEl) counterEl.textContent = (848 + signups.length - 1).toLocaleString();
+
+  // Duplicate check
+  if (signups.indexOf(email) !== -1) {
+    input.parentElement.style.display = 'none';
+    if (micro) micro.style.display = 'none';
+    success.style.display = 'block';
+    return;
+  }
+
+  // Disable button during submission
+  var btn = input.parentElement.querySelector('.email-btn');
+  var btnSpan = btn.querySelector('span');
+  btn.disabled = true;
+  btnSpan.textContent = 'Sending...';
+
+  try {
+    var response = await fetch('https://formspree.io/f/mzdyqvbe', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+      body: JSON.stringify({
+        email: email,
+        source: inputId === 'hero-email' ? 'hero' : 'cta',
+        timestamp: new Date().toISOString()
+      })
+    });
+
+    if (response.ok) {
+      signups.push(email);
+      input.parentElement.style.display = 'none';
+      if (micro) micro.style.display = 'none';
+      success.style.display = 'block';
+      if (counterEl) counterEl.textContent = (848 + signups.length - 1).toLocaleString();
+    } else {
+      // Show error state
+      btnSpan.textContent = 'Try again';
+      btn.disabled = false;
+      input.parentElement.style.borderColor = '#B8704E';
+    }
+  } catch (err) {
+    btnSpan.textContent = 'Try again';
+    btn.disabled = false;
+    input.parentElement.style.borderColor = '#B8704E';
+  }
 }
 </script>
 </body>
