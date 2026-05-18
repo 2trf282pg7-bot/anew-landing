@@ -1,0 +1,39 @@
+@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400&family=DM+Sans:wght@300;400;500&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --clay: #B8704E;
+  --clay-dark: #8C4E32;
+  --warm-white: #FAF6F1;
+  --charcoal: #1C1614;
+  --charcoal-soft: #5C4D45;
+  --stone: #8A7870;
+  --blush-deep: #DBBAA6;
+  --section-alt: #F5EFE8;
+}
+
+body {
+  background-color: var(--warm-white);
+  color: var(--charcoal);
+  font-family: 'DM Sans', sans-serif;
+}
+
+@layer utilities {
+  .typing-dot {
+    animation: typing 1.4s infinite;
+  }
+  .typing-dot:nth-child(2) {
+    animation-delay: 0.2s;
+  }
+  .typing-dot:nth-child(3) {
+    animation-delay: 0.4s;
+  }
+}
+
+@keyframes typing {
+  0%, 60%, 100% { opacity: 0.2; transform: translateY(0); }
+  30% { opacity: 1; transform: translateY(-4px); }
+}
