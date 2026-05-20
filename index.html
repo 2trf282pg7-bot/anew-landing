@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ja">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Anew - Feel close again</title>
+<title>Anew – まだ好きだよ。</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,300;1,400;1,500&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500&display=swap" rel="stylesheet">
@@ -11,574 +11,410 @@
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
 :root {
-  --cream: #F2EDE6;
-  --warm-white: #FAF6F1;
   --clay: #B8704E;
-  --clay-light: #D4906E;
   --clay-dark: #8C4E32;
+  --warm-white: #FAF6F1;
   --charcoal: #1C1614;
-  --charcoal-mid: #3A2E28;
   --charcoal-soft: #5C4D45;
   --stone: #8A7870;
-  --blush: #EDD4C6;
   --blush-deep: #DBBAA6;
   --section-alt: #F5EFE8;
-  --sage: #5E8A60;
 }
 
 html { scroll-behavior: smooth; }
-body {
-  background: var(--warm-white);
-  color: var(--charcoal);
-  font-family: 'DM Sans', sans-serif;
-  font-weight: 300;
-  overflow-x: hidden;
-}
+body { font-family: 'DM Sans', sans-serif; background: var(--warm-white); color: var(--charcoal); line-height: 1.7; }
 
-/* NAV */
-nav {
-  position: fixed; top: 0; left: 0; right: 0; z-index: 200;
-  padding: 26px 48px;
-  display: flex; justify-content: space-between; align-items: center;
-  background: linear-gradient(to bottom, rgba(250,246,241,0.97) 0%, rgba(250,246,241,0) 100%);
-}
-.nav-logo {
-  font-family: 'Cormorant Garamond', serif;
-  font-size: 24px; font-weight: 400;
-  color: var(--charcoal); letter-spacing: 0.1em; text-decoration: none;
-}
-.nav-cta {
-  font-size: 11px; font-weight: 500; letter-spacing: 0.14em; text-transform: uppercase;
-  color: var(--charcoal-soft); text-decoration: none;
-  padding-bottom: 3px; border-bottom: 1px solid var(--stone);
-  transition: color 0.25s, border-color 0.25s;
-}
-.nav-cta:hover { color: var(--clay); border-color: var(--clay); }
+h1, h2, h3 { font-family: 'Cormorant Garamond', serif; font-weight: 400; }
 
-/* HERO */
-.hero {
-  min-height: 100vh;
-  display: flex; flex-direction: column;
-  align-items: center; justify-content: center;
-  text-align: center;
-  padding: 140px 40px 80px;
-  position: relative; overflow: hidden;
-  background: var(--warm-white);
-}
-.hero::before {
-  content: '';
-  position: absolute; top: 30%; left: 50%;
-  transform: translate(-50%, -50%);
-  width: 600px; height: 600px; border-radius: 50%;
-  background: radial-gradient(circle, rgba(221,186,166,0.35) 0%, transparent 70%);
-  pointer-events: none;
-}
+/* ── NAV ── */
+nav { padding: 1.2rem 2rem; display: flex; justify-content: space-between; align-items: center; }
+.nav-logo { font-family: 'Cormorant Garamond', serif; font-size: 1.4rem; letter-spacing: .08em; color: var(--clay); }
 
-.hero-eyebrow {
-  font-size: 11px; font-weight: 500; letter-spacing: 0.2em; text-transform: uppercase;
-  color: var(--clay); margin-bottom: 28px;
-  opacity: 0; animation: fadeUp 0.9s ease 0.1s forwards;
-  position: relative; z-index: 1;
-}
-.hero-headline {
-  font-family: 'Cormorant Garamond', serif;
-  font-size: clamp(48px, 7vw, 84px); font-weight: 300; line-height: 1.08;
-  color: var(--charcoal); margin-bottom: 24px; max-width: 760px;
-  opacity: 0; animation: fadeUp 0.9s ease 0.25s forwards;
-  position: relative; z-index: 1;
-}
-.hero-headline em { font-style: italic; color: var(--clay); }
+/* ── HERO ── */
+.hero { min-height: 90vh; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; padding: 4rem 2rem; }
+.hero h1 { font-size: clamp(2.4rem, 6vw, 4rem); font-style: italic; color: var(--charcoal); max-width: 700px; line-height: 1.25; margin-bottom: 1.4rem; }
+.hero-sub { font-size: 1.1rem; color: var(--charcoal-soft); max-width: 480px; margin-bottom: 2rem; }
+.hero-situations { list-style: none; margin-bottom: 2.8rem; display: flex; flex-direction: column; gap: .5rem; }
+.hero-situations li { font-style: italic; color: var(--stone); font-size: 1rem; }
+.btn-primary { background: var(--clay); color: #fff; border: none; padding: .85rem 2rem; border-radius: 3rem; font-family: 'DM Sans', sans-serif; font-size: 1rem; cursor: pointer; transition: background .2s; }
+.btn-primary:hover { background: var(--clay-dark); }
 
-.hero-situations {
-  display: flex; flex-direction: column; gap: 5px;
-  margin-bottom: 32px;
-  opacity: 0; animation: fadeUp 0.9s ease 0.38s forwards;
-  position: relative; z-index: 1;
-}
-.hero-situation {
-  font-family: 'Cormorant Garamond', serif;
-  font-size: clamp(15px, 2vw, 18px); font-style: italic;
-  color: var(--charcoal-soft); line-height: 1.5;
-}
-.hero-situation::before { content: '-- '; color: var(--blush-deep); }
+/* ── WHY ── */
+.section { padding: 5rem 2rem; }
+.section-alt { background: var(--section-alt); }
+.section-inner { max-width: 740px; margin: 0 auto; }
+.section h2 { font-size: clamp(1.8rem, 4vw, 2.6rem); margin-bottom: 1.6rem; }
+.stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 1.5rem; margin: 2rem 0; }
+.stat { text-align: center; padding: 1.5rem 1rem; background: #fff; border-radius: 1rem; border: 1px solid #E8DDD6; }
+.stat-num { font-family: 'Cormorant Garamond', serif; font-size: 2.6rem; color: var(--clay); }
+.stat-label { font-size: .85rem; color: var(--charcoal-soft); margin-top: .3rem; }
+.disclaimer { font-size: .9rem; font-style: italic; color: var(--stone); margin-top: 1.8rem; border-left: 3px solid var(--blush-deep); padding-left: 1rem; }
 
-.hero-sub {
-  font-size: 16px; line-height: 1.75; color: var(--charcoal-soft);
-  max-width: 440px; margin: 0 auto 36px;
-  opacity: 0; animation: fadeUp 0.9s ease 0.5s forwards;
-  position: relative; z-index: 1;
-}
+/* ── HOW ── */
+.steps { display: flex; flex-direction: column; gap: 2rem; margin-top: 2rem; }
+.step { display: flex; gap: 1.2rem; align-items: flex-start; }
+.step-num { flex-shrink: 0; width: 2.4rem; height: 2.4rem; border-radius: 50%; background: var(--clay); color: #fff; display: flex; align-items: center; justify-content: center; font-size: .9rem; font-weight: 500; }
+.step-text h3 { font-size: 1.1rem; margin-bottom: .3rem; }
+.step-text p { font-size: .95rem; color: var(--charcoal-soft); }
 
-/* PRIMARY BUTTON */
-.primary-btn {
-  display: inline-block;
-  background: var(--clay); color: white; border: none; border-radius: 6px;
-  padding: 17px 40px; font-family: 'DM Sans', sans-serif;
-  font-size: 12px; font-weight: 500; letter-spacing: 0.1em; text-transform: uppercase;
-  cursor: pointer; position: relative; overflow: hidden;
-  transition: transform 0.15s; text-decoration: none;
-  box-shadow: 0 6px 32px rgba(28,22,20,0.12);
-}
-.primary-btn::before {
-  content: ''; position: absolute; inset: 0;
-  background: var(--clay-dark);
-  transform: scaleX(0); transform-origin: left;
-  transition: transform 0.35s ease;
-}
-.primary-btn:hover::before { transform: scaleX(1); }
-.primary-btn:hover { transform: translateY(-1px); }
-.primary-btn span { position: relative; z-index: 1; }
+/* ── CHAT ── */
+.chat-wrap { max-width: 640px; margin: 0 auto; }
+.chat-section-header { text-align: center; margin-bottom: 2rem; }
+.chat-section-header h2 { font-size: clamp(1.8rem, 4vw, 2.4rem); margin-bottom: .5rem; }
+.chat-section-header p { color: var(--charcoal-soft); font-size: .95rem; }
+.chat-box { background: #fff; border: 1px solid #E8DDD6; border-radius: 1.2rem; min-height: 320px; max-height: 480px; overflow-y: auto; padding: 1.2rem; display: flex; flex-direction: column; gap: .8rem; margin-bottom: 1rem; }
+.bubble { max-width: 78%; padding: .7rem 1rem; border-radius: 1.2rem; font-size: .95rem; line-height: 1.6; word-break: break-word; }
+.bubble-ai { background: #fff; border: 1px solid #E8DDD6; align-self: flex-start; border-bottom-left-radius: .3rem; color: var(--charcoal); }
+.bubble-user { background: var(--clay); color: #fff; align-self: flex-end; border-bottom-right-radius: .3rem; }
+.typing { display: flex; gap: .35rem; align-items: center; padding: .7rem 1rem; }
+.dot { width: 7px; height: 7px; background: var(--stone); border-radius: 50%; animation: blink 1.2s infinite; }
+.dot:nth-child(2) { animation-delay: .2s; }
+.dot:nth-child(3) { animation-delay: .4s; }
+@keyframes blink { 0%, 80%, 100% { opacity: .2; } 40% { opacity: 1; } }
+.quick-replies { display: flex; flex-wrap: wrap; gap: .5rem; margin-bottom: 1rem; }
+.quick-btn { border: 1px solid var(--clay); background: transparent; color: var(--clay); padding: .45rem .9rem; border-radius: 2rem; font-size: .85rem; cursor: pointer; font-family: 'DM Sans', sans-serif; transition: all .15s; }
+.quick-btn:hover { background: var(--clay); color: #fff; }
+.chat-input-row { display: flex; gap: .6rem; }
+.chat-input { flex: 1; border: 1px solid #E0D5CC; border-radius: 2rem; padding: .65rem 1.1rem; font-family: 'DM Sans', sans-serif; font-size: .95rem; outline: none; background: #fff; color: var(--charcoal); }
+.chat-input:focus { border-color: var(--clay); }
+.send-btn { background: var(--clay); color: #fff; border: none; border-radius: 50%; width: 2.6rem; height: 2.6rem; cursor: pointer; font-size: 1rem; display: flex; align-items: center; justify-content: center; flex-shrink: 0; transition: background .2s; }
+.send-btn:hover { background: var(--clay-dark); }
+.done-btn { display: none; width: 100%; margin-top: 1rem; background: var(--charcoal); color: #fff; border: none; padding: .85rem; border-radius: 3rem; font-family: 'DM Sans', sans-serif; font-size: 1rem; cursor: pointer; transition: background .2s; }
+.done-btn:hover { background: #000; }
 
-.form-microcopy {
-  font-size: 12px; color: var(--stone); letter-spacing: 0.04em;
-  opacity: 0; animation: fadeUp 0.9s ease 0.72s forwards;
-  position: relative; z-index: 1;
-}
+/* ── PAYWALL ── */
+.paywall-wrap { max-width: 640px; margin: 0 auto; text-align: center; }
+.paywall-wrap h2 { font-size: clamp(1.8rem, 4vw, 2.4rem); margin-bottom: 1rem; }
+.paywall-wrap p { color: var(--charcoal-soft); margin-bottom: 2rem; }
+.pattern-cards { display: flex; flex-direction: column; gap: 1rem; margin-bottom: 2rem; }
+.pattern-card { background: #fff; border: 1px solid #E8DDD6; border-radius: 1rem; padding: 1.4rem 1.6rem; text-align: left; }
+.pattern-card h3 { font-family: 'Cormorant Garamond', serif; font-size: 1.3rem; color: var(--clay); margin-bottom: .4rem; }
+.pattern-card p { font-size: .9rem; color: var(--charcoal-soft); }
+.pattern-card.blurred { filter: blur(5px); user-select: none; pointer-events: none; }
 
-/* HERO CARDS */
-.hero-cards {
-  position: relative; width: 100%; max-width: 680px; height: 190px;
-  margin: 52px auto 0;
-  opacity: 0; animation: fadeUp 0.9s ease 0.84s forwards;
-  z-index: 1;
-}
-.hcard {
-  position: absolute; background: white; border-radius: 18px;
-  padding: 18px 24px;
-  box-shadow: 0 10px 40px rgba(28,22,20,0.09), 0 2px 8px rgba(28,22,20,0.04);
-  will-change: transform;
-}
-.hcard:nth-child(1) { width: 230px; left: 0; top: 20px; transform: rotate(-3deg); }
-.hcard:nth-child(2) { width: 250px; left: 50%; top: 0; transform: translateX(-50%) rotate(0.5deg); }
-.hcard:nth-child(3) { width: 222px; right: 0; top: 28px; transform: rotate(2.5deg); }
-.hcard-label { font-size: 9px; font-weight: 500; letter-spacing: 0.18em; text-transform: uppercase; color: var(--clay); margin-bottom: 7px; }
-.hcard-text { font-family: 'Cormorant Garamond', serif; font-size: 15px; line-height: 1.55; color: var(--charcoal); }
-.hcard-text em { font-style: italic; color: var(--charcoal-soft); }
+/* ── SUGGESTIONS ── */
+.sug-wrap { max-width: 640px; margin: 0 auto; }
+.sug-wrap h2 { font-size: clamp(1.6rem, 4vw, 2.2rem); margin-bottom: .5rem; text-align: center; }
+.sug-sub { text-align: center; color: var(--charcoal-soft); font-size: .9rem; margin-bottom: 2rem; }
+.loading-text { text-align: center; color: var(--stone); font-style: italic; padding: 2rem 0; }
+.sug-cards { display: flex; flex-direction: column; gap: 1rem; }
+.sug-card { background: #fff; border: 1.5px solid #E8DDD6; border-radius: 1rem; padding: 1.3rem 1.4rem; cursor: pointer; transition: border-color .15s; }
+.sug-card.selected { border-color: var(--clay); }
+.type-badge { display: inline-block; font-size: .75rem; font-weight: 500; padding: .2rem .7rem; border-radius: 1rem; margin-bottom: .6rem; }
+.type-badge.message { background: #F0E4DB; color: var(--clay-dark); }
+.type-badge.action { background: #E0EBE0; color: #3B6B3B; }
+.sug-text { font-size: .95rem; margin-bottom: .4rem; color: var(--charcoal); }
+.sug-why { font-size: .8rem; color: var(--stone); font-style: italic; }
+.try-btn { display: none; width: 100%; margin-top: 1.2rem; background: var(--clay); color: #fff; border: none; padding: .85rem; border-radius: 3rem; font-family: 'DM Sans', sans-serif; font-size: 1rem; cursor: pointer; transition: background .2s; }
+.try-btn:hover { background: var(--clay-dark); }
+.done-msg { display: none; text-align: center; padding: 1.5rem; background: var(--section-alt); border-radius: 1rem; margin-top: 1rem; }
+.done-msg p { color: var(--charcoal-soft); font-style: italic; }
 
-/* DEMO SECTION */
-.section-demo { background: var(--section-alt); padding: 96px 48px; }
-.demo-inner { max-width: 780px; margin: 0 auto; text-align: center; }
-.section-label {
-  font-size: 11px; font-weight: 500; letter-spacing: 0.2em; text-transform: uppercase;
-  color: var(--clay); margin-bottom: 16px;
-}
-.demo-headline {
-  font-family: 'Cormorant Garamond', serif;
-  font-size: clamp(32px, 4vw, 48px); font-weight: 300; line-height: 1.15;
-  color: var(--charcoal); margin-bottom: 12px;
-}
-.demo-headline em { font-style: italic; }
-.demo-sub {
-  font-size: 15px; color: var(--charcoal-soft); line-height: 1.7;
-  margin-bottom: 48px; max-width: 500px; margin-left: auto; margin-right: auto;
-}
-.demo-box {
-  background: white; border-radius: 16px; padding: 36px 40px;
-  box-shadow: 0 8px 48px rgba(28,22,20,0.08); text-align: left;
-}
-.demo-prompt-label {
-  font-size: 11px; font-weight: 500; letter-spacing: 0.16em; text-transform: uppercase;
-  color: var(--stone); margin-bottom: 12px;
-}
-.demo-pills { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 28px; }
-.demo-pill {
-  background: var(--section-alt); border: 1px solid var(--blush-deep);
-  border-radius: 100px; padding: 10px 18px;
-  font-family: 'Cormorant Garamond', serif;
-  font-size: 15px; font-style: italic; color: var(--charcoal-soft);
-  cursor: pointer;
-  transition: background 0.2s, border-color 0.2s, color 0.2s;
-}
-.demo-pill:hover { background: var(--blush); border-color: var(--clay-light); color: var(--charcoal); }
-.demo-pill.selected { background: var(--charcoal); border-color: var(--charcoal); color: white; font-style: normal; }
+/* ── FOOTER ── */
+footer { text-align: center; padding: 2rem; font-size: .85rem; color: var(--stone); }
 
-.demo-result { min-height: 100px; border-top: 1px solid var(--blush-deep); padding-top: 24px; display: none; }
-.demo-result.visible { display: block; }
-.demo-result-label {
-  font-size: 10px; font-weight: 500; letter-spacing: 0.16em; text-transform: uppercase;
-  color: var(--clay); margin-bottom: 12px;
-}
-.demo-result-msg {
-  font-family: 'Cormorant Garamond', serif;
-  font-size: clamp(17px, 2.2vw, 21px); font-weight: 400; line-height: 1.6;
-  color: var(--charcoal);
-  opacity: 0; transform: translateY(8px);
-  transition: opacity 0.5s ease, transform 0.5s ease;
-}
-.demo-result-msg.show { opacity: 1; transform: translateY(0); }
-.demo-result-why {
-  margin-top: 14px; font-size: 12px; color: var(--stone); line-height: 1.6; font-style: italic;
-  opacity: 0; transition: opacity 0.5s ease 0.2s;
-}
-.demo-result-why.show { opacity: 1; }
-.demo-cta-row {
-  margin-top: 24px;
-  opacity: 0; transition: opacity 0.5s ease 0.35s;
-}
-.demo-cta-row.show { opacity: 1; }
-.demo-cta-btn {
-  display: inline-block;
-  background: var(--clay); color: white; border: none; border-radius: 6px;
-  padding: 14px 28px; font-family: 'DM Sans', sans-serif;
-  font-size: 12px; font-weight: 500; letter-spacing: 0.1em; text-transform: uppercase;
-  cursor: pointer; position: relative; overflow: hidden;
-  transition: transform 0.15s;
-}
-.demo-cta-btn::before {
-  content: ''; position: absolute; inset: 0;
-  background: var(--clay-dark);
-  transform: scaleX(0); transform-origin: left;
-  transition: transform 0.35s ease;
-}
-.demo-cta-btn:hover::before { transform: scaleX(1); }
-.demo-cta-btn:hover { transform: translateY(-1px); }
-.demo-cta-btn span { position: relative; z-index: 1; }
-
-/* TRUTH */
-.section-truth { background: var(--charcoal); padding: 100px 48px; position: relative; overflow: hidden; }
-.truth-geo { position: absolute; border-radius: 50%; border: 1px solid rgba(216,150,122,0.1); pointer-events: none; }
-.truth-geo-1 { width: 400px; height: 400px; top: -100px; right: -100px; }
-.truth-geo-2 { width: 620px; height: 620px; top: -200px; right: -200px; }
-.truth-inner { max-width: 960px; margin: 0 auto; display: grid; grid-template-columns: 1fr 1fr; gap: 80px; align-items: start; }
-.truth-label { font-size: 11px; font-weight: 500; letter-spacing: 0.2em; text-transform: uppercase; color: var(--clay); margin-bottom: 24px; }
-.truth-headline { font-family: 'Cormorant Garamond', serif; font-size: clamp(34px, 3.5vw, 50px); font-weight: 300; line-height: 1.2; color: #EDE8E3; }
-.truth-headline em { font-style: italic; color: var(--clay-light); }
-.truth-bridge { margin-top: 24px; font-size: 14px; line-height: 1.8; color: #7A6E68; }
-.stat-item { border-left: 2px solid var(--clay-dark); padding: 0 0 36px 24px; opacity: 0; transform: translateX(-10px); transition: opacity 0.7s ease, transform 0.7s ease; }
-.stat-item:last-child { padding-bottom: 0; }
-.stat-item.visible { opacity: 1; transform: translateX(0); }
-.stat-item:nth-child(2) { transition-delay: 0.15s; }
-.stat-item:nth-child(3) { transition-delay: 0.3s; }
-.stat-number { font-family: 'Cormorant Garamond', serif; font-size: 46px; font-weight: 300; color: var(--clay-light); line-height: 1; margin-bottom: 6px; }
-.stat-label { font-size: 13px; color: #7A6E68; line-height: 1.55; }
-.stat-source { font-size: 10px; color: rgba(122,110,104,0.55); margin-top: 4px; letter-spacing: 0.04em; }
-
-/* HOW */
-.section-how { background: var(--warm-white); padding: 96px 48px; }
-.section-how-inner { max-width: 920px; margin: 0 auto; }
-.section-headline { font-family: 'Cormorant Garamond', serif; font-size: clamp(34px, 4vw, 52px); font-weight: 300; line-height: 1.15; color: var(--charcoal); margin-bottom: 64px; }
-.section-headline em { font-style: italic; }
-.steps { display: grid; grid-template-columns: repeat(3,1fr); gap: 48px; }
-.step-num { font-family: 'Cormorant Garamond', serif; font-size: 60px; font-weight: 300; color: var(--blush-deep); line-height: 1; margin-bottom: 16px; }
-.step-title { font-family: 'Cormorant Garamond', serif; font-size: 21px; font-weight: 400; color: var(--charcoal); margin-bottom: 10px; }
-.step-body { font-size: 14px; line-height: 1.75; color: var(--charcoal-soft); }
-.step-body strong { font-weight: 500; color: var(--charcoal); }
-
-/* FAQ */
-.section-faq { background: var(--section-alt); padding: 96px 48px; }
-.faq-inner { max-width: 640px; margin: 0 auto; }
-.faq-list { display: flex; flex-direction: column; margin-top: 40px; }
-.faq-item { border-bottom: 1px solid var(--blush-deep); }
-.faq-q { width: 100%; background: none; border: none; text-align: left; padding: 18px 0; font-family: 'Cormorant Garamond', serif; font-size: 19px; font-weight: 400; color: var(--charcoal); cursor: pointer; display: flex; justify-content: space-between; align-items: center; gap: 14px; }
-.faq-arrow { width: 16px; height: 16px; flex-shrink: 0; transition: transform 0.3s ease; color: var(--clay); }
-.faq-item.open .faq-arrow { transform: rotate(180deg); }
-.faq-a { max-height: 0; overflow: hidden; transition: max-height 0.4s ease, padding 0.3s ease; font-size: 13px; line-height: 1.8; color: var(--charcoal-soft); }
-.faq-item.open .faq-a { max-height: 200px; padding-bottom: 18px; }
-
-/* CTA */
-.section-cta { background: var(--blush); padding: 120px 48px; text-align: center; position: relative; overflow: hidden; }
-.section-cta::before { content: ''; position: absolute; top: 50%; left: 50%; transform: translate(-50%,-50%); width: 700px; height: 700px; border-radius: 50%; background: radial-gradient(circle, var(--blush-deep) 0%, transparent 65%); }
-.cta-inner { position: relative; z-index: 2; max-width: 520px; margin: 0 auto; }
-.cta-headline { font-family: 'Cormorant Garamond', serif; font-size: clamp(40px, 5vw, 62px); font-weight: 300; line-height: 1.15; color: var(--charcoal); margin-bottom: 16px; }
-.cta-headline em { font-style: italic; color: var(--clay-dark); }
-.cta-sub { font-size: 16px; line-height: 1.75; color: var(--charcoal-soft); margin-bottom: 12px; }
-.cta-decision { font-family: 'Cormorant Garamond', serif; font-size: 20px; font-style: italic; color: var(--charcoal-soft); margin-bottom: 40px; }
-.cta-microcopy { font-size: 12px; color: var(--stone); letter-spacing: 0.04em; margin-top: 14px; }
-
-/* FOOTER */
-footer { background: var(--charcoal); padding: 44px 48px; display: flex; justify-content: space-between; align-items: center; }
-.footer-logo { font-family: 'Cormorant Garamond', serif; font-size: 22px; font-weight: 400; color: #EDE8E3; letter-spacing: 0.1em; }
-.footer-links { display: flex; gap: 28px; }
-.footer-link { font-size: 12px; color: var(--charcoal-soft); text-decoration: none; transition: color 0.2s; }
-.footer-link:hover { color: var(--clay-light); }
-.footer-note { font-size: 11px; color: rgba(138,120,112,0.5); }
-
-/* REVEAL */
-.reveal { opacity: 0; transform: translateY(20px); transition: opacity 0.7s ease, transform 0.7s ease; }
-.reveal.visible { opacity: 1; transform: translateY(0); }
-.reveal-d1 { transition-delay: 0.1s; }
-.reveal-d2 { transition-delay: 0.2s; }
-.reveal-d3 { transition-delay: 0.3s; }
-
-@keyframes fadeUp { from { opacity:0; transform:translateY(20px); } to { opacity:1; transform:translateY(0); } }
-
-@media (max-width: 768px) {
-  nav { padding: 20px 24px; }
-  .hero { padding: 110px 24px 60px; }
-  .hero-cards { height: 260px; }
-  .hcard:nth-child(3) { display: none; }
-  .hcard:nth-child(1) { width: 190px; }
-  .hcard:nth-child(2) { width: 200px; top: 100px; }
-  .section-demo, .section-truth, .section-how, .section-faq, .section-cta { padding: 72px 24px; }
-  .truth-inner { grid-template-columns: 1fr; gap: 52px; }
-  .steps { grid-template-columns: 1fr; gap: 36px; }
-  .demo-box { padding: 24px 20px; }
-  footer { flex-direction: column; gap: 20px; text-align: center; padding: 40px 24px; }
-  .footer-links { justify-content: center; }
-}
+/* HIDDEN */
+.hidden { display: none !important; }
 </style>
 </head>
 <body>
 
+<!-- NAV -->
 <nav>
-  <a href="#" class="nav-logo">Anew</a>
-  <a href="#" class="nav-cta">Start privately</a>
+  <span class="nav-logo">Anew</span>
 </nav>
 
-<!-- 1. HERO -->
+<!-- SECTION 1: HERO -->
 <section class="hero">
-  <p class="hero-eyebrow">Based on Gottman Method &middot; 40+ years of clinical research</p>
-  <h1 class="hero-headline">You still love them.<br>You've just lost the <em>words.</em></h1>
-  <div class="hero-situations">
-    <span class="hero-situation">Conversations feel shorter than they used to.</span>
-    <span class="hero-situation">You stopped reaching for each other.</span>
-    <span class="hero-situation">You've been thinking about bringing it up for weeks.</span>
-  </div>
-  <p class="hero-sub">Start rebuilding connection &mdash; one small step at a time.<br>No partner needed. A first step before therapy.</p>
-  <a href="#" class="primary-btn" style="opacity:0;animation:fadeUp 0.9s ease 0.62s forwards;position:relative;z-index:1;margin-bottom:12px;">
-    <span>Start privately</span>
-  </a>
-  <p class="form-microcopy">No partner needed &nbsp;&middot;&nbsp; No commitment &nbsp;&middot;&nbsp; Leave anytime</p>
-  <div class="hero-cards" id="parallax-cards">
-    <div class="hcard">
-      <p class="hcard-label">What you feel</p>
-      <p class="hcard-text">I reach for them at night.<br><em>They don't move.</em></p>
+  <h1>まだ好きだよ。<br>ただ、言葉が出てこない。</h1>
+  <p class="hero-sub">パートナーとの距離を感じている。でも、どこから始めればいいかわからない。</p>
+  <ul class="hero-situations">
+    <li>会話が短くなった</li>
+    <li>向こうから来なくなった</li>
+    <li>何度も同じことで揉める</li>
+    <li>もう、どう言えばいいかわからない</li>
+  </ul>
+  <button class="btn-primary" onclick="document.getElementById('chat').scrollIntoView({behavior:'smooth'})">無料で試してみる</button>
+</section>
+
+<!-- SECTION 2: WHY ANEW -->
+<section class="section section-alt">
+  <div class="section-inner">
+    <h2>カップルの平均は、<br>6年間 一人で抱える。</h2>
+    <div class="stats">
+      <div class="stat">
+        <div class="stat-num">69%</div>
+        <div class="stat-label">の問題は、解決できなくても<br>うまく付き合える</div>
+      </div>
+      <div class="stat">
+        <div class="stat-num">6年</div>
+        <div class="stat-label">カップルが問題を抱えてから<br>助けを求めるまでの平均年数</div>
+      </div>
+      <div class="stat">
+        <div class="stat-num">3×</div>
+        <div class="stat-label">批判より肯定を3倍増やすと<br>関係が安定する</div>
+      </div>
     </div>
-    <div class="hcard">
-      <p class="hcard-label">What Anew helps you say</p>
-      <p class="hcard-text">"I've been missing feeling close to you."</p>
-    </div>
-    <div class="hcard">
-      <p class="hcard-label">Today's step</p>
-      <p class="hcard-text">One compliment &mdash; not what they do, but who they are.</p>
-    </div>
+    <p class="disclaimer">セラピーの代替ではありません。セラピーに踏み出す前の、最初の一歩です。</p>
   </div>
 </section>
 
-<!-- 2. MINI DEMO -->
-<section class="section-demo">
-  <div class="demo-inner">
-    <p class="section-label reveal">Try it now</p>
-    <h2 class="demo-headline reveal">What would you <em>actually</em> say?</h2>
-    <p class="demo-sub reveal">Pick the situation closest to yours. Anew will show you a message you could send tonight.</p>
-    <div class="demo-box reveal">
-      <p class="demo-prompt-label">My situation right now...</p>
-      <div class="demo-pills">
-        <button class="demo-pill" onclick="showDemo(this, 0)">We feel distant lately</button>
-        <button class="demo-pill" onclick="showDemo(this, 1)">They never initiate anymore</button>
-        <button class="demo-pill" onclick="showDemo(this, 2)">We keep having the same fight</button>
-        <button class="demo-pill" onclick="showDemo(this, 3)">We've stopped talking about it</button>
+<!-- SECTION 3: HOW IT WORKS -->
+<section class="section">
+  <div class="section-inner">
+    <h2>使い方</h2>
+    <div class="steps">
+      <div class="step">
+        <div class="step-num">1</div>
+        <div class="step-text">
+          <h3>話す</h3>
+          <p>パートナーへの言及は不要です。今感じていることをそのまま。AIが静かに聴きます。</p>
+        </div>
       </div>
-      <div class="demo-result" id="demo-result">
-        <p class="demo-result-label">A message you could send tonight</p>
-        <p class="demo-result-msg" id="demo-msg"></p>
-        <p class="demo-result-why" id="demo-why"></p>
-        <div class="demo-cta-row" id="demo-cta">
-          <button class="demo-cta-btn" onclick="window.location.href='#'">
-            <span>Get your personalized message &mdash; free</span>
-          </button>
+      <div class="step">
+        <div class="step-num">2</div>
+        <div class="step-text">
+          <h3>パターンを見る</h3>
+          <p>会話をもとに、今の関係で起きているパターンが可視化されます。</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">3</div>
+        <div class="step-text">
+          <h3>今夜の一歩</h3>
+          <p>大きな変化は必要ありません。今夜すぐできる小さなアクションを3つ提案します。</p>
         </div>
       </div>
     </div>
   </div>
 </section>
 
-<!-- 3. TRUTH -->
-<section class="section-truth">
-  <div class="truth-geo truth-geo-1"></div>
-  <div class="truth-geo truth-geo-2"></div>
-  <div class="truth-inner">
-    <div class="reveal">
-      <p class="truth-label">The gap no one talks about</p>
-      <h2 class="truth-headline">Most couples wait <em>6 years</em> before getting help.</h2>
-      <p class="truth-bridge">Couples therapy works &mdash; but cost, wait times, and stigma keep most people from ever getting there.<br><br>Anew isn't therapy. It's what happens in that 6-year gap &mdash; when you know something's wrong, but haven't taken a single step yet.</p>
+<!-- SECTION 4: CHAT -->
+<section class="section section-alt" id="chat">
+  <div class="chat-wrap">
+    <div class="chat-section-header">
+      <h2>話してみてください。</h2>
+      <p>評価しません。パートナーへの言及も不要です。</p>
     </div>
-    <div>
-      <div class="stat-item">
-        <p class="stat-number">6 yrs</p>
-        <p class="stat-label">Average wait before seeking couples therapy after recognizing a problem</p>
-        <p class="stat-source">Journal of Marital and Family Therapy</p>
-      </div>
-      <div class="stat-item">
-        <p class="stat-number">40%</p>
-        <p class="stat-label">of couples stop therapy due to cost &mdash; $150&ndash;300 per session</p>
-        <p class="stat-source">American Psychological Association</p>
-      </div>
-      <div class="stat-item">
-        <p class="stat-number">1 in 3</p>
-        <p class="stat-label">Americans live in areas with insufficient mental health providers</p>
-        <p class="stat-source">Health Resources &amp; Services Administration</p>
-      </div>
+    <div class="chat-box" id="chatBox"></div>
+    <div class="quick-replies" id="quickReplies">
+      <button class="quick-btn" onclick="sendQuick('最近、距離を感じる')">最近、距離を感じる</button>
+      <button class="quick-btn" onclick="sendQuick('向こうから誘ってこない')">向こうから誘ってこない</button>
+      <button class="quick-btn" onclick="sendQuick('同じことで何度も喧嘩する')">同じことで何度も喧嘩する</button>
+      <button class="quick-btn" onclick="sendQuick('もう話せなくなった')">もう話せなくなった</button>
+    </div>
+    <div class="chat-input-row">
+      <input class="chat-input" id="chatInput" type="text" placeholder="今、どんな気持ちですか…" onkeydown="if(event.key==='Enter')sendMessage()">
+      <button class="send-btn" onclick="sendMessage()">↑</button>
+    </div>
+    <button class="done-btn" id="doneBtn" onclick="finishChat()">話し終わりました</button>
+  </div>
+</section>
+
+<!-- SECTION 5: PAYWALL -->
+<section class="section hidden" id="paywall">
+  <div class="paywall-wrap">
+    <h2>なぜ辛かったのか、<br>見えてきました。</h2>
+    <p>あなたの会話から、今の関係のパターンが見つかりました。</p>
+    <div class="pattern-cards" id="patternCards"></div>
+    <button class="btn-primary" id="suggestBtn" onclick="showSuggestions()">今夜の一歩を見る（無料）</button>
+  </div>
+</section>
+
+<!-- SECTION 6: SUGGESTIONS -->
+<section class="section section-alt hidden" id="suggestions">
+  <div class="sug-wrap">
+    <h2>今夜の一歩</h2>
+    <p class="sug-sub">小さく、今すぐできることを3つ選びました。</p>
+    <div id="sugContent">
+      <p class="loading-text">提案を考えています...</p>
+    </div>
+    <button class="try-btn hidden" id="tryBtn" onclick="completeTry()">これを試してみる</button>
+    <div class="done-msg hidden" id="doneMsg">
+      <p>すこし、楽になれますように。</p>
     </div>
   </div>
 </section>
 
-<!-- 4. HOW -->
-<section class="section-how">
-  <div class="section-how-inner">
-    <p class="section-label reveal">How it works</p>
-    <h2 class="section-headline reveal">Not a therapist.<br><em>A bridge to one.</em></h2>
-    <div class="steps">
-      <div class="step reveal reveal-d1">
-        <p class="step-num">01</p>
-        <h3 class="step-title">You talk. Anew listens.</h3>
-        <p class="step-body">No judgment, no generic advice. Share what's really going on. Anew reflects it back in a way that makes it <strong>clearer, not heavier.</strong></p>
-      </div>
-      <div class="step reveal reveal-d2">
-        <p class="step-num">02</p>
-        <h3 class="step-title">See what's happening.</h3>
-        <p class="step-body">Based on 40+ years of Gottman research, Anew identifies patterns <strong>without blaming either of you.</strong></p>
-      </div>
-      <div class="step reveal reveal-d3">
-        <p class="step-num">03</p>
-        <h3 class="step-title">One small step, today.</h3>
-        <p class="step-body"><strong>A message you can send tonight.</strong> Small things, often &mdash; that's what research says works.</p>
-      </div>
-    </div>
-  </div>
-</section>
-
-<!-- 5. FAQ -->
-<section class="section-faq">
-  <div class="faq-inner">
-    <p class="section-label reveal">Questions</p>
-    <h2 class="section-headline reveal" style="font-size: clamp(28px, 3vw, 38px); margin-bottom: 0;">Things people ask <em>before</em> joining.</h2>
-    <div class="faq-list">
-      <div class="faq-item reveal">
-        <button class="faq-q" onclick="toggleFaq(this)">
-          Does my partner need to use this?
-          <svg class="faq-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M19 9l-7 7-7-7"/></svg>
-        </button>
-        <div class="faq-a">No. Anew is designed for one person to start. You don't need your partner's buy-in. Many users start alone, then gradually bring their partner in &mdash; or send them a message Anew helped write.</div>
-      </div>
-      <div class="faq-item reveal">
-        <button class="faq-q" onclick="toggleFaq(this)">
-          Is this a replacement for therapy?
-          <svg class="faq-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M19 9l-7 7-7-7"/></svg>
-        </button>
-        <div class="faq-a">No &mdash; and we're upfront about that. Anew is built for the gap before therapy. If your situation involves abuse, crisis, or serious mental health concerns, please reach out to a qualified professional.</div>
-      </div>
-      <div class="faq-item reveal">
-        <button class="faq-q" onclick="toggleFaq(this)">
-          Who can see my conversations?
-          <svg class="faq-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M19 9l-7 7-7-7"/></svg>
-        </button>
-        <div class="faq-a">Nobody. Anonymous accounts &mdash; your email is never linked to your conversations. End-to-end encrypted. Delete everything permanently, anytime.</div>
-      </div>
-      <div class="faq-item reveal">
-        <button class="faq-q" onclick="toggleFaq(this)">
-          How much does it cost?
-          <svg class="faq-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M19 9l-7 7-7-7"/></svg>
-        </button>
-        <div class="faq-a">Free during beta. Full toolkit at $19&ndash;24/month after launch. Early access members keep founding pricing permanently.</div>
-      </div>
-    </div>
-  </div>
-</section>
-
-<!-- 6. CTA -->
-<section class="section-cta">
-  <div class="cta-inner">
-    <h2 class="cta-headline reveal">You deserve to feel <em>wanted</em> again.</h2>
-    <p class="cta-sub reveal">Early access is free. Founding members keep their rate after launch.</p>
-    <p class="cta-decision reveal">You don't need to fix everything today. Just start.</p>
-    <div class="reveal">
-      <a href="#" class="primary-btn">
-        <span>Start privately</span>
-      </a>
-      <p class="cta-microcopy">No partner needed &nbsp;&middot;&nbsp; No commitment &nbsp;&middot;&nbsp; Leave anytime</p>
-    </div>
-  </div>
-</section>
-
+<!-- FOOTER -->
 <footer>
-  <span class="footer-logo">Anew</span>
-  <div class="footer-links">
-    <a href="#" class="footer-link">Privacy</a>
-    <a href="#" class="footer-link">Terms</a>
-    <a href="#" class="footer-link">Contact</a>
-  </div>
-  <span class="footer-note">&copy; 2026 Anew &middot; anewapp.net</span>
+  <p>© 2026 Anew</p>
 </footer>
 
 <script>
-var demoData = [
-  {
-    msg: '"I\'ve been missing feeling close to you. Could we take a walk together this weekend -- just the two of us?"',
-    why: 'Gottman research: low-pressure bids for connection work better than direct confrontation. This opens a door without pressure.'
-  },
-  {
-    msg: '"I want to feel wanted by you. Would it be okay if I told you more often what I need?"',
-    why: 'Expressing a need as a wish -- not an accusation -- keeps your partner from going defensive.'
-  },
-  {
-    msg: '"I think we keep coming back to this because we both care. Can we try talking about it differently -- maybe just 10 minutes, no phones?"',
-    why: 'Naming the shared stake reframes conflict from "you vs me" to "us vs the problem."'
-  },
-  {
-    msg: '"I\'ve been wanting to talk about something, but I haven\'t known how to start. Can I try?"',
-    why: 'Asking permission to talk reduces the other person\'s anxiety and increases the chance they\'ll actually listen.'
+const messages = [];
+let turnCount = 0;
+let situationText = '';
+let selectedSug = null;
+
+function addBubble(role, text) {
+  const box = document.getElementById('chatBox');
+  const div = document.createElement('div');
+  div.className = 'bubble ' + (role === 'assistant' ? 'bubble-ai' : 'bubble-user');
+  div.textContent = text;
+  box.appendChild(div);
+  box.scrollTop = box.scrollHeight;
+}
+
+function showTyping() {
+  const box = document.getElementById('chatBox');
+  const t = document.createElement('div');
+  t.className = 'bubble bubble-ai typing';
+  t.id = 'typingIndicator';
+  t.innerHTML = '<span class="dot"></span><span class="dot"></span><span class="dot"></span>';
+  box.appendChild(t);
+  box.scrollTop = box.scrollHeight;
+}
+
+function removeTyping() {
+  const t = document.getElementById('typingIndicator');
+  if (t) t.remove();
+}
+
+async function callChat(userText) {
+  messages.push({ role: 'user', content: userText });
+  showTyping();
+  const res = await fetch('/api/chat', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ messages })
+  });
+  const data = await res.json();
+  removeTyping();
+  const reply = data.reply || '';
+  messages.push({ role: 'assistant', content: reply });
+  addBubble('assistant', reply);
+  turnCount++;
+  if (turnCount >= 2) {
+    document.getElementById('doneBtn').style.display = 'block';
   }
-];
-
-function showDemo(pill, idx) {
-  var pills = document.querySelectorAll('.demo-pill');
-  pills.forEach(function(p) { p.classList.remove('selected'); });
-  pill.classList.add('selected');
-
-  var result = document.getElementById('demo-result');
-  var msg = document.getElementById('demo-msg');
-  var why = document.getElementById('demo-why');
-  var cta = document.getElementById('demo-cta');
-
-  msg.classList.remove('show');
-  why.classList.remove('show');
-  cta.classList.remove('show');
-  result.classList.add('visible');
-
-  setTimeout(function() {
-    msg.textContent = demoData[idx].msg;
-    why.textContent = demoData[idx].why;
-    msg.classList.add('show');
-    why.classList.add('show');
-    cta.classList.add('show');
-  }, 80);
 }
 
-// Scroll reveal
-var observer = new IntersectionObserver(function(entries) {
-  entries.forEach(function(entry) {
-    if (entry.isIntersecting) {
-      entry.target.classList.add('visible');
-      observer.unobserve(entry.target);
-    }
-  });
-}, { threshold: 0.1 });
-document.querySelectorAll('.reveal, .stat-item').forEach(function(el) { observer.observe(el); });
-
-// Parallax
-var cardEls = document.querySelectorAll('#parallax-cards .hcard');
-var baseRots = [-3, 0.5, 2.5];
-document.addEventListener('mousemove', function(e) {
-  var dx = (e.clientX - window.innerWidth / 2) / window.innerWidth;
-  var dy = (e.clientY - window.innerHeight / 2) / window.innerHeight;
-  cardEls.forEach(function(card, i) {
-    var d = (i + 1) * 7;
-    if (i === 1) {
-      card.style.transform = 'translateX(calc(-50% + ' + (dx*d) + 'px)) translateY(' + (dy*d) + 'px) rotate(' + baseRots[i] + 'deg)';
-    } else {
-      card.style.transform = 'translateX(' + (dx*d) + 'px) translateY(' + (dy*d) + 'px) rotate(' + baseRots[i] + 'deg)';
-    }
-  });
-});
-
-// FAQ
-function toggleFaq(btn) {
-  var item = btn.parentElement;
-  var wasOpen = item.classList.contains('open');
-  document.querySelectorAll('.faq-item.open').forEach(function(el) { el.classList.remove('open'); });
-  if (!wasOpen) item.classList.add('open');
+function sendMessage() {
+  const input = document.getElementById('chatInput');
+  const text = input.value.trim();
+  if (!text) return;
+  input.value = '';
+  document.getElementById('quickReplies').style.display = 'none';
+  addBubble('user', text);
+  callChat(text);
 }
+
+function sendQuick(text) {
+  document.getElementById('quickReplies').style.display = 'none';
+  addBubble('user', text);
+  callChat(text);
+}
+
+function detectPattern(msgs) {
+  const text = msgs.map(m => m.content || '').join('');
+  if (/誘|スキンシップ|求め/.test(text)) return 'desire';
+  if (/喧嘩|言い合い|同じ/.test(text)) return 'gridlock';
+  if (/話せ|言えない|黙/.test(text)) return 'silence';
+  return 'pursue';
+}
+
+const PATTERNS = {
+  desire: {
+    name: '欲求のすれ違いサイクル',
+    desc: '求める側と避ける側に分かれ、どちらも傷つくパターンです。どちらが正しいわけではありません。'
+  },
+  gridlock: {
+    name: 'グリッドロック（固着）パターン',
+    desc: '同じ議論が繰り返され、どちらも譲れない状態です。背景にある深い価値観の違いが鍵です。'
+  },
+  silence: {
+    name: '沈黙の壁パターン',
+    desc: '言葉が出てこない、または届かない状態です。安全な場をつくることが最初の一歩です。'
+  },
+  pursue: {
+    name: '追いかけ・引きこもりのサイクル',
+    desc: '一方が近づくほど、もう一方が遠ざかる動きです。どちらも悪意はなく、防衛反応です。'
+  }
+};
+
+function finishChat() {
+  situationText = messages.map(m => `${m.role === 'user' ? 'ユーザー' : 'AI'}: ${m.content}`).join('\n');
+  document.getElementById('doneBtn').style.display = 'none';
+
+  const patternKey = detectPattern(messages.filter(m => m.role === 'user'));
+  const p1 = PATTERNS[patternKey];
+  const allKeys = Object.keys(PATTERNS);
+  const p2key = allKeys.find(k => k !== patternKey) || allKeys[0];
+  const p2 = PATTERNS[p2key];
+
+  const cards = document.getElementById('patternCards');
+  cards.innerHTML = `
+    <div class="pattern-card">
+      <h3>${p1.name}</h3>
+      <p>${p1.desc}</p>
+    </div>
+    <div class="pattern-card blurred">
+      <h3>${p2.name}</h3>
+      <p>${p2.desc}</p>
+    </div>`;
+
+  document.getElementById('paywall').classList.remove('hidden');
+  document.getElementById('paywall').scrollIntoView({ behavior: 'smooth' });
+}
+
+async function showSuggestions() {
+  document.getElementById('suggestions').classList.remove('hidden');
+  document.getElementById('suggestions').scrollIntoView({ behavior: 'smooth' });
+
+  const res = await fetch('/api/suggestions', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ situation: situationText })
+  });
+  const data = await res.json();
+  const sugs = data.suggestions || [];
+
+  const container = document.getElementById('sugContent');
+  if (!sugs.length) {
+    container.innerHTML = '<p style="color:var(--stone);text-align:center">提案を取得できませんでした。もう一度お試しください。</p>';
+    return;
+  }
+
+  container.innerHTML = '<div class="sug-cards" id="sugCards"></div>';
+  const cardsEl = document.getElementById('sugCards');
+
+  sugs.forEach((s, i) => {
+    const card = document.createElement('div');
+    card.className = 'sug-card';
+    card.dataset.index = i;
+    card.innerHTML = `
+      <span class="type-badge ${s.type}">${s.type === 'message' ? 'メッセージ' : 'アクション'}</span>
+      <p class="sug-text">${s.text}</p>
+      <p class="sug-why">${s.why}</p>`;
+    card.addEventListener('click', () => selectSug(i));
+    cardsEl.appendChild(card);
+  });
+
+  document.getElementById('tryBtn').classList.remove('hidden');
+}
+
+function selectSug(index) {
+  selectedSug = index;
+  document.querySelectorAll('.sug-card').forEach((c, i) => {
+    c.classList.toggle('selected', i === index);
+  });
+  document.getElementById('tryBtn').style.display = 'block';
+}
+
+function completeTry() {
+  document.getElementById('tryBtn').style.display = 'none';
+  document.getElementById('doneMsg').classList.remove('hidden');
+}
+
+// Initial AI message
+(function init() {
+  const box = document.getElementById('chatBox');
+  const div = document.createElement('div');
+  div.className = 'bubble bubble-ai';
+  div.textContent = '最近、パートナーとの間でどんなことが起きていますか？ゆっくりで大丈夫です。';
+  box.appendChild(div);
+})();
 </script>
 </body>
 </html>
