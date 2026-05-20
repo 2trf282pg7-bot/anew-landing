@@ -8,7 +8,22 @@ module.exports = async function(req, res) {
   try {
     const { messages } = req.body;
 
-    const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
+    const apiKey = process.env.ANTHROPIC_API_KEY;
+
+    // Diagnostic log — remove after confirming env var is visible
+    console.log('DIAG node=' + process.version +
+      ' hasKey=' + !!apiKey +
+      ' keyPrefix=' + (apiKey ? apiKey.slice(0, 7) : 'MISSING') +
+      ' envKeys=' + Object.keys(process.env).filter(k => k.startsWith('ANTHRO')).join(','));
+
+    if (!apiKey) {
+      return res.status(500).json({
+        error: 'ANTHROPIC_API_KEY is not set in this Vercel environment',
+        hint: 'Check Settings → Environment Variables in the Vercel dashboard for project "anew-landing" (not "anew-landing-m1sa")'
+      });
+    }
+
+    const client = new Anthropic({ apiKey });
 
     const validMessages = messages.filter(m => m && m.content && m.content.trim() !== '');
 
@@ -27,7 +42,7 @@ module.exports = async function(req, res) {
     return res.status(200).json({ reply });
 
   } catch (error) {
-    console.error('API Error:', error);
+    console.error('API Error:', error.message, error.status ?? '');
     return res.status(500).json({ error: error.message });
   }
 };
