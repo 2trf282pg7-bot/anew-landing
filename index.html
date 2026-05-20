@@ -129,6 +129,21 @@ nav {
 .primary-btn:hover { transform: translateY(-1px); }
 .primary-btn span { position: relative; z-index: 1; }
 
+.email-form {
+  display: flex; gap: 8px;
+  opacity: 0; animation: fadeUp 0.9s ease 0.62s forwards;
+  position: relative; z-index: 1; margin-bottom: 12px;
+  max-width: 460px; width: 100%;
+}
+.email-input {
+  flex: 1; border: 1px solid var(--blush-deep); border-radius: 6px;
+  padding: 16px 20px; font-family: 'DM Sans', sans-serif;
+  font-size: 14px; color: var(--charcoal); background: white;
+  outline: none; transition: border-color 0.2s; min-width: 0;
+}
+.email-input:focus { border-color: var(--clay); }
+.email-input::placeholder { color: var(--stone); }
+
 .form-microcopy {
   font-size: 12px; color: var(--stone); letter-spacing: 0.04em;
   opacity: 0; animation: fadeUp 0.9s ease 0.72s forwards;
@@ -335,9 +350,12 @@ footer { background: var(--charcoal); padding: 44px 48px; display: flex; justify
     <span class="hero-situation">You've been thinking about bringing it up for weeks.</span>
   </div>
   <p class="hero-sub">Start rebuilding connection &mdash; one small step at a time.<br>No partner needed. A first step before therapy.</p>
-  <a href="#" class="primary-btn" style="opacity:0;animation:fadeUp 0.9s ease 0.62s forwards;position:relative;z-index:1;margin-bottom:12px;">
-    <span>Start privately</span>
-  </a>
+  <form id="email-form" class="email-form" action="https://formspree.io/f/mzdyqvbe" method="POST">
+    <input class="email-input" type="email" name="email" placeholder="your@email.com" required>
+    <button type="submit" class="primary-btn" style="margin:0;flex-shrink:0;">
+      <span>Get early access — free</span>
+    </button>
+  </form>
   <p class="form-microcopy">No partner needed &nbsp;&middot;&nbsp; No commitment &nbsp;&middot;&nbsp; Leave anytime</p>
   <div class="hero-cards" id="parallax-cards">
     <div class="hcard">
