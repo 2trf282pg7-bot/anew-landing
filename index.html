@@ -278,19 +278,31 @@ function removeTyping() {
 async function callChat(userText) {
   messages.push({ role: 'user', content: userText });
   showTyping();
-  const res = await fetch('/api/chat', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ messages })
-  });
-  const data = await res.json();
-  removeTyping();
-  const reply = data.reply || '';
-  messages.push({ role: 'assistant', content: reply });
-  addBubble('assistant', reply);
-  turnCount++;
-  if (turnCount >= 2) {
-    document.getElementById('doneBtn').style.display = 'block';
+  try {
+    const res = await fetch('/api/chat', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ messages })
+    });
+    if (!res.ok) {
+      const errData = await res.json().catch(() => ({}));
+      throw new Error(errData.error || `HTTP ${res.status}`);
+    }
+    const data = await res.json();
+    const reply = data.reply || '';
+    if (reply) {
+      messages.push({ role: 'assistant', content: reply });
+      addBubble('assistant', reply);
+    }
+    turnCount++;
+    if (turnCount >= 2) {
+      document.getElementById('doneBtn').style.display = 'block';
+    }
+  } catch (e) {
+    console.error('callChat error:', e);
+    addBubble('assistant', '申し訳ありません、うまく繋がれませんでした。もう一度お試しください。');
+  } finally {
+    removeTyping();
   }
 }
 
@@ -366,36 +378,45 @@ async function showSuggestions() {
   document.getElementById('suggestions').classList.remove('hidden');
   document.getElementById('suggestions').scrollIntoView({ behavior: 'smooth' });
 
-  const res = await fetch('/api/suggestions', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ situation: situationText })
-  });
-  const data = await res.json();
-  const sugs = data.suggestions || [];
-
   const container = document.getElementById('sugContent');
-  if (!sugs.length) {
+  try {
+    const res = await fetch('/api/suggestions', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ situation: situationText })
+    });
+    if (!res.ok) {
+      const errData = await res.json().catch(() => ({}));
+      throw new Error(errData.error || `HTTP ${res.status}`);
+    }
+    const data = await res.json();
+    const sugs = data.suggestions || [];
+
+    if (!sugs.length) {
+      container.innerHTML = '<p style="color:var(--stone);text-align:center">提案を取得できませんでした。もう一度お試しください。</p>';
+      return;
+    }
+
+    container.innerHTML = '<div class="sug-cards" id="sugCards"></div>';
+    const cardsEl = document.getElementById('sugCards');
+
+    sugs.forEach((s, i) => {
+      const card = document.createElement('div');
+      card.className = 'sug-card';
+      card.dataset.index = i;
+      card.innerHTML = `
+        <span class="type-badge ${s.type}">${s.type === 'message' ? 'メッセージ' : 'アクション'}</span>
+        <p class="sug-text">${s.text}</p>
+        <p class="sug-why">${s.why}</p>`;
+      card.addEventListener('click', () => selectSug(i));
+      cardsEl.appendChild(card);
+    });
+
+    document.getElementById('tryBtn').classList.remove('hidden');
+  } catch (e) {
+    console.error('showSuggestions error:', e);
     container.innerHTML = '<p style="color:var(--stone);text-align:center">提案を取得できませんでした。もう一度お試しください。</p>';
-    return;
   }
-
-  container.innerHTML = '<div class="sug-cards" id="sugCards"></div>';
-  const cardsEl = document.getElementById('sugCards');
-
-  sugs.forEach((s, i) => {
-    const card = document.createElement('div');
-    card.className = 'sug-card';
-    card.dataset.index = i;
-    card.innerHTML = `
-      <span class="type-badge ${s.type}">${s.type === 'message' ? 'メッセージ' : 'アクション'}</span>
-      <p class="sug-text">${s.text}</p>
-      <p class="sug-why">${s.why}</p>`;
-    card.addEventListener('click', () => selectSug(i));
-    cardsEl.appendChild(card);
-  });
-
-  document.getElementById('tryBtn').classList.remove('hidden');
 }
 
 function selectSug(index) {
