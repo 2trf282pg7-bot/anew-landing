@@ -1,4 +1,4 @@
-import Anthropic from "@anthropic-ai/sdk";
+const Anthropic = require("@anthropic-ai/sdk");
 
 const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
 
@@ -14,7 +14,7 @@ const SYSTEM_PROMPT = `ユーザーの状況に合わせて、今夜試せる提
 JSONのみ返す（マークダウン不可）：
 {"suggestions":[{"type":"message","text":"本文","why":"説明"},{"type":"action","text":"行動内容","why":"説明"},{"type":"message","text":"本文","why":"説明"}]}`;
 
-export default async function handler(req, res) {
+module.exports = async function handler(req, res) {
   if (req.method !== "POST") {
     return res.status(405).json({ error: "Method not allowed" });
   }
@@ -40,4 +40,4 @@ export default async function handler(req, res) {
   }
 
   return res.status(200).json(parsed);
-}
+};
