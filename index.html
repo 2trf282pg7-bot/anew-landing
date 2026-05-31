@@ -150,26 +150,6 @@ nav {
   position: relative; z-index: 1;
 }
 
-/* HERO CARDS */
-.hero-cards {
-  position: relative; width: 100%; max-width: 680px; height: 190px;
-  margin: 52px auto 0;
-  opacity: 0; animation: fadeUp 0.9s ease 0.84s forwards;
-  z-index: 1;
-}
-.hcard {
-  position: absolute; background: white; border-radius: 18px;
-  padding: 18px 24px;
-  box-shadow: 0 10px 40px rgba(28,22,20,0.09), 0 2px 8px rgba(28,22,20,0.04);
-  will-change: transform;
-}
-.hcard:nth-child(1) { width: 230px; left: 0; top: 20px; transform: rotate(-3deg); }
-.hcard:nth-child(2) { width: 250px; left: 50%; top: 0; transform: translateX(-50%) rotate(0.5deg); }
-.hcard:nth-child(3) { width: 222px; right: 0; top: 28px; transform: rotate(2.5deg); }
-.hcard-label { font-size: 9px; font-weight: 500; letter-spacing: 0.18em; text-transform: uppercase; color: var(--clay); margin-bottom: 7px; }
-.hcard-text { font-family: 'Cormorant Garamond', serif; font-size: 15px; line-height: 1.55; color: var(--charcoal); }
-.hcard-text em { font-style: italic; color: var(--charcoal-soft); }
-
 /* DEMO SECTION */
 .section-demo { background: var(--section-alt); padding: 96px 48px; }
 .demo-inner { max-width: 780px; margin: 0 auto; text-align: center; }
@@ -320,10 +300,6 @@ footer { background: var(--charcoal); padding: 44px 48px; display: flex; justify
 @media (max-width: 768px) {
   nav { padding: 20px 24px; }
   .hero { padding: 110px 24px 60px; }
-  .hero-cards { height: 260px; }
-  .hcard:nth-child(3) { display: none; }
-  .hcard:nth-child(1) { width: 190px; }
-  .hcard:nth-child(2) { width: 200px; top: 100px; }
   .section-demo, .section-truth, .section-how, .section-faq, .section-cta { padding: 72px 24px; }
   .truth-inner { grid-template-columns: 1fr; gap: 52px; }
   .steps { grid-template-columns: 1fr; gap: 36px; }
@@ -357,20 +333,6 @@ footer { background: var(--charcoal); padding: 44px 48px; display: flex; justify
     </button>
   </form>
   <p class="form-microcopy">No partner needed &nbsp;&middot;&nbsp; No commitment &nbsp;&middot;&nbsp; Leave anytime</p>
-  <div class="hero-cards" id="parallax-cards">
-    <div class="hcard">
-      <p class="hcard-label">What you feel</p>
-      <p class="hcard-text">I reach for them at night.<br><em>They don't move.</em></p>
-    </div>
-    <div class="hcard">
-      <p class="hcard-label">What Anew helps you say</p>
-      <p class="hcard-text">"I've been missing feeling close to you."</p>
-    </div>
-    <div class="hcard">
-      <p class="hcard-label">Today's step</p>
-      <p class="hcard-text">One compliment &mdash; not what they do, but who they are.</p>
-    </div>
-  </div>
 </section>
 
 <!-- 2. MINI DEMO -->
@@ -573,22 +535,6 @@ var observer = new IntersectionObserver(function(entries) {
   });
 }, { threshold: 0.1 });
 document.querySelectorAll('.reveal, .stat-item').forEach(function(el) { observer.observe(el); });
-
-// Parallax
-var cardEls = document.querySelectorAll('#parallax-cards .hcard');
-var baseRots = [-3, 0.5, 2.5];
-document.addEventListener('mousemove', function(e) {
-  var dx = (e.clientX - window.innerWidth / 2) / window.innerWidth;
-  var dy = (e.clientY - window.innerHeight / 2) / window.innerHeight;
-  cardEls.forEach(function(card, i) {
-    var d = (i + 1) * 7;
-    if (i === 1) {
-      card.style.transform = 'translateX(calc(-50% + ' + (dx*d) + 'px)) translateY(' + (dy*d) + 'px) rotate(' + baseRots[i] + 'deg)';
-    } else {
-      card.style.transform = 'translateX(' + (dx*d) + 'px) translateY(' + (dy*d) + 'px) rotate(' + baseRots[i] + 'deg)';
-    }
-  });
-});
 
 // FAQ
 function toggleFaq(btn) {
