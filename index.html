@@ -150,25 +150,82 @@ nav {
   position: relative; z-index: 1;
 }
 
-/* HERO CARDS */
-.hero-cards {
-  position: relative; width: 100%; max-width: 680px; height: 190px;
-  margin: 52px auto 0;
-  opacity: 0; animation: fadeUp 0.9s ease 0.84s forwards;
-  z-index: 1;
+/* PEOPLE LIKE YOU */
+.section-cases { background: var(--warm-white); padding: 96px 0; overflow: hidden; }
+.cases-inner { max-width: 920px; margin: 0 auto; padding: 0 48px; margin-bottom: 48px; }
+.case-track {
+  display: flex;
+  overflow-x: auto;
+  gap: 20px;
+  padding: 0 48px 24px;
+  scroll-snap-type: x mandatory;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+  box-sizing: border-box;
 }
-.hcard {
-  position: absolute; background: white; border-radius: 18px;
-  padding: 18px 24px;
-  box-shadow: 0 10px 40px rgba(28,22,20,0.09), 0 2px 8px rgba(28,22,20,0.04);
-  will-change: transform;
+.case-track::-webkit-scrollbar { display: none; }
+.case-card {
+  flex-shrink: 0;
+  background: white;
+  border-radius: 20px;
+  padding: 32px 28px;
+  width: 480px;
+  max-width: 480px;
+  box-shadow: 0 8px 40px rgba(28,22,20,0.07);
+  scroll-snap-align: start;
+  box-sizing: border-box;
+  overflow: hidden;
 }
-.hcard:nth-child(1) { width: 230px; left: 0; top: 20px; transform: rotate(-3deg); }
-.hcard:nth-child(2) { width: 250px; left: 50%; top: 0; transform: translateX(-50%) rotate(0.5deg); }
-.hcard:nth-child(3) { width: 222px; right: 0; top: 28px; transform: rotate(2.5deg); }
-.hcard-label { font-size: 9px; font-weight: 500; letter-spacing: 0.18em; text-transform: uppercase; color: var(--clay); margin-bottom: 7px; }
-.hcard-text { font-family: 'Cormorant Garamond', serif; font-size: 15px; line-height: 1.55; color: var(--charcoal); }
-.hcard-text em { font-style: italic; color: var(--charcoal-soft); }
+.case-quote {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: clamp(16px, 4.5vw, 19px);
+  line-height: 1.6;
+  color: var(--charcoal);
+  font-style: italic;
+  margin-bottom: 24px;
+  overflow-wrap: break-word;
+  word-break: break-word;
+}
+.case-timeline { margin-bottom: 20px; display: flex; flex-direction: column; gap: 10px; }
+.case-row { display: flex; align-items: center; gap: 6px; flex-wrap: nowrap; }
+.phase-name {
+  font-size: 12px;
+  color: var(--charcoal-soft);
+  min-width: 0;
+  flex-shrink: 1;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 130px;
+}
+.week-label {
+  font-size: 10px;
+  color: var(--stone);
+  flex-shrink: 0;
+  white-space: nowrap;
+  text-align: right;
+  min-width: 44px;
+}
+.bar-track { flex: 1; min-width: 40px; height: 8px; background: var(--blush); border-radius: 4px; overflow: hidden; }
+.bar-fill { height: 100%; background: var(--clay); border-radius: 4px; }
+.case-tags { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 16px; }
+.case-tag {
+  background: var(--section-alt);
+  border: 1px solid var(--blush-deep);
+  border-radius: 100px;
+  padding: 5px 12px;
+  font-size: 11px;
+  color: var(--charcoal-soft);
+  white-space: nowrap;
+}
+.case-use {
+  font-size: 13px;
+  line-height: 1.65;
+  color: var(--stone);
+  word-break: normal;
+  overflow-wrap: break-word;
+  word-break: break-word;
+}
 
 /* DEMO SECTION */
 .section-demo { background: var(--section-alt); padding: 96px 48px; }
@@ -320,11 +377,16 @@ footer { background: var(--charcoal); padding: 44px 48px; display: flex; justify
 @media (max-width: 768px) {
   nav { padding: 20px 24px; }
   .hero { padding: 110px 24px 60px; }
-  .hero-cards { height: 260px; }
-  .hcard:nth-child(3) { display: none; }
-  .hcard:nth-child(1) { width: 190px; }
-  .hcard:nth-child(2) { width: 200px; top: 100px; }
   .section-demo, .section-truth, .section-how, .section-faq, .section-cta { padding: 72px 24px; }
+  .cases-inner { padding: 0 24px; }
+  .case-track { padding: 0 16px 16px; gap: 16px; }
+  .case-card {
+    min-width: min(calc(100vw - 48px), 480px);
+    max-width: 480px;
+    padding: 28px 22px;
+    box-sizing: border-box;
+    overflow: hidden;
+  }
   .truth-inner { grid-template-columns: 1fr; gap: 52px; }
   .steps { grid-template-columns: 1fr; gap: 36px; }
   .demo-box { padding: 24px 20px; }
@@ -357,20 +419,6 @@ footer { background: var(--charcoal); padding: 44px 48px; display: flex; justify
     </button>
   </form>
   <p class="form-microcopy">No partner needed &nbsp;&middot;&nbsp; No commitment &nbsp;&middot;&nbsp; Leave anytime</p>
-  <div class="hero-cards" id="parallax-cards">
-    <div class="hcard">
-      <p class="hcard-label">What you feel</p>
-      <p class="hcard-text">I reach for them at night.<br><em>They don't move.</em></p>
-    </div>
-    <div class="hcard">
-      <p class="hcard-label">What Anew helps you say</p>
-      <p class="hcard-text">"I've been missing feeling close to you."</p>
-    </div>
-    <div class="hcard">
-      <p class="hcard-label">Today's step</p>
-      <p class="hcard-text">One compliment &mdash; not what they do, but who they are.</p>
-    </div>
-  </div>
 </section>
 
 <!-- 2. MINI DEMO -->
@@ -456,7 +504,95 @@ footer { background: var(--charcoal); padding: 44px 48px; display: flex; justify
   </div>
 </section>
 
-<!-- 5. FAQ -->
+<!-- 5. PEOPLE LIKE YOU -->
+<section class="section-cases">
+  <div class="cases-inner">
+    <p class="section-label reveal">People like you</p>
+    <h2 class="section-headline reveal">Real people, <em>real steps forward.</em></h2>
+  </div>
+  <div class="case-track">
+    <div class="case-card">
+      <blockquote class="case-quote">"I didn't know where to start. Anew gave me the first sentence &mdash; and we actually talked that night."</blockquote>
+      <div class="case-timeline">
+        <div class="case-row">
+          <span class="phase-name">Getting started</span>
+          <span class="week-label">Wk 1–2</span>
+          <div class="bar-track"><div class="bar-fill" style="width:28%"></div></div>
+        </div>
+        <div class="case-row">
+          <span class="phase-name">Opening up</span>
+          <span class="week-label">Wk 3–5</span>
+          <div class="bar-track"><div class="bar-fill" style="width:58%"></div></div>
+        </div>
+        <div class="case-row">
+          <span class="phase-name">Reconnecting</span>
+          <span class="week-label">Wk 6–8</span>
+          <div class="bar-track"><div class="bar-fill" style="width:84%"></div></div>
+        </div>
+      </div>
+      <div class="case-tags">
+        <span class="case-tag">Emotional distance</span>
+        <span class="case-tag">Solo start</span>
+        <span class="case-tag">No partner buy-in</span>
+      </div>
+      <p class="case-use">Typical Anew use: daily journaling prompts and one message template per week, used solo for 6 weeks.</p>
+    </div>
+    <div class="case-card">
+      <blockquote class="case-quote">"We kept having the same argument. Anew helped me see I was making it about winning, not connecting."</blockquote>
+      <div class="case-timeline">
+        <div class="case-row">
+          <span class="phase-name">Pattern recognition</span>
+          <span class="week-label">Wk 1–3</span>
+          <div class="bar-track"><div class="bar-fill" style="width:35%"></div></div>
+        </div>
+        <div class="case-row">
+          <span class="phase-name">Reframing conflict</span>
+          <span class="week-label">Wk 4–6</span>
+          <div class="bar-track"><div class="bar-fill" style="width:65%"></div></div>
+        </div>
+        <div class="case-row">
+          <span class="phase-name">Calmer conversations</span>
+          <span class="week-label">Wk 7–10</span>
+          <div class="bar-track"><div class="bar-fill" style="width:88%"></div></div>
+        </div>
+      </div>
+      <div class="case-tags">
+        <span class="case-tag">Recurring arguments</span>
+        <span class="case-tag">Communication</span>
+        <span class="case-tag">Gottman-based</span>
+      </div>
+      <p class="case-use">Typical Anew use: conflict reframe exercises and shared check-ins, both partners using the app by week 4.</p>
+    </div>
+    <div class="case-card">
+      <blockquote class="case-quote">"Intimacy had faded and I was too scared to bring it up. Anew made me feel less alone in wanting more."</blockquote>
+      <div class="case-timeline">
+        <div class="case-row">
+          <span class="phase-name">Naming the feeling</span>
+          <span class="week-label">Wk 1–2</span>
+          <div class="bar-track"><div class="bar-fill" style="width:22%"></div></div>
+        </div>
+        <div class="case-row">
+          <span class="phase-name">Small bids</span>
+          <span class="week-label">Wk 3–6</span>
+          <div class="bar-track"><div class="bar-fill" style="width:55%"></div></div>
+        </div>
+        <div class="case-row">
+          <span class="phase-name">Rebuilding closeness</span>
+          <span class="week-label">Wk 7–12</span>
+          <div class="bar-track"><div class="bar-fill" style="width:80%"></div></div>
+        </div>
+      </div>
+      <div class="case-tags">
+        <span class="case-tag">Intimacy</span>
+        <span class="case-tag">Long-term couple</span>
+        <span class="case-tag">Slow rebuild</span>
+      </div>
+      <p class="case-use">Typical Anew use: connection prompts and weekly reflection, gradually moved toward couples therapy in month 3.</p>
+    </div>
+  </div>
+</section>
+
+<!-- 6. FAQ -->
 <section class="section-faq">
   <div class="faq-inner">
     <p class="section-label reveal">Questions</p>
@@ -494,7 +630,7 @@ footer { background: var(--charcoal); padding: 44px 48px; display: flex; justify
   </div>
 </section>
 
-<!-- 6. CTA -->
+<!-- 7. CTA -->
 <section class="section-cta">
   <div class="cta-inner">
     <h2 class="cta-headline reveal">You deserve to feel <em>wanted</em> again.</h2>
@@ -573,22 +709,6 @@ var observer = new IntersectionObserver(function(entries) {
   });
 }, { threshold: 0.1 });
 document.querySelectorAll('.reveal, .stat-item').forEach(function(el) { observer.observe(el); });
-
-// Parallax
-var cardEls = document.querySelectorAll('#parallax-cards .hcard');
-var baseRots = [-3, 0.5, 2.5];
-document.addEventListener('mousemove', function(e) {
-  var dx = (e.clientX - window.innerWidth / 2) / window.innerWidth;
-  var dy = (e.clientY - window.innerHeight / 2) / window.innerHeight;
-  cardEls.forEach(function(card, i) {
-    var d = (i + 1) * 7;
-    if (i === 1) {
-      card.style.transform = 'translateX(calc(-50% + ' + (dx*d) + 'px)) translateY(' + (dy*d) + 'px) rotate(' + baseRots[i] + 'deg)';
-    } else {
-      card.style.transform = 'translateX(' + (dx*d) + 'px) translateY(' + (dy*d) + 'px) rotate(' + baseRots[i] + 'deg)';
-    }
-  });
-});
 
 // FAQ
 function toggleFaq(btn) {
