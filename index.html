@@ -150,84 +150,89 @@ nav {
   position: relative; z-index: 1;
 }
 
-/* DEMO SECTION */
-.section-demo { background: var(--section-alt); padding: 96px 48px; }
-.demo-inner { max-width: 780px; margin: 0 auto; text-align: center; }
+/* SECTION LABEL (shared) */
 .section-label {
   font-size: 11px; font-weight: 500; letter-spacing: 0.2em; text-transform: uppercase;
   color: var(--clay); margin-bottom: 16px;
 }
-.demo-headline {
-  font-family: 'Cormorant Garamond', serif;
-  font-size: clamp(32px, 4vw, 48px); font-weight: 300; line-height: 1.15;
-  color: var(--charcoal); margin-bottom: 12px;
-}
-.demo-headline em { font-style: italic; }
-.demo-sub {
-  font-size: 15px; color: var(--charcoal-soft); line-height: 1.7;
-  margin-bottom: 48px; max-width: 500px; margin-left: auto; margin-right: auto;
-}
-.demo-box {
-  background: white; border-radius: 16px; padding: 36px 40px;
-  box-shadow: 0 8px 48px rgba(28,22,20,0.08); text-align: left;
-}
-.demo-prompt-label {
-  font-size: 11px; font-weight: 500; letter-spacing: 0.16em; text-transform: uppercase;
-  color: var(--stone); margin-bottom: 12px;
-}
-.demo-pills { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 28px; }
-.demo-pill {
-  background: var(--section-alt); border: 1px solid var(--blush-deep);
-  border-radius: 100px; padding: 10px 18px;
-  font-family: 'Cormorant Garamond', serif;
-  font-size: 15px; font-style: italic; color: var(--charcoal-soft);
-  cursor: pointer;
-  transition: background 0.2s, border-color 0.2s, color 0.2s;
-}
-.demo-pill:hover { background: var(--blush); border-color: var(--clay-light); color: var(--charcoal); }
-.demo-pill.selected { background: var(--charcoal); border-color: var(--charcoal); color: white; font-style: normal; }
 
-.demo-result { min-height: 100px; border-top: 1px solid var(--blush-deep); padding-top: 24px; display: none; }
-.demo-result.visible { display: block; }
-.demo-result-label {
+/* PEOPLE LIKE YOU */
+.section-people { background: var(--warm-white); padding: 96px 0; }
+.people-header { padding: 0 48px; }
+.people-track-wrap {
+  width: 100%;
+  box-sizing: border-box;
+  padding-left: 48px;
+  padding-right: 48px;
+  overflow-x: auto;
+  overflow-y: visible;
+  margin-top: 48px;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+}
+.people-track-wrap::-webkit-scrollbar { display: none; }
+.people-track { display: flex; gap: 24px; width: max-content; }
+.person-card {
+  width: calc(100vw - 48px);
+  max-width: 360px;
+  min-width: 0;
+  box-sizing: border-box;
+  overflow: hidden;
+  flex-shrink: 0;
+  background: white;
+  border-radius: 18px;
+  padding: 28px 28px 24px;
+  box-shadow: 0 8px 40px rgba(28,22,20,0.08);
+}
+.person-who {
   font-size: 10px; font-weight: 500; letter-spacing: 0.16em; text-transform: uppercase;
   color: var(--clay); margin-bottom: 12px;
+  overflow-wrap: break-word; word-break: break-word; max-width: 100%;
 }
-.demo-result-msg {
+.person-quote {
   font-family: 'Cormorant Garamond', serif;
-  font-size: clamp(17px, 2.2vw, 21px); font-weight: 400; line-height: 1.6;
-  color: var(--charcoal);
-  opacity: 0; transform: translateY(8px);
-  transition: opacity 0.5s ease, transform 0.5s ease;
+  font-size: clamp(15px, 4vw, 19px);
+  white-space: normal;
+  line-height: 1.6; font-style: italic;
+  color: var(--charcoal); margin-bottom: 24px;
+  overflow-wrap: break-word; word-break: break-word; max-width: 100%;
 }
-.demo-result-msg.show { opacity: 1; transform: translateY(0); }
-.demo-result-why {
-  margin-top: 14px; font-size: 12px; color: var(--stone); line-height: 1.6; font-style: italic;
-  opacity: 0; transition: opacity 0.5s ease 0.2s;
+.person-timeline { margin-bottom: 20px; overflow: hidden; width: 100%; }
+.timeline-row {
+  display: flex; align-items: center; gap: 6px;
+  overflow: hidden; width: 100%; margin-bottom: 6px;
 }
-.demo-result-why.show { opacity: 1; }
-.demo-cta-row {
-  margin-top: 24px;
-  opacity: 0; transition: opacity 0.5s ease 0.35s;
+.timeline-phase {
+  flex: 0 0 auto; max-width: 110px;
+  font-size: 12px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  color: var(--charcoal-soft);
 }
-.demo-cta-row.show { opacity: 1; }
-.demo-cta-btn {
-  display: inline-block;
-  background: var(--clay); color: white; border: none; border-radius: 6px;
-  padding: 14px 28px; font-family: 'DM Sans', sans-serif;
-  font-size: 12px; font-weight: 500; letter-spacing: 0.1em; text-transform: uppercase;
-  cursor: pointer; position: relative; overflow: hidden;
-  transition: transform 0.15s;
+.timeline-week {
+  flex: 0 0 44px; font-size: 10px; white-space: nowrap;
+  text-align: right; color: var(--stone);
 }
-.demo-cta-btn::before {
-  content: ''; position: absolute; inset: 0;
-  background: var(--clay-dark);
-  transform: scaleX(0); transform-origin: left;
-  transition: transform 0.35s ease;
+.timeline-bar-track {
+  flex: 1 1 0; min-width: 0; height: 8px;
+  overflow: hidden; border-radius: 4px; background: var(--blush);
 }
-.demo-cta-btn:hover::before { transform: scaleX(1); }
-.demo-cta-btn:hover { transform: translateY(-1px); }
-.demo-cta-btn span { position: relative; z-index: 1; }
+.timeline-bar-fill { height: 100%; border-radius: 4px; background: var(--clay-light); }
+.person-tags {
+  display: flex; flex-wrap: wrap; gap: 8px; width: 100%; margin-bottom: 20px;
+}
+.person-tag {
+  background: var(--section-alt); border: 1px solid var(--blush-deep);
+  border-radius: 100px; padding: 5px 12px; font-size: 11px;
+  color: var(--charcoal-soft); white-space: nowrap; flex-shrink: 0;
+}
+.person-use { width: 100%; box-sizing: border-box; border-top: 1px solid var(--blush-deep); padding-top: 16px; }
+.person-use-label {
+  font-size: 10px; font-weight: 500; letter-spacing: 0.16em; text-transform: uppercase;
+  color: var(--stone); margin-bottom: 8px;
+}
+.person-use-line {
+  font-size: 13px; line-height: 1.65;
+  overflow-wrap: break-word; color: var(--charcoal-soft);
+}
 
 /* TRUTH */
 .section-truth { background: var(--charcoal); padding: 100px 48px; position: relative; overflow: hidden; }
@@ -300,10 +305,12 @@ footer { background: var(--charcoal); padding: 44px 48px; display: flex; justify
 @media (max-width: 768px) {
   nav { padding: 20px 24px; }
   .hero { padding: 110px 24px 60px; }
-  .section-demo, .section-truth, .section-how, .section-faq, .section-cta { padding: 72px 24px; }
+  .section-truth, .section-how, .section-faq, .section-cta { padding: 72px 24px; }
+  .section-people { padding: 72px 0; }
+  .people-header { padding: 0 24px; }
+  .people-track-wrap { padding-left: 16px; padding-right: 16px; }
   .truth-inner { grid-template-columns: 1fr; gap: 52px; }
   .steps { grid-template-columns: 1fr; gap: 36px; }
-  .demo-box { padding: 24px 20px; }
   footer { flex-direction: column; gap: 20px; text-align: center; padding: 40px 24px; }
   .footer-links { justify-content: center; }
 }
@@ -335,30 +342,139 @@ footer { background: var(--charcoal); padding: 44px 48px; display: flex; justify
   <p class="form-microcopy">No partner needed &nbsp;&middot;&nbsp; No commitment &nbsp;&middot;&nbsp; Leave anytime</p>
 </section>
 
-<!-- 2. MINI DEMO -->
-<section class="section-demo">
-  <div class="demo-inner">
-    <p class="section-label reveal">Try it now</p>
-    <h2 class="demo-headline reveal">What would you <em>actually</em> say?</h2>
-    <p class="demo-sub reveal">Pick the situation closest to yours. Anew will show you a message you could send tonight.</p>
-    <div class="demo-box reveal">
-      <p class="demo-prompt-label">My situation right now...</p>
-      <div class="demo-pills">
-        <button class="demo-pill" onclick="showDemo(this, 0)">We feel distant lately</button>
-        <button class="demo-pill" onclick="showDemo(this, 1)">They never initiate anymore</button>
-        <button class="demo-pill" onclick="showDemo(this, 2)">We keep having the same fight</button>
-        <button class="demo-pill" onclick="showDemo(this, 3)">We've stopped talking about it</button>
-      </div>
-      <div class="demo-result" id="demo-result">
-        <p class="demo-result-label">A message you could send tonight</p>
-        <p class="demo-result-msg" id="demo-msg"></p>
-        <p class="demo-result-why" id="demo-why"></p>
-        <div class="demo-cta-row" id="demo-cta">
-          <button class="demo-cta-btn" onclick="window.location.href='#'">
-            <span>Get your personalized message &mdash; free</span>
-          </button>
+<!-- 2. PEOPLE LIKE YOU -->
+<section class="section-people">
+  <div class="people-header">
+    <p class="section-label reveal">People like you</p>
+    <h2 class="section-headline reveal">You&rsquo;re not alone<br><em>in this.</em></h2>
+  </div>
+  <div class="people-track-wrap">
+    <div class="people-track">
+
+      <div class="person-card reveal">
+        <p class="person-who">The one who drifted</p>
+        <blockquote class="person-quote">&ldquo;We stopped laughing. I didn&rsquo;t realize it until we were already months in.&rdquo;</blockquote>
+        <div class="person-timeline">
+          <div class="timeline-row">
+            <span class="timeline-phase">Recognizing</span>
+            <span class="timeline-week">Wk 1</span>
+            <div class="timeline-bar-track"><div class="timeline-bar-fill" style="width:40%"></div></div>
+          </div>
+          <div class="timeline-row">
+            <span class="timeline-phase">Opening up</span>
+            <span class="timeline-week">Wk 2&ndash;4</span>
+            <div class="timeline-bar-track"><div class="timeline-bar-fill" style="width:70%"></div></div>
+          </div>
+          <div class="timeline-row">
+            <span class="timeline-phase">Reconnecting</span>
+            <span class="timeline-week">Wk 5+</span>
+            <div class="timeline-bar-track"><div class="timeline-bar-fill" style="width:90%"></div></div>
+          </div>
+        </div>
+        <div class="person-tags">
+          <span class="person-tag">Emotional distance</span>
+          <span class="person-tag">Long-term couple</span>
+          <span class="person-tag">No crisis</span>
+        </div>
+        <div class="person-use">
+          <p class="person-use-label">Typical first step</p>
+          <p class="person-use-line">Sends a message noting one specific thing they missed about the other person &mdash; not vague, not heavy.</p>
         </div>
       </div>
+
+      <div class="person-card reveal">
+        <p class="person-who">The one who stopped initiating</p>
+        <blockquote class="person-quote">&ldquo;I kept waiting for them to come to me. They were probably doing the same.&rdquo;</blockquote>
+        <div class="person-timeline">
+          <div class="timeline-row">
+            <span class="timeline-phase">Noticing</span>
+            <span class="timeline-week">Wk 1</span>
+            <div class="timeline-bar-track"><div class="timeline-bar-fill" style="width:30%"></div></div>
+          </div>
+          <div class="timeline-row">
+            <span class="timeline-phase">Small bids</span>
+            <span class="timeline-week">Wk 2&ndash;3</span>
+            <div class="timeline-bar-track"><div class="timeline-bar-fill" style="width:60%"></div></div>
+          </div>
+          <div class="timeline-row">
+            <span class="timeline-phase">Momentum</span>
+            <span class="timeline-week">Wk 4+</span>
+            <div class="timeline-bar-track"><div class="timeline-bar-fill" style="width:85%"></div></div>
+          </div>
+        </div>
+        <div class="person-tags">
+          <span class="person-tag">Low initiation</span>
+          <span class="person-tag">Feeling unseen</span>
+          <span class="person-tag">Wants to try</span>
+        </div>
+        <div class="person-use">
+          <p class="person-use-label">Typical first step</p>
+          <p class="person-use-line">Learns to make small bids for connection &mdash; a question, a text &mdash; without waiting for the other person first.</p>
+        </div>
+      </div>
+
+      <div class="person-card reveal">
+        <p class="person-who">The one with the same fight</p>
+        <blockquote class="person-quote">&ldquo;We argue about dishes. It was never really about dishes.&rdquo;</blockquote>
+        <div class="person-timeline">
+          <div class="timeline-row">
+            <span class="timeline-phase">Naming it</span>
+            <span class="timeline-week">Wk 1</span>
+            <div class="timeline-bar-track"><div class="timeline-bar-fill" style="width:35%"></div></div>
+          </div>
+          <div class="timeline-row">
+            <span class="timeline-phase">Reframing</span>
+            <span class="timeline-week">Wk 2&ndash;4</span>
+            <div class="timeline-bar-track"><div class="timeline-bar-fill" style="width:65%"></div></div>
+          </div>
+          <div class="timeline-row">
+            <span class="timeline-phase">Breaking cycle</span>
+            <span class="timeline-week">Wk 5+</span>
+            <div class="timeline-bar-track"><div class="timeline-bar-fill" style="width:80%"></div></div>
+          </div>
+        </div>
+        <div class="person-tags">
+          <span class="person-tag">Recurring conflict</span>
+          <span class="person-tag">Communication gap</span>
+          <span class="person-tag">Both care</span>
+        </div>
+        <div class="person-use">
+          <p class="person-use-label">Typical first step</p>
+          <p class="person-use-line">Identifies the unspoken need behind the recurring argument &mdash; then practices saying that instead.</p>
+        </div>
+      </div>
+
+      <div class="person-card reveal">
+        <p class="person-who">The one afraid to start</p>
+        <blockquote class="person-quote">&ldquo;I knew something needed to change. I just didn&rsquo;t know how to bring it up.&rdquo;</blockquote>
+        <div class="person-timeline">
+          <div class="timeline-row">
+            <span class="timeline-phase">Clarity</span>
+            <span class="timeline-week">Wk 1</span>
+            <div class="timeline-bar-track"><div class="timeline-bar-fill" style="width:25%"></div></div>
+          </div>
+          <div class="timeline-row">
+            <span class="timeline-phase">Practicing</span>
+            <span class="timeline-week">Wk 2&ndash;3</span>
+            <div class="timeline-bar-track"><div class="timeline-bar-fill" style="width:55%"></div></div>
+          </div>
+          <div class="timeline-row">
+            <span class="timeline-phase">Saying it</span>
+            <span class="timeline-week">Wk 4+</span>
+            <div class="timeline-bar-track"><div class="timeline-bar-fill" style="width:88%"></div></div>
+          </div>
+        </div>
+        <div class="person-tags">
+          <span class="person-tag">Hard to start</span>
+          <span class="person-tag">Needs the words</span>
+          <span class="person-tag">Solo user</span>
+        </div>
+        <div class="person-use">
+          <p class="person-use-label">Typical first step</p>
+          <p class="person-use-line">Gets a message they can actually send tonight &mdash; specific to their situation, no rehearsing required.</p>
+        </div>
+      </div>
+
     </div>
   </div>
 </section>
@@ -482,49 +598,6 @@ footer { background: var(--charcoal); padding: 44px 48px; display: flex; justify
 </footer>
 
 <script>
-var demoData = [
-  {
-    msg: '"I\'ve been missing feeling close to you. Could we take a walk together this weekend -- just the two of us?"',
-    why: 'Gottman research: low-pressure bids for connection work better than direct confrontation. This opens a door without pressure.'
-  },
-  {
-    msg: '"I want to feel wanted by you. Would it be okay if I told you more often what I need?"',
-    why: 'Expressing a need as a wish -- not an accusation -- keeps your partner from going defensive.'
-  },
-  {
-    msg: '"I think we keep coming back to this because we both care. Can we try talking about it differently -- maybe just 10 minutes, no phones?"',
-    why: 'Naming the shared stake reframes conflict from "you vs me" to "us vs the problem."'
-  },
-  {
-    msg: '"I\'ve been wanting to talk about something, but I haven\'t known how to start. Can I try?"',
-    why: 'Asking permission to talk reduces the other person\'s anxiety and increases the chance they\'ll actually listen.'
-  }
-];
-
-function showDemo(pill, idx) {
-  var pills = document.querySelectorAll('.demo-pill');
-  pills.forEach(function(p) { p.classList.remove('selected'); });
-  pill.classList.add('selected');
-
-  var result = document.getElementById('demo-result');
-  var msg = document.getElementById('demo-msg');
-  var why = document.getElementById('demo-why');
-  var cta = document.getElementById('demo-cta');
-
-  msg.classList.remove('show');
-  why.classList.remove('show');
-  cta.classList.remove('show');
-  result.classList.add('visible');
-
-  setTimeout(function() {
-    msg.textContent = demoData[idx].msg;
-    why.textContent = demoData[idx].why;
-    msg.classList.add('show');
-    why.classList.add('show');
-    cta.classList.add('show');
-  }, 80);
-}
-
 // Scroll reveal
 var observer = new IntersectionObserver(function(entries) {
   entries.forEach(function(entry) {
@@ -535,6 +608,7 @@ var observer = new IntersectionObserver(function(entries) {
   });
 }, { threshold: 0.1 });
 document.querySelectorAll('.reveal, .stat-item').forEach(function(el) { observer.observe(el); });
+
 
 // FAQ
 function toggleFaq(btn) {
