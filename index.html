@@ -279,6 +279,62 @@ nav {
 .step-body { font-size: 14px; line-height: 1.75; color: var(--charcoal-soft); }
 .step-body strong { font-weight: 500; color: var(--charcoal); }
 
+/* PEOPLE LIKE YOU */
+.section-people { background: var(--section-alt); padding: 96px 48px; }
+.people-inner { max-width: 1060px; margin: 0 auto; }
+.case-cards { display: grid; grid-template-columns: repeat(3, 1fr); gap: 28px; margin-top: 48px; }
+.case-card {
+  background: white; border-radius: 16px; padding: 32px 28px;
+  box-shadow: 0 4px 24px rgba(28,22,20,0.07);
+  display: flex; flex-direction: column; gap: 24px;
+}
+.case-quote {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 16px; font-style: italic; line-height: 1.65;
+  color: var(--charcoal); white-space: pre-line;
+}
+.case-tags { display: flex; flex-wrap: wrap; gap: 8px; }
+.case-tag {
+  font-size: 11px; font-weight: 500; letter-spacing: 0.06em;
+  color: var(--charcoal-soft); background: var(--section-alt);
+  border: 1px solid var(--blush-deep); border-radius: 100px;
+  padding: 5px 12px;
+}
+.case-project {
+  font-size: 11px; font-weight: 500; letter-spacing: 0.14em; text-transform: uppercase;
+  color: var(--clay); padding-bottom: 12px; border-bottom: 1px solid var(--blush-deep);
+}
+.case-timeline { display: flex; flex-direction: column; gap: 10px; }
+.timeline-row { display: flex; align-items: baseline; gap: 8px; }
+.tl-period {
+  font-family: 'DM Sans', sans-serif; font-size: 11px;
+  color: var(--stone); width: 64px; flex-shrink: 0;
+}
+.tl-what {
+  font-family: 'DM Sans', sans-serif; font-size: 13px;
+  color: var(--charcoal-soft); flex: 1;
+}
+.tl-theory {
+  font-family: 'DM Sans', sans-serif; font-size: 10px;
+  text-transform: uppercase; letter-spacing: 0.1em;
+  color: var(--clay); width: 160px; flex-shrink: 0; text-align: right;
+}
+.case-outcome {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 15px; font-style: italic; line-height: 1.6;
+  color: var(--sage); padding-top: 12px; border-top: 1px solid var(--blush-deep);
+}
+.case-usage { display: flex; flex-direction: column; gap: 6px; }
+.case-usage-title {
+  font-size: 10px; font-weight: 500; letter-spacing: 0.14em; text-transform: uppercase;
+  color: var(--stone); margin-bottom: 4px;
+}
+.case-usage-item { font-size: 13px; color: var(--charcoal-soft); line-height: 1.5; }
+
+@media (max-width: 900px) {
+  .case-cards { grid-template-columns: 1fr; }
+}
+
 /* FAQ */
 .section-faq { background: var(--section-alt); padding: 96px 48px; }
 .faq-inner { max-width: 640px; margin: 0 auto; }
@@ -342,14 +398,14 @@ footer { background: var(--charcoal); padding: 44px 48px; display: flex; justify
 
 <!-- 1. HERO -->
 <section class="hero">
-  <p class="hero-eyebrow">Based on Gottman Method &middot; 40+ years of clinical research</p>
-  <h1 class="hero-headline">You still love them.<br>You've just lost the <em>words.</em></h1>
+  <p class="hero-eyebrow">Gottman Method &middot; Sensate Focus &middot; EFT &middot; CBT &middot; MI</p>
+  <h1 class="hero-headline">You're in a sexless relationship.<br>And the hardest part <em>isn't the sex.</em></h1>
   <div class="hero-situations">
-    <span class="hero-situation">Conversations feel shorter than they used to.</span>
-    <span class="hero-situation">You stopped reaching for each other.</span>
-    <span class="hero-situation">You've been thinking about bringing it up for weeks.</span>
+    <span class="hero-situation">You love them. But you don't feel wanted by them.</span>
+    <span class="hero-situation">That pain quietly takes your confidence.</span>
+    <span class="hero-situation">You've been carrying this alone.</span>
   </div>
-  <p class="hero-sub">Start rebuilding connection &mdash; one small step at a time.<br>No partner needed. A first step before therapy.</p>
+  <p class="hero-sub">Anew was built for exactly this.<br>No partner needed. No therapy required.</p>
   <form id="email-form" class="email-form" action="https://formspree.io/f/mzdyqvbe" method="POST">
     <input class="email-input" type="email" name="email" placeholder="your@email.com" required>
     <button type="submit" class="primary-btn" style="margin:0;flex-shrink:0;">
@@ -456,7 +512,150 @@ footer { background: var(--charcoal); padding: 44px 48px; display: flex; justify
   </div>
 </section>
 
-<!-- 5. FAQ -->
+<!-- 5. PEOPLE LIKE YOU -->
+<section class="section-people">
+  <div class="people-inner">
+    <p class="section-label reveal">People like you</p>
+    <h2 class="section-headline reveal">What they were feeling.<br><em>What happened next.</em></h2>
+    <div class="case-cards">
+
+      <!-- Card 1 -->
+      <div class="case-card reveal">
+        <p class="case-quote">"Married 7 years. Two kids, 4 and 6.
+It stopped after our second was born.
+That was 3 years ago.
+I still reach for him at night.
+He doesn't move."</p>
+        <div class="case-tags">
+          <span class="case-tag">Too tired to even talk about it</span>
+          <span class="case-tag">Sleeping next to a stranger</span>
+        </div>
+        <p class="case-project">Rebuilding Touch After the Baby Years</p>
+        <div class="case-timeline">
+          <div class="timeline-row">
+            <span class="tl-period">Week 1–3</span>
+            <span class="tl-what">Understand what changed</span>
+            <span class="tl-theory">Motivational Interviewing</span>
+          </div>
+          <div class="timeline-row">
+            <span class="tl-period">Week 4–6</span>
+            <span class="tl-what">Non-sexual physical reconnection</span>
+            <span class="tl-theory">Sensate Focus</span>
+          </div>
+          <div class="timeline-row">
+            <span class="tl-period">Week 7–10</span>
+            <span class="tl-what">Find the words and send them</span>
+            <span class="tl-theory">Gottman Method</span>
+          </div>
+          <div class="timeline-row">
+            <span class="tl-period">Week 11+</span>
+            <span class="tl-what">Sustain closeness alongside parenting</span>
+            <span class="tl-theory">IBCT</span>
+          </div>
+        </div>
+        <p class="case-outcome">Week 4: she said the thing she'd never said out loud. He listened.</p>
+        <div class="case-usage">
+          <p class="case-usage-title">Typical Anew Use</p>
+          <p class="case-usage-item">&#10003; 2–3 conversations during week 1</p>
+          <p class="case-usage-item">&#10003; Weekly check-ins while practicing</p>
+          <p class="case-usage-item">&#10003; Support before difficult conversations</p>
+          <p class="case-usage-item">&#10003; Continue only as long as it's useful</p>
+        </div>
+      </div>
+
+      <!-- Card 2 -->
+      <div class="case-card reveal reveal-d1">
+        <p class="case-quote">"Together 9 years. No kids.
+I used to initiate.
+After enough rejections, I stopped.
+Now neither of us brings it up.
+Something is gone and we both know it."</p>
+        <div class="case-tags">
+          <span class="case-tag">Rejected so many times I gave up</span>
+          <span class="case-tag">We don't talk about it anymore</span>
+        </div>
+        <p class="case-project">Breaking the Silence After Years of Rejection</p>
+        <div class="case-timeline">
+          <div class="timeline-row">
+            <span class="tl-period">Week 1–3</span>
+            <span class="tl-what">Separate rejection from self-worth</span>
+            <span class="tl-theory">Motivational Interviewing</span>
+          </div>
+          <div class="timeline-row">
+            <span class="tl-period">Week 4–7</span>
+            <span class="tl-what">Rewrite the "why bother" pattern</span>
+            <span class="tl-theory">CBT</span>
+          </div>
+          <div class="timeline-row">
+            <span class="tl-period">Week 8–10</span>
+            <span class="tl-what">Design words that don't sound like blame</span>
+            <span class="tl-theory">Gottman Method</span>
+          </div>
+          <div class="timeline-row">
+            <span class="tl-period">Week 11+</span>
+            <span class="tl-what">Track responses and adjust</span>
+            <span class="tl-theory">IBCT</span>
+          </div>
+        </div>
+        <p class="case-outcome">She found a way to bring it up — without it turning into silence again.</p>
+        <div class="case-usage">
+          <p class="case-usage-title">Typical Anew Use</p>
+          <p class="case-usage-item">&#10003; Before each difficult conversation</p>
+          <p class="case-usage-item">&#10003; To process what happened after a fight</p>
+          <p class="case-usage-item">&#10003; Weekly to adjust the approach</p>
+          <p class="case-usage-item">&#10003; Step back whenever you need space</p>
+        </div>
+      </div>
+
+      <!-- Card 3 -->
+      <div class="case-card reveal reveal-d2">
+        <p class="case-quote">"12 years together. Still love each other.
+There was no fight. No big moment.
+Just somewhere in the last few years,
+we stopped being that way with each other.
+I can't remember the last time he looked at me like he wanted me."</p>
+        <div class="case-tags">
+          <span class="case-tag">No obvious reason — it just faded</span>
+          <span class="case-tag">Good relationship, missing one thing</span>
+        </div>
+        <p class="case-project">From Comfortable to Close Again</p>
+        <div class="case-timeline">
+          <div class="timeline-row">
+            <span class="tl-period">Week 1–3</span>
+            <span class="tl-what">Name what you actually want, without shame</span>
+            <span class="tl-theory">EFT</span>
+          </div>
+          <div class="timeline-row">
+            <span class="tl-period">Week 4–6</span>
+            <span class="tl-what">One small step toward closeness</span>
+            <span class="tl-theory">Sensate Focus</span>
+          </div>
+          <div class="timeline-row">
+            <span class="tl-period">Week 7–9</span>
+            <span class="tl-what">Understand the emotional distance</span>
+            <span class="tl-theory">EFT</span>
+          </div>
+          <div class="timeline-row">
+            <span class="tl-period">Week 10+</span>
+            <span class="tl-what">Build habits that keep closeness alive</span>
+            <span class="tl-theory">Gottman Method</span>
+          </div>
+        </div>
+        <p class="case-outcome">Week 3: first physical contact that wasn't just logistical. In months.</p>
+        <div class="case-usage">
+          <p class="case-usage-title">Typical Anew Use</p>
+          <p class="case-usage-item">&#10003; Short check-ins a few times a week</p>
+          <p class="case-usage-item">&#10003; When you're not sure how to start</p>
+          <p class="case-usage-item">&#10003; To notice what's actually shifting</p>
+          <p class="case-usage-item">&#10003; No pressure to use it every day</p>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- 6. FAQ -->
 <section class="section-faq">
   <div class="faq-inner">
     <p class="section-label reveal">Questions</p>
@@ -494,7 +693,7 @@ footer { background: var(--charcoal); padding: 44px 48px; display: flex; justify
   </div>
 </section>
 
-<!-- 6. CTA -->
+<!-- 7. CTA -->
 <section class="section-cta">
   <div class="cta-inner">
     <h2 class="cta-headline reveal">You deserve to feel <em>wanted</em> again.</h2>
