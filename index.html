@@ -281,58 +281,119 @@ nav {
 
 /* PEOPLE LIKE YOU */
 .section-people { background: var(--section-alt); padding: 96px 48px; }
-.people-inner { max-width: 1060px; margin: 0 auto; }
-.case-cards { display: grid; grid-template-columns: repeat(3, 1fr); gap: 28px; margin-top: 48px; }
-.case-card {
-  background: white; border-radius: 16px; padding: 32px 28px;
-  box-shadow: 0 4px 24px rgba(28,22,20,0.07);
-  display: flex; flex-direction: column; gap: 24px;
-}
-.case-quote {
-  font-family: 'Cormorant Garamond', serif;
-  font-size: 16px; font-style: italic; line-height: 1.65;
-  color: var(--charcoal); white-space: pre-line;
-}
-.case-tags { display: flex; flex-wrap: wrap; gap: 8px; }
-.case-tag {
-  font-size: 11px; font-weight: 500; letter-spacing: 0.06em;
-  color: var(--charcoal-soft); background: var(--section-alt);
-  border: 1px solid var(--blush-deep); border-radius: 100px;
-  padding: 5px 12px;
-}
-.case-project {
-  font-size: 11px; font-weight: 500; letter-spacing: 0.14em; text-transform: uppercase;
-  color: var(--clay); padding-bottom: 12px; border-bottom: 1px solid var(--blush-deep);
-}
-.case-timeline { display: flex; flex-direction: column; gap: 10px; }
-.timeline-row { display: flex; align-items: baseline; gap: 8px; }
-.tl-period {
-  font-family: 'DM Sans', sans-serif; font-size: 11px;
-  color: var(--stone); width: 64px; flex-shrink: 0;
-}
-.tl-what {
-  font-family: 'DM Sans', sans-serif; font-size: 13px;
-  color: var(--charcoal-soft); flex: 1;
-}
-.tl-theory {
-  font-family: 'DM Sans', sans-serif; font-size: 10px;
-  text-transform: uppercase; letter-spacing: 0.1em;
-  color: var(--clay); width: 160px; flex-shrink: 0; text-align: right;
-}
-.case-outcome {
-  font-family: 'Cormorant Garamond', serif;
-  font-size: 15px; font-style: italic; line-height: 1.6;
-  color: var(--sage); padding-top: 12px; border-top: 1px solid var(--blush-deep);
-}
-.case-usage { display: flex; flex-direction: column; gap: 6px; }
-.case-usage-title {
-  font-size: 10px; font-weight: 500; letter-spacing: 0.14em; text-transform: uppercase;
-  color: var(--stone); margin-bottom: 4px;
-}
-.case-usage-item { font-size: 13px; color: var(--charcoal-soft); line-height: 1.5; }
+.people-inner { max-width: 920px; margin: 0 auto; }
 
-@media (max-width: 900px) {
-  .case-cards { grid-template-columns: 1fr; }
+.case-nav-wrapper { max-width: 560px; margin: 40px auto 0; position: relative; }
+.case-nav-btn {
+  width: 40px; height: 40px; border-radius: 50%;
+  border: 1px solid var(--blush-deep);
+  background: white; color: var(--clay); font-size: 16px;
+  cursor: pointer; display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0; transition: border-color 0.2s, box-shadow 0.2s;
+}
+.case-nav-btn:hover { border-color: var(--clay); box-shadow: 0 4px 16px rgba(184,112,78,0.15); }
+.case-nav-btn:disabled { opacity: 0.25; cursor: default; pointer-events: none; }
+.case-prev { position: absolute; left: -52px; top: 50%; transform: translateY(-50%); }
+.case-next { position: absolute; right: -52px; top: 50%; transform: translateY(-50%); }
+
+.case-card-wrap { overflow: hidden; border-radius: 20px; }
+.case-card {
+  background: white; border-radius: 20px; padding: 36px 32px;
+  box-shadow: 0 12px 48px rgba(28,22,20,0.09), 0 2px 8px rgba(28,22,20,0.04);
+  display: flex; flex-direction: column; gap: 20px;
+  box-sizing: border-box; width: 100%;
+  transition: opacity 0.22s ease, transform 0.22s ease;
+}
+.cc-quote-mark {
+  font-family: 'Cormorant Garamond', serif; font-size: 56px; color: var(--clay);
+  line-height: 0.6; display: block; margin-bottom: 4px;
+}
+.cc-quote {
+  font-family: 'Cormorant Garamond', serif; font-size: 18px; font-style: italic;
+  color: var(--charcoal); line-height: 1.65;
+}
+.cc-divider { height: 1px; background: var(--blush-deep); margin-top: 4px; }
+.cc-project-header {
+  display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px;
+}
+.cc-project-label {
+  font-family: 'DM Sans', sans-serif; font-size: 10px;
+  text-transform: uppercase; letter-spacing: 0.18em; color: var(--stone);
+}
+.cc-project-pill {
+  background: var(--blush); border-radius: 100px; padding: 4px 12px;
+  font-family: 'DM Sans', sans-serif; font-size: 10px;
+  text-transform: uppercase; letter-spacing: 0.1em; color: var(--clay-dark);
+}
+.cc-steps { display: flex; flex-direction: column; }
+.cc-step {
+  display: flex; align-items: flex-start; gap: 12px;
+  padding: 8px 0; border-bottom: 1px solid var(--section-alt);
+}
+.cc-step:last-child { border-bottom: none; }
+.cc-step-week {
+  font-family: 'DM Sans', sans-serif; font-size: 10px; color: var(--stone);
+  width: 52px; flex-shrink: 0; padding-top: 1px;
+}
+.cc-step-text {
+  font-family: 'DM Sans', sans-serif; font-size: 13px;
+  color: var(--charcoal-soft); line-height: 1.5; flex: 1;
+}
+.cc-step.weekly .cc-step-text { color: var(--clay-dark); font-style: italic; }
+.cc-step.weekly .cc-step-text::before { content: '\00B7'; color: var(--clay); margin-right: 6px; font-style: normal; }
+.cc-built-on {
+  display: flex; align-items: center; gap: 8px;
+  background: var(--section-alt); border-radius: 6px; padding: 8px 12px;
+}
+.cc-built-label {
+  font-family: 'DM Sans', sans-serif; font-size: 10px;
+  color: var(--stone); letter-spacing: 0.1em; white-space: nowrap;
+}
+.cc-built-theories { font-family: 'DM Sans', sans-serif; font-size: 10px; color: var(--charcoal-soft); }
+.cc-outcome {
+  border-left: 2px solid var(--clay); padding-left: 14px;
+  font-family: 'Cormorant Garamond', serif; font-size: 16px;
+  font-style: italic; color: var(--clay-dark); line-height: 1.55;
+}
+.case-dots { display: flex; gap: 8px; justify-content: center; margin-top: 20px; }
+.case-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--blush-deep); transition: all 0.2s; flex-shrink: 0; }
+.case-dot.active { width: 8px; height: 8px; background: var(--clay); }
+
+.case-personalise {
+  max-width: 560px; margin: 32px auto 0;
+  background: var(--blush); border-radius: 16px; padding: 28px 32px;
+  text-align: center; box-shadow: 0 4px 24px rgba(184,112,78,0.10);
+}
+.case-personalise-hl {
+  font-family: 'Cormorant Garamond', serif; font-size: 26px; font-weight: 300;
+  color: var(--charcoal); margin-bottom: 8px;
+}
+.case-personalise-sub {
+  font-family: 'DM Sans', sans-serif; font-size: 14px;
+  color: var(--charcoal-soft); line-height: 1.7; margin-bottom: 24px;
+}
+.case-personalise-btn {
+  background: var(--clay); color: white; border: none; border-radius: 4px;
+  padding: 15px 32px; font-family: 'DM Sans', sans-serif;
+  font-size: 11px; text-transform: uppercase; letter-spacing: 0.14em;
+  cursor: pointer; transition: background 0.25s;
+}
+.case-personalise-btn:hover { background: var(--clay-dark); }
+
+@media (max-width: 640px) {
+  .section-people { padding: 72px 24px; }
+  .case-nav-wrapper {
+    display: grid;
+    grid-template-areas: "card card card" "prev dots next";
+    grid-template-columns: 40px 1fr 40px;
+    row-gap: 16px;
+  }
+  .case-card-wrap { grid-area: card; }
+  .case-prev { position: static; transform: none; grid-area: prev; }
+  .case-next { position: static; transform: none; grid-area: next; }
+  .case-dots { grid-area: dots; margin-top: 0; align-self: center; }
+  .case-card { padding: 28px 22px; }
+  .case-personalise { padding: 24px 20px; }
 }
 
 /* FAQ */
@@ -517,140 +578,22 @@ footer { background: var(--charcoal); padding: 44px 48px; display: flex; justify
   <div class="people-inner">
     <p class="section-label reveal">People like you</p>
     <h2 class="section-headline reveal">What they were feeling.<br><em>What happened next.</em></h2>
-    <div class="case-cards">
-
-      <!-- Card 1 -->
-      <div class="case-card reveal">
-        <p class="case-quote">"Married 7 years. Two kids, 4 and 6.
-It stopped after our second was born.
-That was 3 years ago.
-I still reach for him at night.
-He doesn't move."</p>
-        <div class="case-tags">
-          <span class="case-tag">Too tired to even talk about it</span>
-          <span class="case-tag">Sleeping next to a stranger</span>
-        </div>
-        <p class="case-project">Rebuilding Touch After the Baby Years</p>
-        <div class="case-timeline">
-          <div class="timeline-row">
-            <span class="tl-period">Week 1–3</span>
-            <span class="tl-what">Understand what changed</span>
-            <span class="tl-theory">Motivational Interviewing</span>
-          </div>
-          <div class="timeline-row">
-            <span class="tl-period">Week 4–6</span>
-            <span class="tl-what">Non-sexual physical reconnection</span>
-            <span class="tl-theory">Sensate Focus</span>
-          </div>
-          <div class="timeline-row">
-            <span class="tl-period">Week 7–10</span>
-            <span class="tl-what">Find the words and send them</span>
-            <span class="tl-theory">Gottman Method</span>
-          </div>
-          <div class="timeline-row">
-            <span class="tl-period">Week 11+</span>
-            <span class="tl-what">Sustain closeness alongside parenting</span>
-            <span class="tl-theory">IBCT</span>
-          </div>
-        </div>
-        <p class="case-outcome">Week 4: she said the thing she'd never said out loud. He listened.</p>
-        <div class="case-usage">
-          <p class="case-usage-title">Typical Anew Use</p>
-          <p class="case-usage-item">&#10003; 2–3 conversations during week 1</p>
-          <p class="case-usage-item">&#10003; Weekly check-ins while practicing</p>
-          <p class="case-usage-item">&#10003; Support before difficult conversations</p>
-          <p class="case-usage-item">&#10003; Continue only as long as it's useful</p>
-        </div>
+    <div class="case-nav-wrapper reveal">
+      <button class="case-nav-btn case-prev" id="case-prev" onclick="moveCase(-1)" disabled>&#8249;</button>
+      <button class="case-nav-btn case-next" id="case-next" onclick="moveCase(1)">&#8250;</button>
+      <div class="case-card-wrap">
+        <div class="case-card" id="case-card"></div>
       </div>
-
-      <!-- Card 2 -->
-      <div class="case-card reveal reveal-d1">
-        <p class="case-quote">"Together 9 years. No kids.
-I used to initiate.
-After enough rejections, I stopped.
-Now neither of us brings it up.
-Something is gone and we both know it."</p>
-        <div class="case-tags">
-          <span class="case-tag">Rejected so many times I gave up</span>
-          <span class="case-tag">We don't talk about it anymore</span>
-        </div>
-        <p class="case-project">Breaking the Silence After Years of Rejection</p>
-        <div class="case-timeline">
-          <div class="timeline-row">
-            <span class="tl-period">Week 1–3</span>
-            <span class="tl-what">Separate rejection from self-worth</span>
-            <span class="tl-theory">Motivational Interviewing</span>
-          </div>
-          <div class="timeline-row">
-            <span class="tl-period">Week 4–7</span>
-            <span class="tl-what">Rewrite the "why bother" pattern</span>
-            <span class="tl-theory">CBT</span>
-          </div>
-          <div class="timeline-row">
-            <span class="tl-period">Week 8–10</span>
-            <span class="tl-what">Design words that don't sound like blame</span>
-            <span class="tl-theory">Gottman Method</span>
-          </div>
-          <div class="timeline-row">
-            <span class="tl-period">Week 11+</span>
-            <span class="tl-what">Track responses and adjust</span>
-            <span class="tl-theory">IBCT</span>
-          </div>
-        </div>
-        <p class="case-outcome">She found a way to bring it up — without it turning into silence again.</p>
-        <div class="case-usage">
-          <p class="case-usage-title">Typical Anew Use</p>
-          <p class="case-usage-item">&#10003; Before each difficult conversation</p>
-          <p class="case-usage-item">&#10003; To process what happened after a fight</p>
-          <p class="case-usage-item">&#10003; Weekly to adjust the approach</p>
-          <p class="case-usage-item">&#10003; Step back whenever you need space</p>
-        </div>
+      <div class="case-dots" id="case-dots">
+        <span class="case-dot active"></span>
+        <span class="case-dot"></span>
+        <span class="case-dot"></span>
       </div>
-
-      <!-- Card 3 -->
-      <div class="case-card reveal reveal-d2">
-        <p class="case-quote">"12 years together. Still love each other.
-There was no fight. No big moment.
-Just somewhere in the last few years,
-we stopped being that way with each other.
-I can't remember the last time he looked at me like he wanted me."</p>
-        <div class="case-tags">
-          <span class="case-tag">No obvious reason — it just faded</span>
-          <span class="case-tag">Good relationship, missing one thing</span>
-        </div>
-        <p class="case-project">From Comfortable to Close Again</p>
-        <div class="case-timeline">
-          <div class="timeline-row">
-            <span class="tl-period">Week 1–3</span>
-            <span class="tl-what">Name what you actually want, without shame</span>
-            <span class="tl-theory">EFT</span>
-          </div>
-          <div class="timeline-row">
-            <span class="tl-period">Week 4–6</span>
-            <span class="tl-what">One small step toward closeness</span>
-            <span class="tl-theory">Sensate Focus</span>
-          </div>
-          <div class="timeline-row">
-            <span class="tl-period">Week 7–9</span>
-            <span class="tl-what">Understand the emotional distance</span>
-            <span class="tl-theory">EFT</span>
-          </div>
-          <div class="timeline-row">
-            <span class="tl-period">Week 10+</span>
-            <span class="tl-what">Build habits that keep closeness alive</span>
-            <span class="tl-theory">Gottman Method</span>
-          </div>
-        </div>
-        <p class="case-outcome">Week 3: first physical contact that wasn't just logistical. In months.</p>
-        <div class="case-usage">
-          <p class="case-usage-title">Typical Anew Use</p>
-          <p class="case-usage-item">&#10003; Short check-ins a few times a week</p>
-          <p class="case-usage-item">&#10003; When you're not sure how to start</p>
-          <p class="case-usage-item">&#10003; To notice what's actually shifting</p>
-          <p class="case-usage-item">&#10003; No pressure to use it every day</p>
-        </div>
-      </div>
-
+    </div>
+    <div class="case-personalise reveal">
+      <p class="case-personalise-hl">Your situation is unique.</p>
+      <p class="case-personalise-sub">Anew analyzes your specific patterns<br>and builds a recovery plan around them.</p>
+      <button class="case-personalise-btn" onclick="document.querySelector('.email-form').scrollIntoView({behavior:'smooth'})">Start privately &mdash; free</button>
     </div>
   </div>
 </section>
@@ -788,6 +731,105 @@ document.addEventListener('mousemove', function(e) {
     }
   });
 });
+
+// Case cards
+var cases = [
+  {
+    quote: "It stopped after our second was born.\nThat was 3 years ago.\nI still reach for him at night. He doesn’t move.",
+    pill: "After the baby years",
+    steps: [
+      { week: "Wk 1–3", text: "Understand why you stopped saying it" },
+      { week: "Wk 4–6", text: "Touch before words" },
+      { week: "Wk 7–10", text: "Find the words and send them" },
+      { week: "Weekly", text: "Check-in with Anew to adjust", weekly: true }
+    ],
+    builtOn: "MI · Sensate Focus · Gottman · IBCT",
+    outcome: "Week 4: she said the thing she’d never said out loud.\nHe listened."
+  },
+  {
+    quote: "I used to initiate.\nAfter enough rejections, I stopped.\nNow neither of us brings it up.",
+    pill: "After years of rejection",
+    steps: [
+      { week: "Wk 1–3", text: "Separate rejection from self-worth" },
+      { week: "Wk 4–7", text: "Rewrite the “why bother” pattern" },
+      { week: "Wk 8–10", text: "Design words that don’t sound like blame" },
+      { week: "Weekly", text: "Check-in with Anew to adjust", weekly: true }
+    ],
+    builtOn: "MI · CBT · Gottman · IBCT",
+    outcome: "She found a way to bring it up —\nwithout it turning into silence again."
+  },
+  {
+    quote: "There was no fight. No big moment.\nSomewhere along the way, we stopped\nbeing that way with each other.",
+    pill: "When it just faded",
+    steps: [
+      { week: "Wk 1–3", text: "Name what you actually want" },
+      { week: "Wk 4–6", text: "One small move toward closeness" },
+      { week: "Wk 7–9", text: "Understand where the distance came from" },
+      { week: "Weekly", text: "Check-in with Anew to adjust", weekly: true }
+    ],
+    builtOn: "EFT · Sensate Focus · Gottman · IBCT",
+    outcome: "Week 3: first physical contact\nthat wasn’t just logistical. In months."
+  }
+];
+var currentCase = 0;
+
+function renderCaseCard(idx) {
+  var c = cases[idx];
+  var stepsHtml = c.steps.map(function(s) {
+    return '<div class="cc-step' + (s.weekly ? ' weekly' : '') + '">' +
+      '<span class="cc-step-week">' + s.week + '</span>' +
+      '<span class="cc-step-text">' + s.text + '</span>' +
+      '</div>';
+  }).join('');
+  return '<div class="cc-quote-block">' +
+    '<span class="cc-quote-mark">“</span>' +
+    '<p class="cc-quote">' + c.quote.replace(/\n/g, '<br>') + '</p>' +
+    '<div class="cc-divider"></div></div>' +
+    '<div class="cc-project-block">' +
+    '<div class="cc-project-header">' +
+    '<span class="cc-project-label">Recovery project</span>' +
+    '<span class="cc-project-pill">' + c.pill + '</span>' +
+    '</div>' +
+    '<div class="cc-steps">' + stepsHtml + '</div>' +
+    '</div>' +
+    '<div class="cc-built-on">' +
+    '<span class="cc-built-label">Based on</span>' +
+    '<span class="cc-built-theories">' + c.builtOn + '</span>' +
+    '</div>' +
+    '<p class="cc-outcome">' + c.outcome.replace(/\n/g, '<br>') + '</p>';
+}
+
+function updateCaseNav() {
+  var prev = document.getElementById('case-prev');
+  var next = document.getElementById('case-next');
+  if (prev) prev.disabled = currentCase === 0;
+  if (next) next.disabled = currentCase === 2;
+  document.querySelectorAll('.case-dot').forEach(function(d, i) {
+    d.classList.toggle('active', i === currentCase);
+  });
+}
+
+function moveCase(dir) {
+  currentCase = Math.max(0, Math.min(2, currentCase + dir));
+  var card = document.getElementById('case-card');
+  if (!card) return;
+  card.style.opacity = '0';
+  card.style.transform = 'translateY(6px)';
+  setTimeout(function() {
+    card.innerHTML = renderCaseCard(currentCase);
+    requestAnimationFrame(function() {
+      card.style.opacity = '1';
+      card.style.transform = 'translateY(0)';
+    });
+    updateCaseNav();
+  }, 220);
+}
+
+(function initCaseCards() {
+  var card = document.getElementById('case-card');
+  if (card) card.innerHTML = renderCaseCard(0);
+  updateCaseNav();
+})();
 
 // FAQ
 function toggleFaq(btn) {
