@@ -1,0 +1,897 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Anew — Private Relationship Support</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;1,400&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --warm-white: #FAF6F1;
+    --clay: #B8704E;
+    --clay-light: #D4906E;
+    --clay-dark: #8C4E32;
+    --charcoal: #1C1614;
+    --charcoal-soft: #5C4D45;
+    --stone: #8A7870;
+    --blush: #EDD4C6;
+    --blush-deep: #DBBAA6;
+    --section-alt: #F5EFE8;
+    --sage: #5E8A60;
+  }
+
+  html, body {
+    height: 100%;
+    height: 100dvh;
+    font-family: 'DM Sans', sans-serif;
+    background: var(--warm-white);
+    color: var(--charcoal);
+    overflow: hidden;
+  }
+
+  /* ─── STATE 1: Welcome ─── */
+  #state1 {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100dvh;
+    padding: 24px;
+    text-align: center;
+    background: var(--warm-white);
+    transition: opacity 0.5s ease;
+  }
+
+  #state1.fade-out { opacity: 0; pointer-events: none; }
+
+  .welcome-logo {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 28px;
+    font-weight: 400;
+    letter-spacing: 0.1em;
+    color: var(--charcoal);
+    margin-bottom: 48px;
+  }
+
+  .welcome-headline {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: clamp(36px, 5vw, 52px);
+    font-weight: 300;
+    color: var(--charcoal);
+    max-width: 480px;
+    line-height: 1.15;
+    margin-bottom: 16px;
+  }
+
+  .welcome-sub {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 15px;
+    color: var(--charcoal-soft);
+    margin-bottom: 40px;
+    line-height: 1.6;
+  }
+
+  .btn-begin {
+    background: var(--clay);
+    color: white;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 12px;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    padding: 16px 36px;
+    border-radius: 4px;
+    border: none;
+    cursor: pointer;
+    transition: background 0.2s ease;
+    min-height: 44px;
+  }
+
+  .btn-begin:hover { background: var(--clay-dark); }
+
+  .safety-note {
+    margin-top: 24px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 11px;
+    color: var(--stone);
+    max-width: 320px;
+    line-height: 1.6;
+  }
+
+  /* ─── STATE 2: Conversation ─── */
+  #state2 {
+    display: none;
+    flex-direction: column;
+    height: 100dvh;
+    background: var(--warm-white);
+    opacity: 0;
+    transition: opacity 0.5s ease;
+  }
+
+  #state2.visible { opacity: 1; }
+
+  .top-bar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 56px;
+    background: rgba(250,246,241,0.96);
+    border-bottom: 1px solid var(--blush-deep);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 24px;
+    z-index: 100;
+    backdrop-filter: blur(4px);
+  }
+
+  .top-bar-logo {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 22px;
+    font-weight: 400;
+    color: var(--charcoal);
+    letter-spacing: 0.08em;
+  }
+
+  .top-bar-label {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--stone);
+  }
+
+  .chat-area {
+    flex: 1;
+    overflow-y: auto;
+    padding: 80px 24px 140px;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+  }
+
+  .chat-inner {
+    max-width: 640px;
+    margin: 0 auto;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+  }
+
+  .msg-ai {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 20px;
+    font-weight: 400;
+    color: var(--charcoal);
+    line-height: 1.65;
+    max-width: 520px;
+  }
+
+  .msg-user {
+    background: var(--blush-deep);
+    border-radius: 18px 18px 4px 18px;
+    padding: 12px 18px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 15px;
+    color: var(--charcoal);
+    align-self: flex-end;
+    max-width: 400px;
+    line-height: 1.5;
+  }
+
+  .word { opacity: 0; transition: opacity 0.15s ease; display: inline; }
+  .word.visible { opacity: 1; }
+
+  /* Typing indicator */
+  .typing-indicator {
+    display: flex;
+    gap: 5px;
+    align-items: center;
+    padding: 8px 0;
+  }
+
+  .typing-indicator span {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: var(--stone);
+    animation: pulse 1.2s ease-in-out infinite;
+  }
+
+  .typing-indicator span:nth-child(2) { animation-delay: 0.2s; }
+  .typing-indicator span:nth-child(3) { animation-delay: 0.4s; }
+
+  @keyframes pulse {
+    0%, 80%, 100% { opacity: 0.3; transform: scale(0.85); }
+    40% { opacity: 1; transform: scale(1); }
+  }
+
+  /* Input bar */
+  .input-bar {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: white;
+    border-top: 1px solid var(--blush-deep);
+    padding: 12px 16px;
+    z-index: 100;
+  }
+
+  .input-bar-inner {
+    max-width: 640px;
+    margin: 0 auto;
+    display: flex;
+    align-items: flex-end;
+    gap: 10px;
+  }
+
+  #userInput {
+    flex: 1;
+    border: 1.5px solid var(--blush-deep);
+    border-radius: 12px;
+    padding: 12px 16px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 15px;
+    color: var(--charcoal);
+    background: white;
+    resize: none;
+    min-height: 48px;
+    max-height: 120px;
+    line-height: 1.5;
+    outline: none;
+    transition: border-color 0.2s ease;
+    overflow-y: auto;
+  }
+
+  #userInput:focus { border-color: var(--clay); }
+  #userInput::placeholder { color: var(--stone); }
+
+  #sendBtn {
+    width: 44px;
+    height: 44px;
+    min-width: 44px;
+    border-radius: 50%;
+    background: var(--clay);
+    border: none;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.2s ease;
+    flex-shrink: 0;
+  }
+
+  #sendBtn:hover { background: var(--clay-dark); }
+  #sendBtn:disabled { background: var(--blush-deep); cursor: not-allowed; }
+
+  .error-msg {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 13px;
+    color: var(--stone);
+    font-style: italic;
+    padding: 4px 0;
+  }
+
+  /* ─── STATE 3: Reflection trigger buttons ─── */
+  .reflection-buttons {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+    margin-top: 8px;
+  }
+
+  .btn-yes {
+    background: var(--clay);
+    color: white;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 12px;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    padding: 14px 28px;
+    border-radius: 4px;
+    border: none;
+    cursor: pointer;
+    min-height: 44px;
+    transition: background 0.2s ease;
+  }
+
+  .btn-yes:hover { background: var(--clay-dark); }
+
+  .btn-not-yet {
+    background: none;
+    color: var(--clay);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 12px;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    padding: 14px 28px;
+    border-radius: 4px;
+    border: 1.5px solid var(--clay);
+    cursor: pointer;
+    min-height: 44px;
+    transition: opacity 0.2s ease;
+  }
+
+  .btn-not-yet:hover { opacity: 0.75; }
+
+  /* ─── STATE 4: Paywall ─── */
+  .paywall-card {
+    background: white;
+    border-radius: 16px;
+    padding: 32px 28px;
+    box-shadow: 0 8px 40px rgba(28,22,20,0.10);
+    max-width: 480px;
+    margin: 24px auto 48px;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+  }
+
+  .paywall-card.visible { opacity: 1; }
+
+  .paywall-headline {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 28px;
+    font-weight: 300;
+    color: var(--charcoal);
+    margin-bottom: 8px;
+  }
+
+  .paywall-sub {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14px;
+    color: var(--charcoal-soft);
+    margin-bottom: 24px;
+    line-height: 1.5;
+  }
+
+  .paywall-features {
+    list-style: none;
+    margin-bottom: 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .paywall-features li {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14px;
+    color: var(--charcoal);
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    line-height: 1.4;
+  }
+
+  .paywall-features li::before {
+    content: '✓';
+    color: var(--clay);
+    font-weight: 500;
+    flex-shrink: 0;
+    margin-top: 1px;
+  }
+
+  .paywall-divider {
+    border: none;
+    border-top: 1px solid var(--blush-deep);
+    margin-bottom: 20px;
+  }
+
+  .paywall-price-main {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 22px;
+    font-style: italic;
+    color: var(--charcoal);
+    display: block;
+    margin-bottom: 4px;
+  }
+
+  .paywall-price-sub {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 13px;
+    color: var(--stone);
+    display: block;
+    margin-bottom: 4px;
+  }
+
+  .paywall-price-note {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 11px;
+    color: var(--clay);
+    display: block;
+    margin-bottom: 20px;
+  }
+
+  .btn-cta {
+    display: block;
+    width: 100%;
+    background: var(--clay);
+    color: white;
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 20px;
+    font-style: italic;
+    padding: 18px;
+    border-radius: 6px;
+    border: none;
+    cursor: pointer;
+    text-align: center;
+    transition: background 0.2s ease;
+    text-decoration: none;
+    line-height: 1;
+  }
+
+  .btn-cta:hover { background: var(--clay-dark); }
+
+  .paywall-no-cc {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 11px;
+    color: var(--stone);
+    text-align: center;
+    margin-top: 12px;
+    display: block;
+  }
+
+  .paywall-skip {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 12px;
+    color: var(--stone);
+    text-align: center;
+    margin-top: 16px;
+    display: block;
+    cursor: pointer;
+    text-decoration: underline;
+    text-underline-offset: 3px;
+    background: none;
+    border: none;
+    padding: 0;
+  }
+
+  .paywall-skip:hover { color: var(--charcoal-soft); }
+
+  /* Fade-in utility */
+  .fade-in {
+    opacity: 0;
+    animation: fadeIn 0.4s ease forwards;
+  }
+
+  @keyframes fadeIn {
+    to { opacity: 1; }
+  }
+
+  /* Scrollbar */
+  .chat-area::-webkit-scrollbar { width: 4px; }
+  .chat-area::-webkit-scrollbar-track { background: transparent; }
+  .chat-area::-webkit-scrollbar-thumb { background: var(--blush-deep); border-radius: 2px; }
+
+  @media (max-width: 480px) {
+    .msg-ai { font-size: 18px; }
+    .paywall-card { margin: 16px 0 48px; border-radius: 12px; }
+    .top-bar-label { display: none; }
+  }
+</style>
+</head>
+<body>
+
+<!-- STATE 1: Welcome -->
+<div id="state1">
+  <div class="welcome-logo">Anew</div>
+  <h1 class="welcome-headline">Tell me what's been going on.</h1>
+  <p class="welcome-sub">This is private. Take your time.<br>There are no right answers.</p>
+  <button class="btn-begin" id="beginBtn">Begin privately</button>
+  <p class="safety-note">If your situation involves abuse or crisis, please reach out to a qualified professional.</p>
+</div>
+
+<!-- STATE 2/3/4: Conversation -->
+<div id="state2">
+  <div class="top-bar">
+    <span class="top-bar-logo">Anew</span>
+    <span class="top-bar-label">Understanding your situation</span>
+  </div>
+
+  <div class="chat-area" id="chatArea">
+    <div class="chat-inner" id="chatInner"></div>
+  </div>
+
+  <div class="input-bar" id="inputBar">
+    <div class="input-bar-inner">
+      <textarea id="userInput" placeholder="Write here..." rows="1"></textarea>
+      <button id="sendBtn" aria-label="Send">
+        <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
+          <path d="M3 9H15M15 9L10 4M15 9L10 14" stroke="white" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </button>
+    </div>
+  </div>
+</div>
+
+<script>
+  // ─── State ───
+  let messages = [];
+  let turnCount = 0;
+  let readyToReflect = false;
+  let currentState = 1;
+  let isStreaming = false;
+
+  const SYSTEM_PROMPT = `You are the conversational core of Anew, an AI relationship support tool.
+Your only goal right now is to deeply understand this person's situation.
+
+Persona: Warm, unhurried, non-judgmental.
+You speak in plain, human language. Short sentences. No jargon.
+You do not give advice yet. You do not diagnose. You listen.
+
+Rules:
+- Ask one question at a time.
+- Keep responses to 1–3 sentences maximum.
+- Do not use: "therapy", "therapist", "diagnosis", "disorder".
+- Do not say "I understand" or "I hear you" — show it through your next question.
+- Never combine acknowledgment and a question. Either acknowledge OR ask. Not both.
+- No bullet points or lists.
+- Use "they/them" unless user specifies gender.
+
+Information gathering (internal, never reveal):
+  1. What is happening
+  2. How long this has been going on
+  3. What the user has already tried
+  4. How the partner typically responds
+  5. What the user is most afraid of
+  6. What the user actually wants
+
+Scoring: after each user message, score how many of 6 points you have (0–6).
+
+After 3 user messages: evaluate each turn.
+Score 4+: append [READY_TO_REFLECT] on new line at end of response.
+After 10 user messages regardless: append [READY_TO_REFLECT].
+
+Do not explain the tag. Just include it.
+
+Opening message (before user writes anything):
+"What's been going on between you two?"`;
+
+  const REFLECTION_SYSTEM_ADDITION = `
+
+Based on our conversation, write a warm, non-judgmental reflection of what you heard.
+2–3 sentences. Use interpretation language: 'It sounds like...', 'I may be seeing...', 'What I'm noticing is...'.
+Do not diagnose. Do not use clinical terms.
+End with: 'Does that feel close to what's been happening?'`;
+
+  // ─── DOM refs ───
+  const state1El = document.getElementById('state1');
+  const state2El = document.getElementById('state2');
+  const chatInner = document.getElementById('chatInner');
+  const chatArea = document.getElementById('chatArea');
+  const userInput = document.getElementById('userInput');
+  const sendBtn = document.getElementById('sendBtn');
+  const inputBar = document.getElementById('inputBar');
+
+  // ─── Transitions ───
+  document.getElementById('beginBtn').addEventListener('click', () => {
+    state1El.classList.add('fade-out');
+    setTimeout(() => {
+      state1El.style.display = 'none';
+      state2El.style.display = 'flex';
+      requestAnimationFrame(() => {
+        requestAnimationFrame(() => {
+          state2El.classList.add('visible');
+        });
+      });
+      currentState = 2;
+      loadOpeningMessage();
+    }, 500);
+  });
+
+  // ─── Auto-resize textarea ───
+  userInput.addEventListener('input', () => {
+    userInput.style.height = 'auto';
+    userInput.style.height = Math.min(userInput.scrollHeight, 120) + 'px';
+  });
+
+  // ─── Send on Enter ───
+  userInput.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
+      if (!isStreaming) handleSend();
+    }
+  });
+
+  sendBtn.addEventListener('click', () => {
+    if (!isStreaming) handleSend();
+  });
+
+  // ─── iOS visual viewport ───
+  if (window.visualViewport) {
+    window.visualViewport.addEventListener('resize', () => {
+      const offset = window.innerHeight - window.visualViewport.height;
+      inputBar.style.transform = `translateY(-${offset}px)`;
+    });
+  }
+
+  // ─── Append message to chat ───
+  function appendMessage(role, text, opts = {}) {
+    const el = document.createElement('div');
+    if (role === 'ai') {
+      el.className = 'msg-ai';
+    } else {
+      el.className = 'msg-user fade-in';
+      el.textContent = text;
+    }
+    chatInner.appendChild(el);
+    scrollToBottom();
+    return el;
+  }
+
+  // ─── Word-by-word animation ───
+  function animateWords(el, text, onDone) {
+    const words = text.split(' ');
+    el.innerHTML = '';
+    words.forEach((w, i) => {
+      const span = document.createElement('span');
+      span.className = 'word';
+      span.textContent = (i === 0 ? '' : ' ') + w;
+      el.appendChild(span);
+    });
+
+    let i = 0;
+    const spans = el.querySelectorAll('.word');
+    function showNext() {
+      if (i < spans.length) {
+        spans[i].classList.add('visible');
+        i++;
+        setTimeout(showNext, 22);
+      } else {
+        if (onDone) onDone();
+      }
+    }
+    showNext();
+  }
+
+  // ─── Typing indicator ───
+  function showTyping() {
+    const el = document.createElement('div');
+    el.className = 'typing-indicator';
+    el.id = 'typingIndicator';
+    el.innerHTML = '<span></span><span></span><span></span>';
+    chatInner.appendChild(el);
+    scrollToBottom();
+    return el;
+  }
+
+  function hideTyping() {
+    const el = document.getElementById('typingIndicator');
+    if (el) el.remove();
+  }
+
+  function scrollToBottom() {
+    requestAnimationFrame(() => {
+      chatArea.scrollTop = chatArea.scrollHeight;
+    });
+  }
+
+  // ─── API call ───
+  async function callAPI(sysPrompt, msgHistory) {
+    const response = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'anthropic-version': '2023-06-01',
+        'anthropic-dangerous-direct-browser-access': 'true'
+      },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-20250514',
+        max_tokens: 300,
+        system: sysPrompt,
+        messages: msgHistory
+      })
+    });
+
+    if (!response.ok) throw new Error(`API error ${response.status}`);
+    const data = await response.json();
+    return data.content[0].text;
+  }
+
+  // ─── Check for READY_TO_REFLECT ───
+  function processAIText(raw) {
+    const tag = '[READY_TO_REFLECT]';
+    if (raw.includes(tag)) {
+      readyToReflect = true;
+      return raw.replace(tag, '').trim();
+    }
+    return raw;
+  }
+
+  // ─── Show error ───
+  function showError() {
+    const err = document.createElement('div');
+    err.className = 'error-msg fade-in';
+    err.textContent = 'Something went wrong. Please try again.';
+    chatInner.appendChild(err);
+    scrollToBottom();
+    setTimeout(() => err.remove(), 5000);
+  }
+
+  // ─── Opening message ───
+  function loadOpeningMessage() {
+    const el = appendMessage('ai', '');
+    animateWords(el, "What's been going on between you two?", () => {
+      enableInput();
+    });
+    messages.push({ role: 'assistant', content: "What's been going on between you two?" });
+  }
+
+  // ─── Enable/disable input ───
+  function enableInput() {
+    isStreaming = false;
+    userInput.disabled = false;
+    sendBtn.disabled = false;
+    userInput.focus();
+  }
+
+  function disableInput() {
+    isStreaming = true;
+    userInput.disabled = true;
+    sendBtn.disabled = true;
+  }
+
+  // ─── Handle send ───
+  async function handleSend() {
+    const text = userInput.value.trim();
+    if (!text) return;
+
+    // Clear input
+    userInput.value = '';
+    userInput.style.height = 'auto';
+    disableInput();
+
+    // Show user message
+    appendMessage('user', text);
+    messages.push({ role: 'user', content: text });
+    turnCount++;
+
+    // STATE 3 transition
+    if (readyToReflect && currentState === 2) {
+      transitionToState3();
+      return;
+    }
+
+    // Normal AI response
+    await fetchAndShowAI(SYSTEM_PROMPT);
+  }
+
+  async function fetchAndShowAI(sysPrompt) {
+    const typing = showTyping();
+
+    try {
+      const raw = await callAPI(sysPrompt, messages);
+      hideTyping();
+
+      const cleaned = processAIText(raw);
+      const el = appendMessage('ai', '');
+      messages.push({ role: 'assistant', content: cleaned });
+
+      animateWords(el, cleaned, () => {
+        enableInput();
+      });
+    } catch (e) {
+      hideTyping();
+      showError();
+      enableInput();
+    }
+  }
+
+  // ─── STATE 3 ───
+  function transitionToState3() {
+    currentState = 3;
+
+    // Hide input bar
+    inputBar.style.display = 'none';
+
+    const reflectMsg = "I think I'm starting to see some patterns here. Would it be okay if I reflected back what I'm hearing — before we go further?";
+    const el = appendMessage('ai', '');
+
+    animateWords(el, reflectMsg, () => {
+      messages.push({ role: 'assistant', content: reflectMsg });
+
+      // Show buttons
+      const btnsEl = document.createElement('div');
+      btnsEl.className = 'reflection-buttons fade-in';
+      btnsEl.id = 'reflectionBtns';
+
+      const btnYes = document.createElement('button');
+      btnYes.className = 'btn-yes';
+      btnYes.textContent = 'Yes, go ahead';
+      btnYes.addEventListener('click', transitionToState4);
+
+      const btnNotYet = document.createElement('button');
+      btnNotYet.className = 'btn-not-yet';
+      btnNotYet.textContent = 'Not yet, I want to say more';
+      btnNotYet.addEventListener('click', () => {
+        btnsEl.remove();
+        readyToReflect = false;
+        currentState = 2;
+        inputBar.style.display = '';
+        enableInput();
+      });
+
+      btnsEl.appendChild(btnYes);
+      btnsEl.appendChild(btnNotYet);
+      chatInner.appendChild(btnsEl);
+      scrollToBottom();
+    });
+  }
+
+  // ─── STATE 4 ───
+  async function transitionToState4() {
+    currentState = 4;
+    document.getElementById('reflectionBtns')?.remove();
+
+    // Reflection API call
+    const reflectionSystem = SYSTEM_PROMPT + REFLECTION_SYSTEM_ADDITION;
+    const typing = showTyping();
+
+    try {
+      const raw = await callAPI(reflectionSystem, messages);
+      hideTyping();
+
+      const el = appendMessage('ai', '');
+      messages.push({ role: 'assistant', content: raw });
+
+      animateWords(el, raw, () => {
+        // After 1200ms, show second message
+        setTimeout(() => {
+          const el2 = appendMessage('ai', '');
+          const bridgeMsg = "I think there's more I can help you see — and a way to start moving through this.";
+          messages.push({ role: 'assistant', content: bridgeMsg });
+
+          animateWords(el2, bridgeMsg, () => {
+            // Show paywall after 300ms
+            setTimeout(showPaywall, 300);
+          });
+        }, 1200);
+      });
+    } catch (e) {
+      hideTyping();
+      showError();
+    }
+  }
+
+  // ─── Paywall ───
+  function showPaywall() {
+    const card = document.createElement('div');
+    card.className = 'paywall-card';
+    card.innerHTML = `
+      <h2 class="paywall-headline">Your personalized recovery project</h2>
+      <p class="paywall-sub">A 90-day roadmap built around your specific situation.</p>
+      <ul class="paywall-features">
+        <li>Full relationship pattern assessment</li>
+        <li>Week-by-week recovery roadmap</li>
+        <li>Message scripts for difficult conversations</li>
+        <li>Weekly AI coaching check-ins</li>
+      </ul>
+      <hr class="paywall-divider">
+      <span class="paywall-price-main">Start free for 7 days</span>
+      <span class="paywall-price-sub">Then $19/month — cancel anytime</span>
+      <span class="paywall-price-note">Founding member pricing. First 100 members only.</span>
+      <a href="[STRIPE_LINK_PLACEHOLDER]" target="_blank" rel="noopener" class="btn-cta">See my recovery project</a>
+      <span class="paywall-no-cc">No credit card required to start</span>
+      <button class="paywall-skip" onclick="window.location.href='https://anewapp.net'">Not ready yet — go back to anewapp.net</button>
+    `;
+
+    chatInner.appendChild(card);
+    scrollToBottom();
+
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => {
+        card.classList.add('visible');
+      });
+    });
+  }
+</script>
+</body>
+</html>
