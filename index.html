@@ -150,104 +150,10 @@ nav {
   position: relative; z-index: 1;
 }
 
-/* HERO CARDS */
-.hero-cards {
-  position: relative; width: 100%; max-width: 680px; height: 190px;
-  margin: 52px auto 0;
-  opacity: 0; animation: fadeUp 0.9s ease 0.84s forwards;
-  z-index: 1;
-}
-.hcard {
-  position: absolute; background: white; border-radius: 18px;
-  padding: 18px 24px;
-  box-shadow: 0 10px 40px rgba(28,22,20,0.09), 0 2px 8px rgba(28,22,20,0.04);
-  will-change: transform;
-}
-.hcard:nth-child(1) { width: 230px; left: 0; top: 20px; transform: rotate(-3deg); }
-.hcard:nth-child(2) { width: 250px; left: 50%; top: 0; transform: translateX(-50%) rotate(0.5deg); }
-.hcard:nth-child(3) { width: 222px; right: 0; top: 28px; transform: rotate(2.5deg); }
-.hcard-label { font-size: 9px; font-weight: 500; letter-spacing: 0.18em; text-transform: uppercase; color: var(--clay); margin-bottom: 7px; }
-.hcard-text { font-family: 'Cormorant Garamond', serif; font-size: 15px; line-height: 1.55; color: var(--charcoal); }
-.hcard-text em { font-style: italic; color: var(--charcoal-soft); }
-
-/* DEMO SECTION */
-.section-demo { background: var(--section-alt); padding: 96px 48px; }
-.demo-inner { max-width: 780px; margin: 0 auto; text-align: center; }
 .section-label {
   font-size: 11px; font-weight: 500; letter-spacing: 0.2em; text-transform: uppercase;
   color: var(--clay); margin-bottom: 16px;
 }
-.demo-headline {
-  font-family: 'Cormorant Garamond', serif;
-  font-size: clamp(32px, 4vw, 48px); font-weight: 300; line-height: 1.15;
-  color: var(--charcoal); margin-bottom: 12px;
-}
-.demo-headline em { font-style: italic; }
-.demo-sub {
-  font-size: 15px; color: var(--charcoal-soft); line-height: 1.7;
-  margin-bottom: 48px; max-width: 500px; margin-left: auto; margin-right: auto;
-}
-.demo-box {
-  background: white; border-radius: 16px; padding: 36px 40px;
-  box-shadow: 0 8px 48px rgba(28,22,20,0.08); text-align: left;
-}
-.demo-prompt-label {
-  font-size: 11px; font-weight: 500; letter-spacing: 0.16em; text-transform: uppercase;
-  color: var(--stone); margin-bottom: 12px;
-}
-.demo-pills { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 28px; }
-.demo-pill {
-  background: var(--section-alt); border: 1px solid var(--blush-deep);
-  border-radius: 100px; padding: 10px 18px;
-  font-family: 'Cormorant Garamond', serif;
-  font-size: 15px; font-style: italic; color: var(--charcoal-soft);
-  cursor: pointer;
-  transition: background 0.2s, border-color 0.2s, color 0.2s;
-}
-.demo-pill:hover { background: var(--blush); border-color: var(--clay-light); color: var(--charcoal); }
-.demo-pill.selected { background: var(--charcoal); border-color: var(--charcoal); color: white; font-style: normal; }
-
-.demo-result { min-height: 100px; border-top: 1px solid var(--blush-deep); padding-top: 24px; display: none; }
-.demo-result.visible { display: block; }
-.demo-result-label {
-  font-size: 10px; font-weight: 500; letter-spacing: 0.16em; text-transform: uppercase;
-  color: var(--clay); margin-bottom: 12px;
-}
-.demo-result-msg {
-  font-family: 'Cormorant Garamond', serif;
-  font-size: clamp(17px, 2.2vw, 21px); font-weight: 400; line-height: 1.6;
-  color: var(--charcoal);
-  opacity: 0; transform: translateY(8px);
-  transition: opacity 0.5s ease, transform 0.5s ease;
-}
-.demo-result-msg.show { opacity: 1; transform: translateY(0); }
-.demo-result-why {
-  margin-top: 14px; font-size: 12px; color: var(--stone); line-height: 1.6; font-style: italic;
-  opacity: 0; transition: opacity 0.5s ease 0.2s;
-}
-.demo-result-why.show { opacity: 1; }
-.demo-cta-row {
-  margin-top: 24px;
-  opacity: 0; transition: opacity 0.5s ease 0.35s;
-}
-.demo-cta-row.show { opacity: 1; }
-.demo-cta-btn {
-  display: inline-block;
-  background: var(--clay); color: white; border: none; border-radius: 6px;
-  padding: 14px 28px; font-family: 'DM Sans', sans-serif;
-  font-size: 12px; font-weight: 500; letter-spacing: 0.1em; text-transform: uppercase;
-  cursor: pointer; position: relative; overflow: hidden;
-  transition: transform 0.15s;
-}
-.demo-cta-btn::before {
-  content: ''; position: absolute; inset: 0;
-  background: var(--clay-dark);
-  transform: scaleX(0); transform-origin: left;
-  transition: transform 0.35s ease;
-}
-.demo-cta-btn:hover::before { transform: scaleX(1); }
-.demo-cta-btn:hover { transform: translateY(-1px); }
-.demo-cta-btn span { position: relative; z-index: 1; }
 
 /* TRUTH */
 .section-truth { background: var(--charcoal); padding: 100px 48px; position: relative; overflow: hidden; }
@@ -278,6 +184,123 @@ nav {
 .step-title { font-family: 'Cormorant Garamond', serif; font-size: 21px; font-weight: 400; color: var(--charcoal); margin-bottom: 10px; }
 .step-body { font-size: 14px; line-height: 1.75; color: var(--charcoal-soft); }
 .step-body strong { font-weight: 500; color: var(--charcoal); }
+
+/* PEOPLE LIKE YOU */
+.section-people { background: var(--section-alt); padding: 96px 48px; }
+.people-inner { max-width: 920px; margin: 0 auto; }
+
+.case-nav-wrapper { max-width: 560px; margin: 40px auto 0; position: relative; }
+.case-nav-btn {
+  width: 40px; height: 40px; border-radius: 50%;
+  border: 1px solid var(--blush-deep);
+  background: white; color: var(--clay); font-size: 16px;
+  cursor: pointer; display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0; transition: border-color 0.2s, box-shadow 0.2s;
+}
+.case-nav-btn:hover { border-color: var(--clay); box-shadow: 0 4px 16px rgba(184,112,78,0.15); }
+.case-nav-btn:disabled { opacity: 0.25; cursor: default; pointer-events: none; }
+.case-prev { position: absolute; left: -52px; top: 50%; transform: translateY(-50%); }
+.case-next { position: absolute; right: -52px; top: 50%; transform: translateY(-50%); }
+
+.case-card-wrap { overflow: hidden; border-radius: 20px; }
+.case-card {
+  background: white; border-radius: 20px; padding: 36px 32px;
+  box-shadow: 0 12px 48px rgba(28,22,20,0.09), 0 2px 8px rgba(28,22,20,0.04);
+  display: flex; flex-direction: column; gap: 20px;
+  box-sizing: border-box; width: 100%;
+  transition: opacity 0.22s ease, transform 0.22s ease;
+}
+.cc-quote-mark {
+  font-family: 'Cormorant Garamond', serif; font-size: 56px; color: var(--clay);
+  line-height: 0.6; display: block; margin-bottom: 4px;
+}
+.cc-quote {
+  font-family: 'Cormorant Garamond', serif; font-size: 18px; font-style: italic;
+  color: var(--charcoal); line-height: 1.65;
+}
+.cc-divider { height: 1px; background: var(--blush-deep); margin-top: 4px; }
+.cc-project-header {
+  display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px;
+}
+.cc-project-label {
+  font-family: 'DM Sans', sans-serif; font-size: 10px;
+  text-transform: uppercase; letter-spacing: 0.18em; color: var(--stone);
+}
+.cc-project-pill {
+  background: var(--blush); border-radius: 100px; padding: 4px 12px;
+  font-family: 'DM Sans', sans-serif; font-size: 10px;
+  text-transform: uppercase; letter-spacing: 0.1em; color: var(--clay-dark);
+}
+.cc-steps { display: flex; flex-direction: column; }
+.cc-step {
+  display: flex; align-items: flex-start; gap: 12px;
+  padding: 8px 0; border-bottom: 1px solid var(--section-alt);
+}
+.cc-step:last-child { border-bottom: none; }
+.cc-step-week {
+  font-family: 'DM Sans', sans-serif; font-size: 10px; color: var(--stone);
+  width: 52px; flex-shrink: 0; padding-top: 1px;
+}
+.cc-step-text {
+  font-family: 'DM Sans', sans-serif; font-size: 13px;
+  color: var(--charcoal-soft); line-height: 1.5; flex: 1;
+}
+.cc-step.weekly .cc-step-text { color: var(--clay-dark); font-style: italic; }
+.cc-step.weekly .cc-step-text::before { content: '\00B7'; color: var(--clay); margin-right: 6px; font-style: normal; }
+.cc-built-on {
+  display: flex; align-items: center; gap: 8px;
+  background: var(--section-alt); border-radius: 6px; padding: 8px 12px;
+}
+.cc-built-label {
+  font-family: 'DM Sans', sans-serif; font-size: 10px;
+  color: var(--stone); letter-spacing: 0.1em; white-space: nowrap;
+}
+.cc-built-theories { font-family: 'DM Sans', sans-serif; font-size: 10px; color: var(--charcoal-soft); }
+.cc-outcome {
+  border-left: 2px solid var(--clay); padding-left: 14px;
+  font-family: 'Cormorant Garamond', serif; font-size: 16px;
+  font-style: italic; color: var(--clay-dark); line-height: 1.55;
+}
+.case-dots { display: flex; gap: 8px; justify-content: center; margin-top: 20px; }
+.case-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--blush-deep); transition: all 0.2s; flex-shrink: 0; }
+.case-dot.active { width: 8px; height: 8px; background: var(--clay); }
+
+.case-personalise {
+  max-width: 560px; margin: 32px auto 0;
+  background: var(--blush); border-radius: 16px; padding: 28px 32px;
+  text-align: center; box-shadow: 0 4px 24px rgba(184,112,78,0.10);
+}
+.case-personalise-hl {
+  font-family: 'Cormorant Garamond', serif; font-size: 26px; font-weight: 300;
+  color: var(--charcoal); margin-bottom: 8px;
+}
+.case-personalise-sub {
+  font-family: 'DM Sans', sans-serif; font-size: 14px;
+  color: var(--charcoal-soft); line-height: 1.7; margin-bottom: 24px;
+}
+.case-personalise-btn {
+  background: var(--clay); color: white; border: none; border-radius: 4px;
+  padding: 15px 32px; font-family: 'DM Sans', sans-serif;
+  font-size: 11px; text-transform: uppercase; letter-spacing: 0.14em;
+  cursor: pointer; transition: background 0.25s;
+}
+.case-personalise-btn:hover { background: var(--clay-dark); }
+
+@media (max-width: 640px) {
+  .section-people { padding: 72px 24px; }
+  .case-nav-wrapper {
+    display: grid;
+    grid-template-areas: "card card card" "prev dots next";
+    grid-template-columns: 40px 1fr 40px;
+    row-gap: 16px;
+  }
+  .case-card-wrap { grid-area: card; }
+  .case-prev { position: static; transform: none; grid-area: prev; }
+  .case-next { position: static; transform: none; grid-area: next; }
+  .case-dots { grid-area: dots; margin-top: 0; align-self: center; }
+  .case-card { padding: 28px 22px; }
+  .case-personalise { padding: 24px 20px; }
+}
 
 /* FAQ */
 .section-faq { background: var(--section-alt); padding: 96px 48px; }
@@ -320,14 +343,9 @@ footer { background: var(--charcoal); padding: 44px 48px; display: flex; justify
 @media (max-width: 768px) {
   nav { padding: 20px 24px; }
   .hero { padding: 110px 24px 60px; }
-  .hero-cards { height: 260px; }
-  .hcard:nth-child(3) { display: none; }
-  .hcard:nth-child(1) { width: 190px; }
-  .hcard:nth-child(2) { width: 200px; top: 100px; }
-  .section-demo, .section-truth, .section-how, .section-faq, .section-cta { padding: 72px 24px; }
+  .section-truth, .section-how, .section-faq, .section-cta { padding: 72px 24px; }
   .truth-inner { grid-template-columns: 1fr; gap: 52px; }
   .steps { grid-template-columns: 1fr; gap: 36px; }
-  .demo-box { padding: 24px 20px; }
   footer { flex-direction: column; gap: 20px; text-align: center; padding: 40px 24px; }
   .footer-links { justify-content: center; }
 }
@@ -342,14 +360,14 @@ footer { background: var(--charcoal); padding: 44px 48px; display: flex; justify
 
 <!-- 1. HERO -->
 <section class="hero">
-  <p class="hero-eyebrow">Based on Gottman Method &middot; 40+ years of clinical research</p>
-  <h1 class="hero-headline">You still love them.<br>You've just lost the <em>words.</em></h1>
+  <p class="hero-eyebrow">Gottman Method &middot; Sensate Focus &middot; EFT &middot; CBT &middot; MI</p>
+  <h1 class="hero-headline">You're in a sexless relationship.<br>And the hardest part <em>isn't the sex.</em></h1>
   <div class="hero-situations">
-    <span class="hero-situation">Conversations feel shorter than they used to.</span>
-    <span class="hero-situation">You stopped reaching for each other.</span>
-    <span class="hero-situation">You've been thinking about bringing it up for weeks.</span>
+    <span class="hero-situation">You love them. But you don't feel wanted by them.</span>
+    <span class="hero-situation">That pain quietly takes your confidence.</span>
+    <span class="hero-situation">You've been carrying this alone.</span>
   </div>
-  <p class="hero-sub">Start rebuilding connection &mdash; one small step at a time.<br>No partner needed. A first step before therapy.</p>
+  <p class="hero-sub">Anew was built for exactly this.<br>No partner needed. No therapy required.</p>
   <form id="email-form" class="email-form" action="https://formspree.io/f/mzdyqvbe" method="POST">
     <input class="email-input" type="email" name="email" placeholder="your@email.com" required>
     <button type="submit" class="primary-btn" style="margin:0;flex-shrink:0;">
@@ -357,46 +375,29 @@ footer { background: var(--charcoal); padding: 44px 48px; display: flex; justify
     </button>
   </form>
   <p class="form-microcopy">No partner needed &nbsp;&middot;&nbsp; No commitment &nbsp;&middot;&nbsp; Leave anytime</p>
-  <div class="hero-cards" id="parallax-cards">
-    <div class="hcard">
-      <p class="hcard-label">What you feel</p>
-      <p class="hcard-text">I reach for them at night.<br><em>They don't move.</em></p>
-    </div>
-    <div class="hcard">
-      <p class="hcard-label">What Anew helps you say</p>
-      <p class="hcard-text">"I've been missing feeling close to you."</p>
-    </div>
-    <div class="hcard">
-      <p class="hcard-label">Today's step</p>
-      <p class="hcard-text">One compliment &mdash; not what they do, but who they are.</p>
-    </div>
-  </div>
 </section>
 
-<!-- 2. MINI DEMO -->
-<section class="section-demo">
-  <div class="demo-inner">
-    <p class="section-label reveal">Try it now</p>
-    <h2 class="demo-headline reveal">What would you <em>actually</em> say?</h2>
-    <p class="demo-sub reveal">Pick the situation closest to yours. Anew will show you a message you could send tonight.</p>
-    <div class="demo-box reveal">
-      <p class="demo-prompt-label">My situation right now...</p>
-      <div class="demo-pills">
-        <button class="demo-pill" onclick="showDemo(this, 0)">We feel distant lately</button>
-        <button class="demo-pill" onclick="showDemo(this, 1)">They never initiate anymore</button>
-        <button class="demo-pill" onclick="showDemo(this, 2)">We keep having the same fight</button>
-        <button class="demo-pill" onclick="showDemo(this, 3)">We've stopped talking about it</button>
+<!-- 2. PEOPLE LIKE YOU -->
+<section class="section-people">
+  <div class="people-inner">
+    <p class="section-label reveal">People like you</p>
+    <h2 class="section-headline reveal">What they were feeling.<br><em>What happened next.</em></h2>
+    <div class="case-nav-wrapper reveal">
+      <button class="case-nav-btn case-prev" id="case-prev" onclick="moveCase(-1)" disabled>&#8249;</button>
+      <button class="case-nav-btn case-next" id="case-next" onclick="moveCase(1)">&#8250;</button>
+      <div class="case-card-wrap">
+        <div class="case-card" id="case-card"></div>
       </div>
-      <div class="demo-result" id="demo-result">
-        <p class="demo-result-label">A message you could send tonight</p>
-        <p class="demo-result-msg" id="demo-msg"></p>
-        <p class="demo-result-why" id="demo-why"></p>
-        <div class="demo-cta-row" id="demo-cta">
-          <button class="demo-cta-btn" onclick="window.location.href='#'">
-            <span>Get your personalized message &mdash; free</span>
-          </button>
-        </div>
+      <div class="case-dots" id="case-dots">
+        <span class="case-dot active"></span>
+        <span class="case-dot"></span>
+        <span class="case-dot"></span>
       </div>
+    </div>
+    <div class="case-personalise reveal">
+      <p class="case-personalise-hl">Your situation is unique.</p>
+      <p class="case-personalise-sub">Anew analyzes your specific patterns<br>and builds a recovery plan around them.</p>
+      <button class="case-personalise-btn" onclick="document.querySelector('.email-form').scrollIntoView({behavior:'smooth'})">Start privately &mdash; free</button>
     </div>
   </div>
 </section>
@@ -456,7 +457,7 @@ footer { background: var(--charcoal); padding: 44px 48px; display: flex; justify
   </div>
 </section>
 
-<!-- 5. FAQ -->
+<!-- 6. FAQ -->
 <section class="section-faq">
   <div class="faq-inner">
     <p class="section-label reveal">Questions</p>
@@ -494,7 +495,7 @@ footer { background: var(--charcoal); padding: 44px 48px; display: flex; justify
   </div>
 </section>
 
-<!-- 6. CTA -->
+<!-- 7. CTA -->
 <section class="section-cta">
   <div class="cta-inner">
     <h2 class="cta-headline reveal">You deserve to feel <em>wanted</em> again.</h2>
@@ -520,49 +521,6 @@ footer { background: var(--charcoal); padding: 44px 48px; display: flex; justify
 </footer>
 
 <script>
-var demoData = [
-  {
-    msg: '"I\'ve been missing feeling close to you. Could we take a walk together this weekend -- just the two of us?"',
-    why: 'Gottman research: low-pressure bids for connection work better than direct confrontation. This opens a door without pressure.'
-  },
-  {
-    msg: '"I want to feel wanted by you. Would it be okay if I told you more often what I need?"',
-    why: 'Expressing a need as a wish -- not an accusation -- keeps your partner from going defensive.'
-  },
-  {
-    msg: '"I think we keep coming back to this because we both care. Can we try talking about it differently -- maybe just 10 minutes, no phones?"',
-    why: 'Naming the shared stake reframes conflict from "you vs me" to "us vs the problem."'
-  },
-  {
-    msg: '"I\'ve been wanting to talk about something, but I haven\'t known how to start. Can I try?"',
-    why: 'Asking permission to talk reduces the other person\'s anxiety and increases the chance they\'ll actually listen.'
-  }
-];
-
-function showDemo(pill, idx) {
-  var pills = document.querySelectorAll('.demo-pill');
-  pills.forEach(function(p) { p.classList.remove('selected'); });
-  pill.classList.add('selected');
-
-  var result = document.getElementById('demo-result');
-  var msg = document.getElementById('demo-msg');
-  var why = document.getElementById('demo-why');
-  var cta = document.getElementById('demo-cta');
-
-  msg.classList.remove('show');
-  why.classList.remove('show');
-  cta.classList.remove('show');
-  result.classList.add('visible');
-
-  setTimeout(function() {
-    msg.textContent = demoData[idx].msg;
-    why.textContent = demoData[idx].why;
-    msg.classList.add('show');
-    why.classList.add('show');
-    cta.classList.add('show');
-  }, 80);
-}
-
 // Scroll reveal
 var observer = new IntersectionObserver(function(entries) {
   entries.forEach(function(entry) {
@@ -574,21 +532,104 @@ var observer = new IntersectionObserver(function(entries) {
 }, { threshold: 0.1 });
 document.querySelectorAll('.reveal, .stat-item').forEach(function(el) { observer.observe(el); });
 
-// Parallax
-var cardEls = document.querySelectorAll('#parallax-cards .hcard');
-var baseRots = [-3, 0.5, 2.5];
-document.addEventListener('mousemove', function(e) {
-  var dx = (e.clientX - window.innerWidth / 2) / window.innerWidth;
-  var dy = (e.clientY - window.innerHeight / 2) / window.innerHeight;
-  cardEls.forEach(function(card, i) {
-    var d = (i + 1) * 7;
-    if (i === 1) {
-      card.style.transform = 'translateX(calc(-50% + ' + (dx*d) + 'px)) translateY(' + (dy*d) + 'px) rotate(' + baseRots[i] + 'deg)';
-    } else {
-      card.style.transform = 'translateX(' + (dx*d) + 'px) translateY(' + (dy*d) + 'px) rotate(' + baseRots[i] + 'deg)';
-    }
+// Case cards
+var cases = [
+  {
+    quote: "It stopped after our second was born.\nThat was 3 years ago.\nI still reach for him at night. He doesn’t move.",
+    pill: "After the baby years",
+    steps: [
+      { week: "Wk 1–3", text: "Understand why you stopped saying it" },
+      { week: "Wk 4–6", text: "Touch before words" },
+      { week: "Wk 7–10", text: "Find the words and send them" },
+      { week: "Weekly", text: "Check-in with Anew to adjust", weekly: true }
+    ],
+    builtOn: "MI · Sensate Focus · Gottman · IBCT",
+    outcome: "Week 4: she said the thing she’d never said out loud.\nHe listened."
+  },
+  {
+    quote: "I used to initiate.\nAfter enough rejections, I stopped.\nNow neither of us brings it up.",
+    pill: "After years of rejection",
+    steps: [
+      { week: "Wk 1–3", text: "Separate rejection from self-worth" },
+      { week: "Wk 4–7", text: "Rewrite the “why bother” pattern" },
+      { week: "Wk 8–10", text: "Design words that don’t sound like blame" },
+      { week: "Weekly", text: "Check-in with Anew to adjust", weekly: true }
+    ],
+    builtOn: "MI · CBT · Gottman · IBCT",
+    outcome: "She found a way to bring it up —\nwithout it turning into silence again."
+  },
+  {
+    quote: "There was no fight. No big moment.\nSomewhere along the way, we stopped\nbeing that way with each other.",
+    pill: "When it just faded",
+    steps: [
+      { week: "Wk 1–3", text: "Name what you actually want" },
+      { week: "Wk 4–6", text: "One small move toward closeness" },
+      { week: "Wk 7–9", text: "Understand where the distance came from" },
+      { week: "Weekly", text: "Check-in with Anew to adjust", weekly: true }
+    ],
+    builtOn: "EFT · Sensate Focus · Gottman · IBCT",
+    outcome: "Week 3: first physical contact\nthat wasn’t just logistical. In months."
+  }
+];
+var currentCase = 0;
+
+function renderCaseCard(idx) {
+  var c = cases[idx];
+  var stepsHtml = c.steps.map(function(s) {
+    return '<div class="cc-step' + (s.weekly ? ' weekly' : '') + '">' +
+      '<span class="cc-step-week">' + s.week + '</span>' +
+      '<span class="cc-step-text">' + s.text + '</span>' +
+      '</div>';
+  }).join('');
+  return '<div class="cc-quote-block">' +
+    '<span class="cc-quote-mark">“</span>' +
+    '<p class="cc-quote">' + c.quote.replace(/\n/g, '<br>') + '</p>' +
+    '<div class="cc-divider"></div></div>' +
+    '<div class="cc-project-block">' +
+    '<div class="cc-project-header">' +
+    '<span class="cc-project-label">Recovery project</span>' +
+    '<span class="cc-project-pill">' + c.pill + '</span>' +
+    '</div>' +
+    '<div class="cc-steps">' + stepsHtml + '</div>' +
+    '</div>' +
+    '<div class="cc-built-on">' +
+    '<span class="cc-built-label">Based on</span>' +
+    '<span class="cc-built-theories">' + c.builtOn + '</span>' +
+    '</div>' +
+    '<p class="cc-outcome">' + c.outcome.replace(/\n/g, '<br>') + '</p>';
+}
+
+function updateCaseNav() {
+  var prev = document.getElementById('case-prev');
+  var next = document.getElementById('case-next');
+  if (prev) prev.disabled = currentCase === 0;
+  if (next) next.disabled = currentCase === 2;
+  document.querySelectorAll('.case-dot').forEach(function(d, i) {
+    d.classList.toggle('active', i === currentCase);
   });
-});
+}
+
+function moveCase(dir) {
+  currentCase = Math.max(0, Math.min(2, currentCase + dir));
+  var card = document.getElementById('case-card');
+  if (!card) return;
+  card.style.opacity = '0';
+  card.style.transform = 'translateY(6px)';
+  setTimeout(function() {
+    card.innerHTML = renderCaseCard(currentCase);
+    requestAnimationFrame(function() {
+      card.style.opacity = '1';
+      card.style.transform = 'translateY(0)';
+    });
+    updateCaseNav();
+  }, 220);
+}
+
+(function initCaseCards() {
+  var card = document.getElementById('case-card');
+  if (card) card.innerHTML = renderCaseCard(0);
+  updateCaseNav();
+})();
 
 // FAQ
 function toggleFaq(btn) {
