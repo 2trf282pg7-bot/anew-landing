@@ -535,6 +535,7 @@ Rules:
 - Never combine acknowledgment and a question. Either acknowledge OR ask. Not both.
 - No bullet points or lists.
 - Use "they/them" unless user specifies gender.
+- CRITICAL: Never include internal scoring, evaluation notes, or any text containing 'Internal scoring', point tallies, or checklist items in your response. These are strictly internal — never output them to the user.
 
 Information gathering (internal, never reveal):
   1. What is happening
@@ -692,14 +693,15 @@ End with: 'Does that feel close to what's been happening?'`;
     return data.content[0].text;
   }
 
-  // ─── Check for READY_TO_REFLECT ───
+  // ─── Check for READY_TO_REFLECT + strip internal notes ───
   function processAIText(raw) {
-    const tag = '[READY_TO_REFLECT]';
-    if (raw.includes(tag)) {
+    if (raw.includes('[READY_TO_REFLECT]')) {
       readyToReflect = true;
-      return raw.replace(tag, '').trim();
     }
-    return raw;
+    return raw
+      .replace(/\*\*Internal scoring:.*$/s, '')
+      .replace(/\[READY_TO_REFLECT\]/g, '')
+      .trim();
   }
 
   // ─── Show error ───
@@ -827,9 +829,9 @@ End with: 'Does that feel close to what's been happening?'`;
     currentState = 4;
     document.getElementById('reflectionBtns')?.remove();
 
-    // Reflection API call
+    // Step 1: Reflection API call
     const reflectionSystem = SYSTEM_PROMPT + REFLECTION_SYSTEM_ADDITION;
-    const typing = showTyping();
+    showTyping();
 
     try {
       const raw = await callAPI(reflectionSystem, messages);
@@ -839,18 +841,23 @@ End with: 'Does that feel close to what's been happening?'`;
       const el = appendMessage('ai', '');
       messages.push({ role: 'assistant', content: cleaned });
 
+      // Step 1→2: word-by-word, then 600ms pause
       animateWords(el, cleaned, () => {
-        // After 1200ms, show second message
         setTimeout(() => {
+
+          // Step 3: bridge message word-by-word
           const el2 = appendMessage('ai', '');
           const bridgeMsg = "I think there's more I can help you see — and a way to start moving through this.";
           messages.push({ role: 'assistant', content: bridgeMsg });
 
           animateWords(el2, bridgeMsg, () => {
-            // Show paywall after 300ms
-            setTimeout(showPaywall, 300);
+            // Step 4→5: 1500ms then fade-in paywall inline
+            setTimeout(() => {
+              showPaywall();
+            }, 1500);
           });
-        }, 1200);
+
+        }, 600);
       });
     } catch (e) {
       hideTyping();
@@ -881,11 +888,12 @@ End with: 'Does that feel close to what's been happening?'`;
     `;
 
     chatInner.appendChild(card);
-    scrollToBottom();
 
     requestAnimationFrame(() => {
       requestAnimationFrame(() => {
         card.classList.add('visible');
+        // Step 6: smooth scroll to paywall card
+        card.scrollIntoView({ behavior: 'smooth', block: 'start' });
       });
     });
   }
