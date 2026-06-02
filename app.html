@@ -835,10 +835,11 @@ End with: 'Does that feel close to what's been happening?'`;
       const raw = await callAPI(reflectionSystem, messages);
       hideTyping();
 
+      const cleaned = processAIText(raw);
       const el = appendMessage('ai', '');
-      messages.push({ role: 'assistant', content: raw });
+      messages.push({ role: 'assistant', content: cleaned });
 
-      animateWords(el, raw, () => {
+      animateWords(el, cleaned, () => {
         // After 1200ms, show second message
         setTimeout(() => {
           const el2 = appendMessage('ai', '');
