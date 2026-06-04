@@ -754,6 +754,7 @@ Rules:
 - No bullet points or lists.
 - Use "they/them" unless user specifies gender.
 - CRITICAL: Never include internal scoring, evaluation notes, or any text containing 'Internal scoring', point tallies, or checklist items in your response. These are strictly internal — never output them to the user.
+- ABSOLUTE RULE: Never output any text containing 'Internal scoring', point tallies, checkmarks (✓✗), or numbered evaluation lists in your response. These are strictly forbidden from appearing in your output under any circumstances. Violating this rule breaks the user experience.
 
 Information gathering (internal, never reveal):
   1. What is happening
@@ -989,15 +990,19 @@ End with: 'Does that feel close to what\'s been happening?'`;
     return data.content[0].text;
   }
 
-  // ─── Check for READY_TO_REFLECT + strip internal notes ───
+  // ─── Check for READY_TO_REFLECT + strip ALL internal notes ───
   function processAIText(raw) {
-    if (raw.includes('[READY_TO_REFLECT]')) {
-      readyToReflect = true;
-    }
-    return raw
+    const hasReflectTag = raw.includes('[READY_TO_REFLECT]');
+    if (hasReflectTag) readyToReflect = true;
+
+    const clean = raw
       .replace(/\*\*Internal scoring:.*$/m, '')
+      .replace(/Internal scoring:[\s\S]*?(\n\n|$)/g, '')
+      .replace(/\d+\.\s+.*[✓✗].*$/gm, '')
       .replace(/\[READY_TO_REFLECT\]/g, '')
       .trim();
+
+    return clean;
   }
 
   // ─── Show error ───
