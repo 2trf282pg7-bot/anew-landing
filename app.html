@@ -486,7 +486,7 @@
     color: var(--charcoal-soft);
     box-shadow: 0 4px 16px rgba(28,22,20,0.08);
     cursor: pointer;
-    z-index: 200;
+    z-index: 90;
     transition: border-color 0.2s ease, color 0.2s ease;
   }
 
@@ -995,7 +995,7 @@ End with: 'Does that feel close to what\'s been happening?'`;
       readyToReflect = true;
     }
     return raw
-      .replace(/\*\*Internal scoring:.*$/s, '')
+      .replace(/\*\*Internal scoring:.*$/m, '')
       .replace(/\[READY_TO_REFLECT\]/g, '')
       .trim();
   }
