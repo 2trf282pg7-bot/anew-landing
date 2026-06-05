@@ -1,0 +1,628 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Anew — Dashboard</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;1,400&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --warm-white: #FAF6F1;
+    --clay: #B8704E;
+    --clay-light: #D4906E;
+    --clay-dark: #8C4E32;
+    --charcoal: #1C1614;
+    --charcoal-soft: #5C4D45;
+    --stone: #8A7870;
+    --blush: #EDD4C6;
+    --blush-deep: #DBBAA6;
+    --section-alt: #F5EFE8;
+    --sage: #5E8A60;
+  }
+  html, body { min-height: 100dvh; font-family: 'DM Sans', sans-serif; background: var(--warm-white); color: var(--charcoal); }
+
+  /* NAV */
+  .nav {
+    position: fixed; top: 0; left: 0; right: 0; height: 56px;
+    background: rgba(250,246,241,0.96); border-bottom: 1px solid var(--blush-deep);
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 0 24px; z-index: 100; backdrop-filter: blur(4px);
+  }
+  .nav-logo { font-family: 'Cormorant Garamond', serif; font-size: 22px; font-weight: 400; color: var(--charcoal); letter-spacing: 0.08em; text-decoration: none; }
+  .nav-icons { display: flex; gap: 8px; }
+  .nav-icon {
+    width: 40px; height: 40px; border-radius: 8px; border: none; background: none;
+    cursor: pointer; display: flex; align-items: center; justify-content: center;
+    font-size: 18px; color: var(--stone); text-decoration: none;
+    transition: background 0.2s ease, color 0.2s ease;
+  }
+  .nav-icon:hover, .nav-icon.active { background: var(--section-alt); color: var(--clay); }
+
+  /* MAIN */
+  .main { max-width: 680px; margin: 0 auto; padding: 80px 24px 48px; }
+
+  /* Greeting */
+  .greeting { margin-bottom: 32px; }
+  .greeting-name { font-family: 'Cormorant Garamond', serif; font-size: 32px; font-weight: 300; color: var(--charcoal); margin-bottom: 4px; }
+  .greeting-sub { font-size: 14px; color: var(--stone); }
+
+  /* Cards */
+  .card {
+    background: white; border-radius: 16px; padding: 24px 28px;
+    box-shadow: 0 2px 16px rgba(28,22,20,0.06); margin-bottom: 20px;
+  }
+  .card-label {
+    font-family: 'DM Sans', sans-serif; font-size: 10px; font-weight: 500;
+    text-transform: uppercase; letter-spacing: 0.12em; color: var(--stone); margin-bottom: 12px;
+  }
+  .card-title { font-family: 'Cormorant Garamond', serif; font-size: 24px; font-style: italic; color: var(--charcoal); margin-bottom: 8px; }
+  .card-text { font-size: 14px; color: var(--charcoal-soft); line-height: 1.6; }
+
+  /* Tasks */
+  .task-list { display: flex; flex-direction: column; gap: 12px; margin-top: 16px; }
+  .task-item {
+    display: flex; align-items: flex-start; gap: 12px;
+    padding: 14px 16px; background: var(--section-alt); border-radius: 10px;
+  }
+  .task-check {
+    width: 22px; height: 22px; min-width: 22px; border-radius: 6px;
+    border: 1.5px solid var(--blush-deep); background: white;
+    cursor: pointer; appearance: none; margin-top: 1px;
+    transition: background 0.2s ease, border-color 0.2s ease;
+  }
+  .task-check:checked { background: var(--clay); border-color: var(--clay); }
+  .task-body { flex: 1; }
+  .task-title { font-size: 14px; font-weight: 500; color: var(--charcoal); margin-bottom: 2px; }
+  .task-freq { font-size: 12px; color: var(--stone); }
+  .task-info {
+    width: 28px; height: 28px; border-radius: 50%; border: 1.5px solid var(--blush-deep);
+    background: white; cursor: pointer; font-size: 13px; color: var(--stone);
+    display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+    margin-top: 2px; transition: border-color 0.2s ease, color 0.2s ease;
+  }
+  .task-info:hover { border-color: var(--clay); color: var(--clay); }
+
+  /* Roadmap */
+  .roadmap-phases { display: flex; flex-direction: column; gap: 10px; margin-top: 16px; }
+  .phase-item {
+    border: 1.5px solid var(--blush-deep); border-radius: 10px; overflow: hidden;
+  }
+  .phase-header {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 14px 16px; cursor: pointer; background: white;
+    transition: background 0.2s ease;
+  }
+  .phase-header:hover { background: var(--section-alt); }
+  .phase-header.current { background: rgba(184,112,78,0.06); border-color: var(--clay); }
+  .phase-week { font-size: 11px; font-weight: 500; text-transform: uppercase; letter-spacing: 0.1em; color: var(--stone); }
+  .phase-focus { font-size: 14px; color: var(--charcoal); margin-top: 2px; }
+  .phase-badge {
+    font-size: 10px; padding: 3px 8px; border-radius: 100px;
+    background: var(--clay); color: white; white-space: nowrap;
+  }
+  .phase-body { padding: 0 16px; max-height: 0; overflow: hidden; transition: max-height 0.3s ease, padding 0.3s ease; }
+  .phase-body.open { max-height: 400px; padding: 0 16px 16px; }
+  .phase-theory { font-size: 13px; color: var(--charcoal-soft); line-height: 1.5; margin-bottom: 10px; font-style: italic; }
+  .phase-tasks-list { display: flex; flex-direction: column; gap: 6px; }
+  .phase-task { font-size: 13px; color: var(--charcoal); padding: 6px 0; border-bottom: 1px solid var(--section-alt); }
+  .phase-task:last-child { border-bottom: none; }
+
+  /* Chat section */
+  .chat-section { margin-bottom: 20px; }
+  .chat-box {
+    background: white; border-radius: 16px;
+    box-shadow: 0 2px 16px rgba(28,22,20,0.06); overflow: hidden;
+  }
+  .chat-messages {
+    padding: 20px 24px 12px; min-height: 200px; max-height: 400px;
+    overflow-y: auto; display: flex; flex-direction: column; gap: 16px;
+  }
+  .chat-msg-ai {
+    font-family: 'Cormorant Garamond', serif; font-size: 18px;
+    color: var(--charcoal); line-height: 1.6; max-width: 480px;
+  }
+  .chat-msg-user {
+    background: var(--blush-deep); border-radius: 14px 14px 4px 14px;
+    padding: 10px 16px; font-size: 14px; color: var(--charcoal);
+    align-self: flex-end; max-width: 360px; line-height: 1.5;
+  }
+  .chat-input-bar {
+    border-top: 1px solid var(--blush-deep); padding: 12px 16px;
+    display: flex; align-items: flex-end; gap: 10px;
+  }
+  .chat-textarea {
+    flex: 1; border: 1.5px solid var(--blush-deep); border-radius: 10px;
+    padding: 10px 14px; font-family: 'DM Sans', sans-serif; font-size: 14px;
+    color: var(--charcoal); background: white; resize: none; min-height: 44px;
+    max-height: 100px; line-height: 1.5; outline: none; transition: border-color 0.2s ease;
+  }
+  .chat-textarea:focus { border-color: var(--clay); }
+  .chat-send {
+    width: 40px; height: 40px; border-radius: 50%; background: var(--clay);
+    border: none; cursor: pointer; display: flex; align-items: center;
+    justify-content: center; transition: background 0.2s ease; flex-shrink: 0;
+  }
+  .chat-send:hover { background: var(--clay-dark); }
+  .chat-send:disabled { background: var(--blush-deep); cursor: not-allowed; }
+  .typing-dots { display: flex; gap: 4px; align-items: center; padding: 4px 0; }
+  .typing-dots span {
+    width: 6px; height: 6px; border-radius: 50%; background: var(--stone);
+    animation: dotPulse 1.2s ease-in-out infinite;
+  }
+  .typing-dots span:nth-child(2) { animation-delay: 0.2s; }
+  .typing-dots span:nth-child(3) { animation-delay: 0.4s; }
+  @keyframes dotPulse { 0%,80%,100%{opacity:0.3;transform:scale(0.85)} 40%{opacity:1;transform:scale(1)} }
+
+  /* Checkin */
+  .checkin-row { display: flex; align-items: center; justify-content: space-between; }
+  .checkin-date { font-family: 'Cormorant Garamond', serif; font-size: 20px; color: var(--charcoal); }
+  .btn-link {
+    font-size: 12px; color: var(--clay); background: none; border: none;
+    cursor: pointer; text-decoration: underline; text-underline-offset: 3px;
+  }
+  .btn-link:hover { color: var(--clay-dark); }
+
+  /* Settings */
+  .settings-section { margin-top: 40px; padding-top: 32px; border-top: 1px solid var(--blush-deep); }
+  .settings-title { font-size: 12px; font-weight: 500; text-transform: uppercase; letter-spacing: 0.1em; color: var(--stone); margin-bottom: 16px; }
+  .settings-row { display: flex; align-items: center; justify-content: space-between; padding: 12px 0; border-bottom: 1px solid var(--section-alt); }
+  .settings-row:last-child { border-bottom: none; }
+  .settings-plan { font-size: 14px; color: var(--charcoal); }
+  .settings-plan-sub { font-size: 12px; color: var(--stone); margin-top: 2px; }
+  .btn-cancel { font-size: 13px; color: var(--stone); background: none; border: 1px solid var(--blush-deep); border-radius: 6px; padding: 8px 14px; cursor: pointer; transition: color 0.2s ease, border-color 0.2s ease; }
+  .btn-cancel:hover { color: var(--clay-dark); border-color: var(--clay-dark); }
+
+  /* Modal */
+  .modal-overlay {
+    display: none; position: fixed; inset: 0; background: rgba(28,22,20,0.4);
+    z-index: 1000; align-items: center; justify-content: center;
+  }
+  .modal-overlay.open { display: flex; }
+  .modal {
+    background: white; border-radius: 16px; padding: 32px 28px;
+    max-width: 400px; width: calc(100% - 48px); position: relative;
+  }
+  .modal-title { font-family: 'Cormorant Garamond', serif; font-size: 24px; font-weight: 400; color: var(--charcoal); margin-bottom: 12px; }
+  .modal-text { font-size: 14px; color: var(--charcoal-soft); line-height: 1.6; margin-bottom: 24px; }
+  .modal-actions { display: flex; gap: 12px; }
+  .btn-modal-cancel { flex: 1; padding: 14px; border: 1.5px solid var(--blush-deep); border-radius: 6px; background: none; cursor: pointer; font-size: 13px; color: var(--charcoal-soft); transition: border-color 0.2s ease; }
+  .btn-modal-cancel:hover { border-color: var(--charcoal-soft); }
+  .btn-modal-confirm { flex: 1; padding: 14px; background: var(--clay-dark); border: none; border-radius: 6px; cursor: pointer; font-size: 13px; color: white; transition: background 0.2s ease; }
+  .btn-modal-confirm:hover { background: #7A3B20; }
+
+  /* Theory modal */
+  .modal-theory { font-size: 14px; color: var(--charcoal-soft); line-height: 1.7; }
+  .modal-close { position: absolute; top: 14px; right: 18px; background: none; border: none; font-size: 22px; color: var(--stone); cursor: pointer; }
+
+  .loading-screen {
+    position: fixed; inset: 0; background: var(--warm-white);
+    display: flex; align-items: center; justify-content: center; z-index: 200;
+  }
+  .loading-logo { font-family: 'Cormorant Garamond', serif; font-size: 28px; color: var(--charcoal); letter-spacing: 0.1em; }
+</style>
+</head>
+<body>
+
+<div class="loading-screen" id="loadingScreen">
+  <div class="loading-logo">Anew</div>
+</div>
+
+<nav class="nav">
+  <a href="/dashboard.html" class="nav-logo">Anew</a>
+  <div class="nav-icons">
+    <a href="/dashboard.html" class="nav-icon active" title="Home">💬</a>
+    <a href="/project.html" class="nav-icon" title="Project">📋</a>
+    <a href="/history.html" class="nav-icon" title="History">📖</a>
+  </div>
+</nav>
+
+<main class="main" id="mainContent" style="display:none">
+
+  <!-- Greeting -->
+  <div class="greeting">
+    <div class="greeting-name" id="greetingName">Welcome back.</div>
+    <div class="greeting-sub" id="greetingDay"></div>
+  </div>
+
+  <!-- This week's focus -->
+  <div class="card" id="focusCard" style="display:none">
+    <div class="card-label">This week's focus</div>
+    <div class="card-title" id="focusText"></div>
+    <div class="card-text" id="focusTheory"></div>
+  </div>
+
+  <!-- Tasks -->
+  <div class="card" id="tasksCard" style="display:none">
+    <div class="card-label">This week's tasks</div>
+    <div class="task-list" id="taskList"></div>
+  </div>
+
+  <!-- Next check-in -->
+  <div class="card">
+    <div class="card-label">Next check-in</div>
+    <div class="checkin-row">
+      <div class="checkin-date" id="checkinDate">Not scheduled</div>
+      <button class="btn-link" onclick="openCheckinModal()">Change</button>
+    </div>
+  </div>
+
+  <!-- Chat with Anew -->
+  <div class="chat-section">
+    <div class="card-label" style="margin-bottom:12px">Chat with Anew</div>
+    <div class="chat-box">
+      <div class="chat-messages" id="chatMessages"></div>
+      <div class="chat-input-bar">
+        <textarea class="chat-textarea" id="chatInput" placeholder="How are you feeling today?" rows="1"></textarea>
+        <button class="chat-send" id="chatSendBtn" onclick="sendChat()">
+          <svg width="16" height="16" viewBox="0 0 18 18" fill="none">
+            <path d="M3 9H15M15 9L10 4M15 9L10 14" stroke="white" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 90-day roadmap -->
+  <div class="card" id="roadmapCard" style="display:none">
+    <div class="card-label">90-day roadmap</div>
+    <div class="roadmap-phases" id="roadmapPhases"></div>
+  </div>
+
+  <!-- Settings -->
+  <div class="settings-section">
+    <div class="settings-title">Account</div>
+    <div class="settings-row">
+      <div>
+        <div class="settings-plan" id="planName">Anew Monthly</div>
+        <div class="settings-plan-sub" id="planStatus"></div>
+      </div>
+      <button class="btn-cancel" onclick="openCancelModal()">解約する</button>
+    </div>
+  </div>
+
+</main>
+
+<!-- Theory modal -->
+<div class="modal-overlay" id="theoryModal">
+  <div class="modal">
+    <button class="modal-close" onclick="closeTheoryModal()">×</button>
+    <div class="modal-title" id="theoryModalTitle">Why this task?</div>
+    <div class="modal-theory" id="theoryModalText"></div>
+  </div>
+</div>
+
+<!-- Cancel modal -->
+<div class="modal-overlay" id="cancelModal">
+  <div class="modal">
+    <div class="modal-title">サブスクリプションを解約しますか？</div>
+    <div class="modal-text">現在の期間終了まで引き続きご利用いただけます。データは90日間保持されます。</div>
+    <div class="modal-actions">
+      <button class="btn-modal-cancel" onclick="closeCancelModal()">キャンセル</button>
+      <button class="btn-modal-confirm" id="confirmCancelBtn" onclick="confirmCancel()">解約する</button>
+    </div>
+  </div>
+</div>
+
+<script>
+  let sbClient = null;
+  let currentUser = null;
+  let currentProject = null;
+  let chatMessages = [];
+  let chatStreaming = false;
+
+  const COACH_SYSTEM = `You are Anew, an AI relationship coach.
+STRICT RULES:
+- Only discuss topics related to the user's relationship recovery project.
+- Never answer questions unrelated to relationships, the user's project, or emotional wellbeing in the context of their relationship.
+- Never perform web searches, write code, or assist with tasks outside your scope.
+- If asked about unrelated topics, respond: 'I'm here to support your relationship recovery. Is there something about your project you'd like to talk through?'
+Persona: Warm, unhurried, supportive. Short responses. Ask one question at a time.`;
+
+  async function init() {
+    try {
+      const res = await fetch('/api/config');
+      const { supabaseUrl, supabaseAnonKey } = await res.json();
+      sbClient = supabase.createClient(supabaseUrl, supabaseAnonKey);
+
+      const { data: { session } } = await sbClient.auth.getSession();
+      if (!session) { window.location.href = '/app.html'; return; }
+      currentUser = session.user;
+
+      sbClient.auth.onAuthStateChange((event, s) => {
+        if (event === 'SIGNED_OUT' || !s) window.location.href = '/app.html';
+      });
+
+      await loadDashboard();
+    } catch (e) {
+      console.error(e);
+      window.location.href = '/app.html';
+    }
+  }
+
+  async function loadDashboard() {
+    // Greeting
+    const days = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+    document.getElementById('greetingDay').textContent = days[new Date().getDay()];
+    const email = currentUser.email;
+    document.getElementById('greetingName').textContent = `Welcome back${email ? ', ' + email.split('@')[0] : ''}.`;
+
+    // Load project
+    const { data: projects } = await sbClient
+      .from('projects')
+      .select('*')
+      .eq('user_id', currentUser.id)
+      .eq('status', 'active')
+      .order('created_at', { ascending: false })
+      .limit(1);
+
+    if (projects && projects.length > 0) {
+      currentProject = projects[0];
+      renderProject(currentProject);
+    }
+
+    // Load subscription status
+    const { data: userData } = await sbClient
+      .from('users')
+      .select('subscription_status, stripe_subscription_id')
+      .eq('id', currentUser.id)
+      .single();
+
+    if (userData) {
+      document.getElementById('planStatus').textContent =
+        userData.subscription_status === 'trial' ? '7-day free trial' :
+        userData.subscription_status === 'active' ? 'Active' :
+        userData.subscription_status === 'canceled' ? 'Canceled — access until period end' : '';
+    }
+
+    // Load next check-in
+    const { data: checkins } = await sbClient
+      .from('checkins')
+      .select('scheduled_at')
+      .eq('user_id', currentUser.id)
+      .gte('scheduled_at', new Date().toISOString())
+      .order('scheduled_at', { ascending: true })
+      .limit(1);
+
+    if (checkins && checkins.length > 0) {
+      const d = new Date(checkins[0].scheduled_at);
+      document.getElementById('checkinDate').textContent =
+        d.toLocaleDateString('en-US', { weekday:'long', month:'long', day:'numeric' }) +
+        ' at ' + d.toLocaleTimeString('en-US', { hour:'2-digit', minute:'2-digit' });
+    }
+
+    // Start chat
+    addChatMessage('ai', "How are you doing with your project this week? Is there anything you'd like to work through together?");
+
+    document.getElementById('loadingScreen').style.display = 'none';
+    document.getElementById('mainContent').style.display = 'block';
+  }
+
+  function renderProject(project) {
+    if (!project) return;
+
+    const startDate = new Date(project.started_at || project.created_at);
+    const diffDays = Math.floor((Date.now() - startDate) / (1000 * 60 * 60 * 24));
+    const weekIndex = Math.max(0, Math.floor(diffDays / 7));
+    const roadmap = project.roadmap || [];
+    const phase = roadmap[Math.min(weekIndex, roadmap.length - 1)];
+
+    if (phase) {
+      document.getElementById('focusCard').style.display = 'block';
+      document.getElementById('focusText').textContent = phase.focus;
+      document.getElementById('focusTheory').textContent = phase.theory_explanation || '';
+
+      // Tasks
+      if (phase.tasks && phase.tasks.length > 0) {
+        document.getElementById('tasksCard').style.display = 'block';
+        const list = document.getElementById('taskList');
+        list.innerHTML = '';
+        phase.tasks.forEach((task, i) => {
+          const item = document.createElement('div');
+          item.className = 'task-item';
+          item.innerHTML = `
+            <input type="checkbox" class="task-check" id="task-${i}" onchange="toggleTask(this, '${task.title}')">
+            <div class="task-body">
+              <div class="task-title">${task.title}</div>
+              <div class="task-freq">${task.frequency}</div>
+            </div>
+            <button class="task-info" onclick="openTheory('${escHtml(task.title)}','${escHtml(task.theory_basis || task.description)}')">ⓘ</button>
+          `;
+          list.appendChild(item);
+        });
+      }
+    }
+
+    // Roadmap
+    if (roadmap.length > 0) {
+      document.getElementById('roadmapCard').style.display = 'block';
+      const phases = document.getElementById('roadmapPhases');
+      phases.innerHTML = '';
+      roadmap.forEach((p, i) => {
+        const isCurrent = i === Math.min(weekIndex, roadmap.length - 1);
+        const div = document.createElement('div');
+        div.className = 'phase-item';
+        div.innerHTML = `
+          <div class="phase-header ${isCurrent ? 'current' : ''}" onclick="togglePhase(this)">
+            <div>
+              <div class="phase-week">${p.week_range}</div>
+              <div class="phase-focus">${p.focus}</div>
+            </div>
+            ${isCurrent ? '<span class="phase-badge">Current</span>' : ''}
+          </div>
+          <div class="phase-body ${isCurrent ? 'open' : ''}">
+            <p class="phase-theory">${p.theory}: ${p.theory_explanation}</p>
+            <div class="phase-tasks-list">
+              ${(p.tasks || []).map(t => `<div class="phase-task">${t.title}</div>`).join('')}
+            </div>
+          </div>
+        `;
+        phases.appendChild(div);
+      });
+    }
+  }
+
+  function togglePhase(header) {
+    const body = header.nextElementSibling;
+    body.classList.toggle('open');
+  }
+
+  function escHtml(str) {
+    return (str || '').replace(/'/g, "\\'").replace(/"/g, '&quot;');
+  }
+
+  async function toggleTask(checkbox, title) {
+    if (!sbClient || !currentUser || !currentProject) return;
+    await sbClient.from('actions').insert({
+      user_id: currentUser.id,
+      project_id: currentProject.id,
+      title,
+      status: checkbox.checked ? 'done' : 'pending',
+      completed_at: checkbox.checked ? new Date().toISOString() : null,
+    });
+  }
+
+  function openTheory(title, text) {
+    document.getElementById('theoryModalTitle').textContent = title;
+    document.getElementById('theoryModalText').textContent = text;
+    document.getElementById('theoryModal').classList.add('open');
+  }
+  function closeTheoryModal() { document.getElementById('theoryModal').classList.remove('open'); }
+  document.getElementById('theoryModal').addEventListener('click', (e) => {
+    if (e.target === document.getElementById('theoryModal')) closeTheoryModal();
+  });
+
+  function openCancelModal() { document.getElementById('cancelModal').classList.add('open'); }
+  function closeCancelModal() { document.getElementById('cancelModal').classList.remove('open'); }
+  document.getElementById('cancelModal').addEventListener('click', (e) => {
+    if (e.target === document.getElementById('cancelModal')) closeCancelModal();
+  });
+
+  async function confirmCancel() {
+    const btn = document.getElementById('confirmCancelBtn');
+    btn.disabled = true; btn.textContent = '...';
+    try {
+      const { data: { session } } = await sbClient.auth.getSession();
+      const res = await fetch('/api/cancel-subscription', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${session.access_token}`
+        }
+      });
+      if (!res.ok) throw new Error('Failed');
+      closeCancelModal();
+      document.getElementById('planStatus').textContent = 'Canceled — access until period end';
+    } catch (e) {
+      alert('Something went wrong. Please try again.');
+    } finally {
+      btn.disabled = false; btn.textContent = '解約する';
+    }
+  }
+
+  function openCheckinModal() {
+    const dt = prompt('次のチェックイン日時を入力してください (YYYY-MM-DD HH:MM)');
+    if (!dt) return;
+    const d = new Date(dt);
+    if (isNaN(d)) { alert('日時の形式が正しくありません'); return; }
+    sbClient.from('checkins').insert({
+      user_id: currentUser.id,
+      scheduled_at: d.toISOString(),
+      reminder_sent: false,
+    }).then(() => {
+      document.getElementById('checkinDate').textContent =
+        d.toLocaleDateString('en-US', { weekday:'long', month:'long', day:'numeric' }) +
+        ' at ' + d.toLocaleTimeString('en-US', { hour:'2-digit', minute:'2-digit' });
+    });
+  }
+
+  // ── Chat ──
+  function addChatMessage(role, text) {
+    const area = document.getElementById('chatMessages');
+    const el = document.createElement('div');
+    el.className = role === 'ai' ? 'chat-msg-ai' : 'chat-msg-user';
+    el.textContent = text;
+    area.appendChild(el);
+    area.scrollTop = area.scrollHeight;
+    if (role !== 'typing') {
+      chatMessages.push({ role: role === 'ai' ? 'assistant' : 'user', content: text });
+    }
+    return el;
+  }
+
+  function showTyping() {
+    const area = document.getElementById('chatMessages');
+    const el = document.createElement('div');
+    el.className = 'typing-dots'; el.id = 'dashTyping';
+    el.innerHTML = '<span></span><span></span><span></span>';
+    area.appendChild(el);
+    area.scrollTop = area.scrollHeight;
+  }
+  function hideTyping() { document.getElementById('dashTyping')?.remove(); }
+
+  document.getElementById('chatInput').addEventListener('keydown', (e) => {
+    if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); if (!chatStreaming) sendChat(); }
+  });
+  document.getElementById('chatInput').addEventListener('input', function() {
+    this.style.height = 'auto';
+    this.style.height = Math.min(this.scrollHeight, 100) + 'px';
+  });
+
+  async function sendChat() {
+    const input = document.getElementById('chatInput');
+    const text = input.value.trim();
+    if (!text || chatStreaming) return;
+    input.value = ''; input.style.height = 'auto';
+    chatStreaming = true;
+    document.getElementById('chatSendBtn').disabled = true;
+
+    addChatMessage('user', text);
+
+    // Save to Supabase
+    if (sbClient && currentUser) {
+      const sessionId = localStorage.getItem('anew_session_id');
+      if (sessionId) {
+        await sbClient.from('messages').insert({ session_id: sessionId, role: 'user', content: text, user_id: currentUser.id });
+      }
+    }
+
+    showTyping();
+    try {
+      const res = await fetch('/api/chat', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          model: 'claude-sonnet-4-20250514',
+          max_tokens: 300,
+          system: COACH_SYSTEM + (currentProject ? `\n\nUser's project: ${currentProject.project_title}. Current focus: ${currentProject.roadmap?.[0]?.focus || ''}` : ''),
+          messages: chatMessages
+        })
+      });
+      if (!res.ok) throw new Error('API error');
+      const data = await res.json();
+      const reply = data.content[0].text;
+      hideTyping();
+      addChatMessage('ai', reply);
+
+      if (sbClient && currentUser) {
+        const sessionId = localStorage.getItem('anew_session_id');
+        if (sessionId) {
+          await sbClient.from('messages').insert({ session_id: sessionId, role: 'assistant', content: reply, user_id: currentUser.id });
+        }
+      }
+    } catch (e) {
+      hideTyping();
+      addChatMessage('ai', 'Something went wrong. Please try again.');
+    } finally {
+      chatStreaming = false;
+      document.getElementById('chatSendBtn').disabled = false;
+    }
+  }
+
+  init();
+</script>
+</body>
+</html>

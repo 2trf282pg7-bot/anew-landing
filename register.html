@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Anew — Complete Registration</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;1,400&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --warm-white: #FAF6F1; --clay: #B8704E; --clay-dark: #8C4E32;
+    --charcoal: #1C1614; --charcoal-soft: #5C4D45; --stone: #8A7870;
+    --blush-deep: #DBBAA6; --section-alt: #F5EFE8; --sage: #5E8A60;
+  }
+  html, body { min-height: 100dvh; font-family: 'DM Sans', sans-serif; background: var(--warm-white); color: var(--charcoal); }
+  .wrap { min-height: 100dvh; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 32px 24px; }
+  .logo { font-family: 'Cormorant Garamond', serif; font-size: 28px; font-weight: 400; letter-spacing: 0.1em; color: var(--charcoal); margin-bottom: 40px; }
+  .card { background: white; border-radius: 16px; padding: 36px 32px; width: 100%; max-width: 420px; box-shadow: 0 8px 40px rgba(28,22,20,0.08); }
+  .card-title { font-family: 'Cormorant Garamond', serif; font-size: 26px; font-weight: 400; color: var(--charcoal); margin-bottom: 8px; }
+  .card-sub { font-size: 14px; color: var(--charcoal-soft); line-height: 1.6; margin-bottom: 28px; }
+  .form-group { margin-bottom: 16px; }
+  .form-label { display: block; font-size: 11px; font-weight: 500; text-transform: uppercase; letter-spacing: 0.1em; color: var(--stone); margin-bottom: 6px; }
+  .form-input { width: 100%; border: 1.5px solid var(--blush-deep); border-radius: 8px; padding: 12px 14px; font-family: 'DM Sans', sans-serif; font-size: 15px; color: var(--charcoal); background: white; outline: none; transition: border-color 0.2s ease; min-height: 48px; }
+  .form-input:focus { border-color: var(--clay); }
+  .form-input::placeholder { color: var(--stone); }
+  .btn { width: 100%; background: var(--clay); color: white; font-family: 'DM Sans', sans-serif; font-size: 12px; font-weight: 500; text-transform: uppercase; letter-spacing: 0.12em; padding: 16px; border-radius: 6px; border: none; cursor: pointer; transition: background 0.2s ease; min-height: 52px; margin-top: 8px; }
+  .btn:hover { background: var(--clay-dark); }
+  .btn:disabled { background: var(--blush-deep); cursor: not-allowed; }
+  .form-error { font-size: 13px; color: var(--clay-dark); margin-top: 12px; padding: 10px 12px; background: rgba(184,112,78,0.08); border-radius: 6px; display: none; }
+  .form-error.show { display: block; }
+  .success-state { text-align: center; }
+  .success-icon { font-size: 48px; margin-bottom: 16px; }
+  .success-title { font-family: 'Cormorant Garamond', serif; font-size: 26px; color: var(--charcoal); margin-bottom: 12px; }
+  .success-text { font-size: 14px; color: var(--charcoal-soft); line-height: 1.6; margin-bottom: 24px; }
+  .btn-next { display: block; background: var(--clay); color: white; font-family: 'DM Sans', sans-serif; font-size: 12px; font-weight: 500; text-transform: uppercase; letter-spacing: 0.12em; padding: 16px; border-radius: 6px; border: none; cursor: pointer; transition: background 0.2s ease; width: 100%; text-align: center; text-decoration: none; }
+  .btn-next:hover { background: var(--clay-dark); }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="logo">Anew</div>
+  <div class="card" id="cardWrap">
+
+    <!-- Register form (shown if not logged in) -->
+    <div id="registerForm">
+      <div class="card-title">支払いが完了しました</div>
+      <div class="card-sub">アカウントを作成して、プロジェクトを受け取りましょう。</div>
+      <div class="form-group">
+        <label class="form-label" for="email">メールアドレス</label>
+        <input class="form-input" type="email" id="email" placeholder="you@example.com" autocomplete="email">
+      </div>
+      <div class="form-group">
+        <label class="form-label" for="password">パスワード（8文字以上）</label>
+        <input class="form-input" type="password" id="password" placeholder="••••••••" autocomplete="new-password">
+      </div>
+      <div class="form-group">
+        <label class="form-label" for="confirm">パスワード確認</label>
+        <input class="form-input" type="password" id="confirm" placeholder="••••••••" autocomplete="new-password">
+      </div>
+      <button class="btn" id="submitBtn" onclick="handleRegister()">アカウントを作成</button>
+      <div class="form-error" id="formError"></div>
+    </div>
+
+    <!-- Success state (shown after registration) -->
+    <div id="successState" style="display:none" class="success-state">
+      <div class="success-icon">🎉</div>
+      <div class="success-title">アカウントが作成されました</div>
+      <div class="success-text">あなたの90日間リカバリープロジェクトを生成しています。少々お待ちください。</div>
+      <a href="/dashboard.html" class="btn-next">ダッシュボードへ</a>
+    </div>
+
+  </div>
+</div>
+
+<script>
+  let sbClient = null;
+
+  async function init() {
+    try {
+      const res = await fetch('/api/config');
+      const { supabaseUrl, supabaseAnonKey } = await res.json();
+      sbClient = supabase.createClient(supabaseUrl, supabaseAnonKey);
+
+      // If already signed in, generate project and redirect
+      const { data: { session } } = await sbClient.auth.getSession();
+      if (session) {
+        await postRegisterFlow(session);
+        return;
+      }
+    } catch (e) {}
+  }
+
+  async function handleRegister() {
+    if (!sbClient) { showError('ページを再読み込みしてください。'); return; }
+    const email = document.getElementById('email').value.trim();
+    const password = document.getElementById('password').value;
+    const confirm = document.getElementById('confirm').value;
+
+    if (!email || !password || !confirm) { showError('すべての項目を入力してください。'); return; }
+    if (password.length < 8) { showError('パスワードは8文字以上にしてください。'); return; }
+    if (password !== confirm) { showError('パスワードが一致しません。'); return; }
+
+    const btn = document.getElementById('submitBtn');
+    btn.disabled = true; btn.textContent = '...';
+    document.getElementById('formError').classList.remove('show');
+
+    try {
+      const { data, error } = await sbClient.auth.signUp({ email, password });
+      if (error) throw error;
+
+      if (data.session) {
+        await postRegisterFlow(data.session);
+      } else {
+        // Email confirmation required — show success with redirect link
+        document.getElementById('registerForm').style.display = 'none';
+        document.getElementById('successState').style.display = 'block';
+        document.querySelector('.success-text').textContent = '確認メールをお送りしました。メールのリンクをクリックしてログインしてください。';
+      }
+    } catch (e) {
+      showError(e.message || '登録に失敗しました。');
+      btn.disabled = false; btn.textContent = 'アカウントを作成';
+    }
+  }
+
+  async function postRegisterFlow(session) {
+    const stripeSessionId = new URLSearchParams(window.location.search).get('session_id');
+    const onboardingSessionId = localStorage.getItem('anew_onboarding_session_id');
+
+    // Link Stripe checkout session to user
+    if (stripeSessionId) {
+      try {
+        await fetch('/api/link-checkout', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${session.access_token}`
+          },
+          body: JSON.stringify({ stripe_session_id: stripeSessionId })
+        });
+      } catch (_) {}
+    }
+
+    // Trigger project generation in background
+    if (onboardingSessionId) {
+      try {
+        await fetch('/api/generate-project', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${session.access_token}`
+          },
+          body: JSON.stringify({
+            session_id: onboardingSessionId,
+            user_id: session.user.id
+          })
+        });
+        localStorage.removeItem('anew_onboarding_session_id');
+      } catch (_) {}
+    }
+
+    document.getElementById('registerForm').style.display = 'none';
+    document.getElementById('successState').style.display = 'block';
+
+    setTimeout(() => { window.location.href = '/dashboard.html'; }, 2000);
+  }
+
+  function showError(msg) {
+    const el = document.getElementById('formError');
+    el.textContent = msg; el.classList.add('show');
+  }
+
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') handleRegister();
+  });
+
+  init();
+</script>
+</body>
+</html>

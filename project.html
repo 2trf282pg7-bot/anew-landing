@@ -1,0 +1,388 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Anew — My Project</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;1,400&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --warm-white: #FAF6F1; --clay: #B8704E; --clay-light: #D4906E;
+    --clay-dark: #8C4E32; --charcoal: #1C1614; --charcoal-soft: #5C4D45;
+    --stone: #8A7870; --blush: #EDD4C6; --blush-deep: #DBBAA6;
+    --section-alt: #F5EFE8; --sage: #5E8A60;
+  }
+  html, body { min-height: 100dvh; font-family: 'DM Sans', sans-serif; background: var(--warm-white); color: var(--charcoal); }
+  .nav {
+    position: fixed; top: 0; left: 0; right: 0; height: 56px;
+    background: rgba(250,246,241,0.96); border-bottom: 1px solid var(--blush-deep);
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 0 24px; z-index: 100; backdrop-filter: blur(4px);
+  }
+  .nav-logo { font-family: 'Cormorant Garamond', serif; font-size: 22px; font-weight: 400; color: var(--charcoal); letter-spacing: 0.08em; text-decoration: none; }
+  .nav-icons { display: flex; gap: 8px; }
+  .nav-icon { width: 40px; height: 40px; border-radius: 8px; border: none; background: none; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 18px; color: var(--stone); text-decoration: none; transition: background 0.2s ease, color 0.2s ease; }
+  .nav-icon:hover, .nav-icon.active { background: var(--section-alt); color: var(--clay); }
+  .main { max-width: 680px; margin: 0 auto; padding: 80px 24px 48px; }
+  .page-title { font-family: 'Cormorant Garamond', serif; font-size: 30px; font-weight: 300; color: var(--charcoal); margin-bottom: 28px; }
+  .card { background: white; border-radius: 16px; padding: 24px 28px; box-shadow: 0 2px 16px rgba(28,22,20,0.06); margin-bottom: 20px; }
+  .card-label { font-size: 10px; font-weight: 500; text-transform: uppercase; letter-spacing: 0.12em; color: var(--stone); margin-bottom: 16px; }
+  .task-list { display: flex; flex-direction: column; gap: 10px; }
+  .task-item { display: flex; align-items: flex-start; gap: 12px; padding: 14px 16px; background: var(--section-alt); border-radius: 10px; }
+  .task-check { width: 22px; height: 22px; min-width: 22px; border-radius: 6px; border: 1.5px solid var(--blush-deep); background: white; cursor: pointer; appearance: none; margin-top: 1px; transition: background 0.2s ease, border-color 0.2s ease; }
+  .task-check:checked { background: var(--clay); border-color: var(--clay); }
+  .task-body { flex: 1; }
+  .task-title { font-size: 14px; font-weight: 500; color: var(--charcoal); margin-bottom: 2px; }
+  .task-deadline { font-size: 12px; color: var(--stone); }
+  .task-info { width: 28px; height: 28px; border-radius: 50%; border: 1.5px solid var(--blush-deep); background: white; cursor: pointer; font-size: 13px; color: var(--stone); display: flex; align-items: center; justify-content: center; flex-shrink: 0; margin-top: 2px; transition: border-color 0.2s ease, color 0.2s ease; }
+  .task-info:hover { border-color: var(--clay); color: var(--clay); }
+  .empty-state { font-size: 14px; color: var(--stone); font-style: italic; padding: 8px 0; }
+
+  /* Roadmap */
+  .roadmap-phases { display: flex; flex-direction: column; gap: 10px; margin-top: 8px; }
+  .phase-item { border: 1.5px solid var(--blush-deep); border-radius: 10px; overflow: hidden; }
+  .phase-header { display: flex; align-items: center; justify-content: space-between; padding: 14px 16px; cursor: pointer; background: white; transition: background 0.2s ease; }
+  .phase-header:hover { background: var(--section-alt); }
+  .phase-header.current { background: rgba(184,112,78,0.06); }
+  .phase-week { font-size: 11px; font-weight: 500; text-transform: uppercase; letter-spacing: 0.1em; color: var(--stone); }
+  .phase-focus { font-size: 14px; color: var(--charcoal); margin-top: 2px; }
+  .phase-badge { font-size: 10px; padding: 3px 8px; border-radius: 100px; background: var(--clay); color: white; white-space: nowrap; }
+  .phase-body { padding: 0 16px; max-height: 0; overflow: hidden; transition: max-height 0.3s ease, padding 0.3s ease; }
+  .phase-body.open { max-height: 600px; padding: 0 16px 16px; }
+  .phase-theory { font-size: 13px; color: var(--charcoal-soft); line-height: 1.5; margin-bottom: 10px; font-style: italic; }
+  .phase-tasks-list { display: flex; flex-direction: column; gap: 6px; }
+  .phase-task { font-size: 13px; color: var(--charcoal); padding: 8px 0; border-bottom: 1px solid var(--section-alt); display: flex; gap: 8px; align-items: flex-start; }
+  .phase-task:last-child { border-bottom: none; }
+
+  /* Progress */
+  .progress-bar-wrap { background: var(--section-alt); border-radius: 100px; height: 8px; margin-top: 8px; overflow: hidden; }
+  .progress-bar-fill { height: 100%; background: var(--clay); border-radius: 100px; transition: width 0.5s ease; }
+  .progress-label { font-size: 12px; color: var(--stone); margin-top: 6px; }
+
+  /* Schedule */
+  .schedule-section { display: flex; flex-direction: column; gap: 12px; }
+  .schedule-row { display: flex; align-items: center; justify-content: space-between; padding: 12px 0; border-bottom: 1px solid var(--section-alt); }
+  .schedule-row:last-child { border-bottom: none; }
+  .schedule-date { font-family: 'Cormorant Garamond', serif; font-size: 18px; color: var(--charcoal); }
+  .btn-link { font-size: 12px; color: var(--clay); background: none; border: none; cursor: pointer; text-decoration: underline; text-underline-offset: 3px; }
+  .btn-link:hover { color: var(--clay-dark); }
+  .btn-add { font-size: 12px; color: var(--clay); background: none; border: 1px solid var(--blush-deep); border-radius: 6px; padding: 8px 14px; cursor: pointer; transition: border-color 0.2s ease; }
+  .btn-add:hover { border-color: var(--clay); }
+
+  /* Consent banner */
+  .consent-banner { background: white; border-radius: 16px; padding: 28px; box-shadow: 0 8px 40px rgba(28,22,20,0.10); margin-bottom: 24px; }
+  .consent-title { font-family: 'Cormorant Garamond', serif; font-size: 24px; font-weight: 400; color: var(--charcoal); margin-bottom: 12px; }
+  .consent-text { font-size: 14px; color: var(--charcoal-soft); line-height: 1.6; margin-bottom: 20px; }
+  .consent-actions { display: flex; gap: 12px; flex-wrap: wrap; }
+  .btn-primary { background: var(--clay); color: white; font-family: 'DM Sans', sans-serif; font-size: 12px; font-weight: 500; text-transform: uppercase; letter-spacing: 0.1em; padding: 14px 24px; border-radius: 6px; border: none; cursor: pointer; transition: background 0.2s ease; min-height: 48px; }
+  .btn-primary:hover { background: var(--clay-dark); }
+  .btn-secondary { background: none; color: var(--clay); font-family: 'DM Sans', sans-serif; font-size: 12px; font-weight: 500; text-transform: uppercase; letter-spacing: 0.1em; padding: 14px 24px; border-radius: 6px; border: 1.5px solid var(--clay); cursor: pointer; transition: opacity 0.2s ease; min-height: 48px; }
+  .btn-secondary:hover { opacity: 0.75; }
+
+  /* Adjust banner */
+  .adjust-banner { background: rgba(184,112,78,0.08); border: 1px solid rgba(184,112,78,0.2); border-radius: 10px; padding: 16px; margin-top: 16px; font-size: 14px; color: var(--charcoal-soft); line-height: 1.5; }
+  .adjust-banner a { color: var(--clay); text-decoration: underline; }
+
+  /* Modal */
+  .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(28,22,20,0.4); z-index: 1000; align-items: center; justify-content: center; }
+  .modal-overlay.open { display: flex; }
+  .modal { background: white; border-radius: 16px; padding: 32px 28px; max-width: 400px; width: calc(100% - 48px); position: relative; }
+  .modal-close { position: absolute; top: 14px; right: 18px; background: none; border: none; font-size: 22px; color: var(--stone); cursor: pointer; }
+  .modal-title { font-family: 'Cormorant Garamond', serif; font-size: 22px; font-weight: 400; color: var(--charcoal); margin-bottom: 12px; }
+  .modal-theory { font-size: 14px; color: var(--charcoal-soft); line-height: 1.7; }
+  .loading-screen { position: fixed; inset: 0; background: var(--warm-white); display: flex; align-items: center; justify-content: center; z-index: 200; }
+  .loading-logo { font-family: 'Cormorant Garamond', serif; font-size: 28px; color: var(--charcoal); letter-spacing: 0.1em; }
+</style>
+</head>
+<body>
+
+<div class="loading-screen" id="loadingScreen">
+  <div class="loading-logo">Anew</div>
+</div>
+
+<nav class="nav">
+  <a href="/dashboard.html" class="nav-logo">Anew</a>
+  <div class="nav-icons">
+    <a href="/dashboard.html" class="nav-icon" title="Home">💬</a>
+    <a href="/project.html" class="nav-icon active" title="Project">📋</a>
+    <a href="/history.html" class="nav-icon" title="History">📖</a>
+  </div>
+</nav>
+
+<main class="main" id="mainContent" style="display:none">
+  <h1 class="page-title">My Project</h1>
+
+  <!-- Consent banner (shown first time) -->
+  <div class="consent-banner" id="consentBanner" style="display:none">
+    <div class="consent-title" id="consentTitle">Your 90-day recovery project is ready.</div>
+    <div class="consent-text" id="consentSummary"></div>
+    <div class="consent-actions">
+      <button class="btn-primary" onclick="acceptProject()">はい、始めます</button>
+      <button class="btn-secondary" onclick="requestChange()">内容を変更したい</button>
+    </div>
+    <div class="adjust-banner" id="adjustBanner" style="display:none">
+      Anewとのチャットで詳しく話し合いましょう。<a href="/dashboard.html">チャットを開く</a>
+    </div>
+  </div>
+
+  <!-- Progress -->
+  <div class="card" id="progressCard" style="display:none">
+    <div class="card-label">Progress</div>
+    <div class="progress-bar-wrap">
+      <div class="progress-bar-fill" id="progressFill" style="width:0%"></div>
+    </div>
+    <div class="progress-label" id="progressLabel">Day 0 of 90</div>
+  </div>
+
+  <!-- This week's tasks -->
+  <div class="card" id="weekTasksCard" style="display:none">
+    <div class="card-label">This week's tasks</div>
+    <div class="task-list" id="taskList"></div>
+  </div>
+
+  <!-- Schedule -->
+  <div class="card" id="scheduleCard" style="display:none">
+    <div class="card-label">Schedule</div>
+    <div class="schedule-section" id="scheduleSection">
+      <div style="font-size:14px;color:var(--stone);font-style:italic">No check-ins scheduled.</div>
+    </div>
+    <button class="btn-add" style="margin-top:16px" onclick="addCheckin()">+ Add check-in</button>
+  </div>
+
+  <!-- Full roadmap -->
+  <div class="card" id="roadmapCard" style="display:none">
+    <div class="card-label">90-day roadmap</div>
+    <div class="roadmap-phases" id="roadmapPhases"></div>
+  </div>
+
+</main>
+
+<!-- Theory modal -->
+<div class="modal-overlay" id="theoryModal">
+  <div class="modal">
+    <button class="modal-close" onclick="document.getElementById('theoryModal').classList.remove('open')">×</button>
+    <div class="modal-title" id="theoryTitle">Why this task?</div>
+    <div class="modal-theory" id="theoryText"></div>
+  </div>
+</div>
+
+<script>
+  let sbClient = null, currentUser = null, currentProject = null;
+  let changeRequestCount = 0;
+
+  async function init() {
+    try {
+      const res = await fetch('/api/config');
+      const { supabaseUrl, supabaseAnonKey } = await res.json();
+      sbClient = supabase.createClient(supabaseUrl, supabaseAnonKey);
+      const { data: { session } } = await sbClient.auth.getSession();
+      if (!session) { window.location.href = '/app.html'; return; }
+      currentUser = session.user;
+      await loadProject();
+    } catch (e) { window.location.href = '/app.html'; }
+  }
+
+  async function loadProject() {
+    const { data: projects } = await sbClient
+      .from('projects')
+      .select('*')
+      .eq('user_id', currentUser.id)
+      .order('created_at', { ascending: false })
+      .limit(1);
+
+    document.getElementById('loadingScreen').style.display = 'none';
+    document.getElementById('mainContent').style.display = 'block';
+
+    if (!projects || projects.length === 0) {
+      document.querySelector('.page-title').textContent = 'No project yet';
+      return;
+    }
+
+    currentProject = projects[0];
+
+    if (currentProject.status === 'pending') {
+      showConsentBanner(currentProject);
+    } else {
+      renderActiveProject(currentProject);
+    }
+  }
+
+  function showConsentBanner(project) {
+    document.getElementById('consentTitle').textContent = project.project_title || 'Your recovery project is ready.';
+    document.getElementById('consentSummary').textContent = project.project_summary || '';
+    document.getElementById('consentBanner').style.display = 'block';
+  }
+
+  async function acceptProject() {
+    document.getElementById('consentBanner').style.display = 'none';
+    await sbClient.from('projects').update({
+      status: 'active',
+      started_at: new Date().toISOString()
+    }).eq('id', currentProject.id);
+    currentProject.status = 'active';
+    currentProject.started_at = new Date().toISOString();
+    renderActiveProject(currentProject);
+  }
+
+  function requestChange() {
+    changeRequestCount++;
+    if (changeRequestCount >= 3) {
+      document.getElementById('adjustBanner').style.display = 'none';
+      // Force choice after 3 attempts
+      const actions = document.querySelector('.consent-actions');
+      actions.innerHTML = '<p style="font-size:14px;color:var(--charcoal-soft);margin-bottom:16px">2つのどちらかをお選びください：</p>';
+      const b1 = document.createElement('button');
+      b1.className = 'btn-primary'; b1.textContent = 'このプロジェクトを始める';
+      b1.onclick = acceptProject;
+      const b2 = document.createElement('button');
+      b2.className = 'btn-secondary'; b2.style.marginLeft = '12px'; b2.textContent = 'Anewとチャットで調整';
+      b2.onclick = () => window.location.href = '/dashboard.html';
+      actions.appendChild(b1); actions.appendChild(b2);
+    } else {
+      document.getElementById('adjustBanner').style.display = 'block';
+    }
+  }
+
+  function renderActiveProject(project) {
+    const startDate = new Date(project.started_at || project.created_at);
+    const diffDays = Math.floor((Date.now() - startDate) / (1000 * 60 * 60 * 24));
+    const weekIndex = Math.max(0, Math.floor(diffDays / 7));
+    const roadmap = project.roadmap || [];
+    const phase = roadmap[Math.min(weekIndex, roadmap.length - 1)];
+
+    // Progress
+    document.getElementById('progressCard').style.display = 'block';
+    const pct = Math.min(100, Math.round((diffDays / 90) * 100));
+    document.getElementById('progressFill').style.width = pct + '%';
+    document.getElementById('progressLabel').textContent = `Day ${diffDays} of 90`;
+
+    // Tasks
+    if (phase?.tasks?.length) {
+      document.getElementById('weekTasksCard').style.display = 'block';
+      const list = document.getElementById('taskList');
+      list.innerHTML = '';
+      const weekStart = new Date(startDate);
+      weekStart.setDate(weekStart.getDate() + weekIndex * 7);
+      const weekEnd = new Date(weekStart);
+      weekEnd.setDate(weekEnd.getDate() + 6);
+      const deadlineStr = weekEnd.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+
+      phase.tasks.forEach((task, i) => {
+        const item = document.createElement('div');
+        item.className = 'task-item';
+        item.innerHTML = `
+          <input type="checkbox" class="task-check" id="ptask-${i}" onchange="toggleTask(this,'${esc(task.title)}')">
+          <div class="task-body">
+            <div class="task-title">${task.title}</div>
+            <div class="task-deadline">Due: ${deadlineStr} · ${task.frequency}</div>
+          </div>
+          <button class="task-info" onclick="openTheory('${esc(task.title)}','${esc(task.theory_basis || task.description)}')">ⓘ</button>
+        `;
+        list.appendChild(item);
+      });
+    }
+
+    // Roadmap
+    if (roadmap.length) {
+      document.getElementById('roadmapCard').style.display = 'block';
+      const phases = document.getElementById('roadmapPhases');
+      phases.innerHTML = '';
+      roadmap.forEach((p, i) => {
+        const isCurrent = i === Math.min(weekIndex, roadmap.length - 1);
+        const el = document.createElement('div');
+        el.className = 'phase-item';
+        el.innerHTML = `
+          <div class="phase-header ${isCurrent ? 'current' : ''}" onclick="this.nextElementSibling.classList.toggle('open')">
+            <div>
+              <div class="phase-week">${p.week_range}</div>
+              <div class="phase-focus">${p.focus}</div>
+            </div>
+            ${isCurrent ? '<span class="phase-badge">Now</span>' : ''}
+          </div>
+          <div class="phase-body ${isCurrent ? 'open' : ''}">
+            <p class="phase-theory">${p.theory}: ${p.theory_explanation}</p>
+            <div class="phase-tasks-list">
+              ${(p.tasks || []).map(t => `<div class="phase-task">· ${t.title}</div>`).join('')}
+            </div>
+          </div>
+        `;
+        phases.appendChild(el);
+      });
+    }
+
+    // Schedule
+    loadSchedule();
+  }
+
+  async function loadSchedule() {
+    document.getElementById('scheduleCard').style.display = 'block';
+    const { data: checkins } = await sbClient
+      .from('checkins')
+      .select('*')
+      .eq('user_id', currentUser.id)
+      .gte('scheduled_at', new Date().toISOString())
+      .order('scheduled_at', { ascending: true })
+      .limit(5);
+
+    const sec = document.getElementById('scheduleSection');
+    if (!checkins || checkins.length === 0) {
+      sec.innerHTML = '<div style="font-size:14px;color:var(--stone);font-style:italic">No check-ins scheduled.</div>';
+      return;
+    }
+    sec.innerHTML = checkins.map(c => {
+      const d = new Date(c.scheduled_at);
+      return `
+        <div class="schedule-row">
+          <div class="schedule-date">${d.toLocaleDateString('en-US', { weekday:'short', month:'short', day:'numeric' })} at ${d.toLocaleTimeString('en-US', { hour:'2-digit', minute:'2-digit' })}</div>
+          <button class="btn-link" onclick="deleteCheckin('${c.id}')">Remove</button>
+        </div>
+      `;
+    }).join('');
+  }
+
+  async function toggleTask(checkbox, title) {
+    if (!currentProject) return;
+    await sbClient.from('actions').insert({
+      user_id: currentUser.id,
+      project_id: currentProject.id,
+      title,
+      status: checkbox.checked ? 'done' : 'pending',
+      completed_at: checkbox.checked ? new Date().toISOString() : null,
+    });
+  }
+
+  function addCheckin() {
+    const dt = prompt('チェックイン日時を入力 (YYYY-MM-DD HH:MM)');
+    if (!dt) return;
+    const d = new Date(dt);
+    if (isNaN(d)) { alert('日時の形式が正しくありません'); return; }
+    sbClient.from('checkins').insert({
+      user_id: currentUser.id, scheduled_at: d.toISOString(), reminder_sent: false
+    }).then(() => loadSchedule());
+  }
+
+  async function deleteCheckin(id) {
+    await sbClient.from('checkins').delete().eq('id', id);
+    loadSchedule();
+  }
+
+  function openTheory(title, text) {
+    document.getElementById('theoryTitle').textContent = title;
+    document.getElementById('theoryText').textContent = text;
+    document.getElementById('theoryModal').classList.add('open');
+  }
+
+  document.getElementById('theoryModal').addEventListener('click', (e) => {
+    if (e.target === document.getElementById('theoryModal')) document.getElementById('theoryModal').classList.remove('open');
+  });
+
+  function esc(s) { return (s || '').replace(/'/g, "\\'").replace(/"/g, '&quot;'); }
+
+  init();
+</script>
+</body>
+</html>

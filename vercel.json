@@ -1,0 +1,12 @@
+{
+  "version": 2,
+  "routes": [
+    { "src": "/404", "dest": "/404.html" }
+  ],
+  "crons": [
+    {
+      "path": "/api/send-reminder",
+      "schedule": "0 0 * * *"
+    }
+  ]
+}
