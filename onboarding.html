@@ -1010,7 +1010,6 @@ End with: 'Does that feel close to what\'s been happening?'`;
   // ─── Check for READY_TO_REFLECT + strip ALL internal notes ───
   function processAIText(raw) {
     const hasReflectTag = raw.includes('[READY_TO_REFLECT]');
-    if (hasReflectTag) readyToReflect = true;
 
     const clean = raw
       .replace(/\*\*Internal scoring:.*$/m, '')
@@ -1019,7 +1018,7 @@ End with: 'Does that feel close to what\'s been happening?'`;
       .replace(/\[READY_TO_REFLECT\]/g, '')
       .trim();
 
-    return clean;
+    return { clean, hasReflectTag };
   }
 
   // ─── Show error ───
@@ -1086,7 +1085,9 @@ End with: 'Does that feel close to what\'s been happening?'`;
       const raw = await callAPI(sysPrompt, messages);
       hideTyping();
 
-      const cleaned = processAIText(raw);
+      const { clean: cleaned, hasReflectTag } = processAIText(raw);
+      if (hasReflectTag) readyToReflect = true;
+
       const el = appendMessage('ai', '');
       messages.push({ role: 'assistant', content: cleaned });
       saveMessage('assistant', cleaned);
@@ -1152,7 +1153,7 @@ End with: 'Does that feel close to what\'s been happening?'`;
       const raw = await callAPI(reflectionSystem, messages);
       hideTyping();
 
-      const cleaned = processAIText(raw);
+      const { clean: cleaned } = processAIText(raw);
       const el = appendMessage('ai', '');
       messages.push({ role: 'assistant', content: cleaned });
       saveMessage('assistant', cleaned);
