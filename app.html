@@ -167,7 +167,7 @@
   .form-error {
     font-family: 'DM Sans', sans-serif;
     font-size: 13px;
-    color: var(--clay-dark);
+    color: var(--clay);
     margin-top: 12px;
     padding: 10px 12px;
     background: rgba(184,112,78,0.08);
@@ -402,10 +402,13 @@
   }
 
   async function handleLogin() {
-    if (!sbClient) { showError('loginError', 'ページを再読み込みしてください。'); return; }
     const email = document.getElementById('loginEmail').value.trim();
     const password = document.getElementById('loginPassword').value;
-    if (!email || !password) { showError('loginError', 'メールアドレスとパスワードを入力してください。'); return; }
+
+    if (!email) { showError('loginError', 'Please enter your email address.'); return; }
+    if (!password) { showError('loginError', 'Please enter your password.'); return; }
+    if (password.length < 8) { showError('loginError', 'Password must be at least 8 characters.'); return; }
+    if (!sbClient) { showError('loginError', 'Something went wrong. Please try again.'); return; }
 
     const btn = document.getElementById('loginBtn');
     btn.disabled = true;
@@ -417,23 +420,33 @@
       if (error) throw error;
       await redirectByStatus(data.session);
     } catch (e) {
-      showError('loginError', e.message === 'Invalid login credentials'
-        ? 'メールアドレスまたはパスワードが正しくありません。'
-        : e.message || 'ログインに失敗しました。');
+      const msg = e.message || '';
+      let display;
+      if (msg.includes('Invalid login credentials')) {
+        display = 'Incorrect email or password. Please try again.';
+      } else if (msg.includes('Email not confirmed')) {
+        display = 'Please confirm your email address first.';
+      } else {
+        display = 'Something went wrong. Please try again.';
+      }
+      showError('loginError', display);
       btn.disabled = false;
       btn.textContent = 'ログイン';
     }
   }
 
   async function handleRegister() {
-    if (!sbClient) { showError('registerError', 'ページを再読み込みしてください。'); return; }
     const email = document.getElementById('regEmail').value.trim();
     const password = document.getElementById('regPassword').value;
     const confirm = document.getElementById('regConfirm').value;
 
-    if (!email || !password || !confirm) { showError('registerError', 'すべての項目を入力してください。'); return; }
-    if (password.length < 8) { showError('registerError', 'パスワードは8文字以上にしてください。'); return; }
-    if (password !== confirm) { showError('registerError', 'パスワードが一致しません。'); return; }
+    if (!email) { showError('registerError', 'Please enter your email address.'); return; }
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) { showError('registerError', 'Please enter a valid email address.'); return; }
+    if (!password) { showError('registerError', 'Please enter your password.'); return; }
+    if (password.length < 8) { showError('registerError', 'Password must be at least 8 characters.'); return; }
+    if (password !== confirm) { showError('registerError', 'Passwords do not match.'); return; }
+    if (!sbClient) { showError('registerError', 'Something went wrong. Please try again.'); return; }
 
     const btn = document.getElementById('registerBtn');
     btn.disabled = true;
@@ -448,11 +461,10 @@
       });
       if (error) throw error;
 
-      // Show confirmation state
       document.getElementById('regFormFields').style.display = 'none';
       document.getElementById('confirmState').style.display = 'block';
     } catch (e) {
-      showError('registerError', e.message || '登録に失敗しました。');
+      showError('registerError', e.message || 'Something went wrong. Please try again.');
       btn.disabled = false;
       btn.textContent = '登録する';
     }
