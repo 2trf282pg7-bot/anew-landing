@@ -320,10 +320,11 @@
 
   async function loadSchedule() {
     document.getElementById('scheduleCard').style.display = 'block';
+    if (!currentProject) return;
     const { data: checkins } = await sbClient
       .from('checkins')
       .select('*')
-      .eq('user_id', currentUser.id)
+      .eq('project_id', currentProject.id)
       .gte('scheduled_at', new Date().toISOString())
       .order('scheduled_at', { ascending: true })
       .limit(5);
@@ -347,11 +348,9 @@
   async function toggleTask(checkbox, title) {
     if (!currentProject) return;
     await sbClient.from('actions').insert({
-      user_id: currentUser.id,
       project_id: currentProject.id,
-      title,
+      description: title,
       status: checkbox.checked ? 'done' : 'pending',
-      completed_at: checkbox.checked ? new Date().toISOString() : null,
     });
   }
 
@@ -360,8 +359,9 @@
     if (!dt) return;
     const d = new Date(dt);
     if (isNaN(d)) { alert('日時の形式が正しくありません'); return; }
+    if (!currentProject) return;
     sbClient.from('checkins').insert({
-      user_id: currentUser.id, scheduled_at: d.toISOString(), reminder_sent: false
+      project_id: currentProject.id, scheduled_at: d.toISOString()
     }).then(() => loadSchedule());
   }
 

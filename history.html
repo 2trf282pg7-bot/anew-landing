@@ -81,13 +81,17 @@
   }
 
   async function loadHistory() {
-    // Load sessions for this user
-    const { data: sessions } = await sbClient
-      .from('sessions')
-      .select('id, created_at, summary, overview')
-      .eq('user_id', currentUser.id)
-      .order('created_at', { ascending: false })
-      .limit(50);
+    // sessions has no user_id; look up via users.session_id
+    const { data: userData } = await sbClient
+      .from('users')
+      .select('session_id')
+      .eq('id', currentUser.id)
+      .single();
+
+    const sessionId = userData?.session_id;
+    const sessions = sessionId
+      ? (await sbClient.from('sessions').select('id, created_at').eq('id', sessionId)).data
+      : null;
 
     document.getElementById('loadingScreen').style.display = 'none';
 
@@ -111,8 +115,7 @@
       card.className = 'session-card';
       card.innerHTML = `
         <div class="session-date">${dateStr}</div>
-        <div class="session-overview">${session.overview || 'Conversation with Anew'}</div>
-        <div class="session-summary">${session.summary || ''}</div>
+        <div class="session-overview">Conversation with Anew</div>
         <div class="session-body" id="body-${session.id}"></div>
       `;
       card.addEventListener('click', () => toggleSession(session.id));

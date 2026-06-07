@@ -333,7 +333,7 @@ Persona: Warm, unhurried, supportive. Short responses. Ask one question at a tim
       currentUser = session.user;
 
       sbClient.auth.onAuthStateChange((event, s) => {
-        if (event === 'SIGNED_OUT' || !s) window.location.href = '/app.html';
+        if (event === 'SIGNED_OUT') window.location.href = '/app.html';
       });
 
       await loadDashboard();
@@ -355,7 +355,6 @@ Persona: Warm, unhurried, supportive. Short responses. Ask one question at a tim
       .from('projects')
       .select('*')
       .eq('user_id', currentUser.id)
-      .eq('status', 'active')
       .order('created_at', { ascending: false })
       .limit(1);
 
@@ -378,20 +377,22 @@ Persona: Warm, unhurried, supportive. Short responses. Ask one question at a tim
         userData.subscription_status === 'canceled' ? 'Canceled — access until period end' : '';
     }
 
-    // Load next check-in
-    const { data: checkins } = await sbClient
-      .from('checkins')
-      .select('scheduled_at')
-      .eq('user_id', currentUser.id)
-      .gte('scheduled_at', new Date().toISOString())
-      .order('scheduled_at', { ascending: true })
-      .limit(1);
+    // Load next check-in (via project, since checkins has no user_id)
+    if (currentProject) {
+      const { data: checkins } = await sbClient
+        .from('checkins')
+        .select('scheduled_at')
+        .eq('project_id', currentProject.id)
+        .gte('scheduled_at', new Date().toISOString())
+        .order('scheduled_at', { ascending: true })
+        .limit(1);
 
-    if (checkins && checkins.length > 0) {
-      const d = new Date(checkins[0].scheduled_at);
-      document.getElementById('checkinDate').textContent =
-        d.toLocaleDateString('en-US', { weekday:'long', month:'long', day:'numeric' }) +
-        ' at ' + d.toLocaleTimeString('en-US', { hour:'2-digit', minute:'2-digit' });
+      if (checkins && checkins.length > 0) {
+        const d = new Date(checkins[0].scheduled_at);
+        document.getElementById('checkinDate').textContent =
+          d.toLocaleDateString('en-US', { weekday:'long', month:'long', day:'numeric' }) +
+          ' at ' + d.toLocaleTimeString('en-US', { hour:'2-digit', minute:'2-digit' });
+      }
     }
 
     // Start chat
@@ -477,11 +478,9 @@ Persona: Warm, unhurried, supportive. Short responses. Ask one question at a tim
   async function toggleTask(checkbox, title) {
     if (!sbClient || !currentUser || !currentProject) return;
     await sbClient.from('actions').insert({
-      user_id: currentUser.id,
       project_id: currentProject.id,
-      title,
+      description: title,
       status: checkbox.checked ? 'done' : 'pending',
-      completed_at: checkbox.checked ? new Date().toISOString() : null,
     });
   }
 
@@ -585,7 +584,7 @@ Persona: Warm, unhurried, supportive. Short responses. Ask one question at a tim
     if (sbClient && currentUser) {
       const sessionId = localStorage.getItem('anew_session_id');
       if (sessionId) {
-        await sbClient.from('messages').insert({ session_id: sessionId, role: 'user', content: text, user_id: currentUser.id });
+        await sbClient.from('messages').insert({ session_id: sessionId, role: 'user', content: text });
       }
     }
 
@@ -595,7 +594,7 @@ Persona: Warm, unhurried, supportive. Short responses. Ask one question at a tim
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          model: 'claude-sonnet-4-20250514',
+          model: 'claude-sonnet-4-6',
           max_tokens: 300,
           system: COACH_SYSTEM + (currentProject ? `\n\nUser's project: ${currentProject.project_title}. Current focus: ${currentProject.roadmap?.[0]?.focus || ''}` : ''),
           messages: chatMessages
@@ -610,7 +609,7 @@ Persona: Warm, unhurried, supportive. Short responses. Ask one question at a tim
       if (sbClient && currentUser) {
         const sessionId = localStorage.getItem('anew_session_id');
         if (sessionId) {
-          await sbClient.from('messages').insert({ session_id: sessionId, role: 'assistant', content: reply, user_id: currentUser.id });
+          await sbClient.from('messages').insert({ session_id: sessionId, role: 'assistant', content: reply });
         }
       }
     } catch (e) {
