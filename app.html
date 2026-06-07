@@ -276,7 +276,7 @@
         <input class="form-input" type="password" id="loginPassword" placeholder="••••••••" autocomplete="current-password">
         <button class="form-link" onclick="switchTab('reset')">パスワードを忘れた方</button>
       </div>
-      <button class="btn-auth" id="loginBtn" onclick="handleLogin()">ログイン</button>
+      <button class="btn-auth" id="loginBtn" onclick="handleLogin()" disabled>Loading...</button>
       <div class="form-error" id="loginError"></div>
     </div>
 
@@ -295,7 +295,7 @@
           <label class="form-label" for="regConfirm">パスワード確認</label>
           <input class="form-input" type="password" id="regConfirm" placeholder="••••••••" autocomplete="new-password">
         </div>
-        <button class="btn-auth" id="registerBtn" onclick="handleRegister()">登録する</button>
+        <button class="btn-auth" id="registerBtn" onclick="handleRegister()" disabled>Loading...</button>
         <div class="form-error" id="registerError"></div>
       </div>
 
@@ -313,7 +313,7 @@
         <label class="form-label" for="resetEmail">メールアドレス</label>
         <input class="form-input" type="email" id="resetEmail" placeholder="you@example.com" autocomplete="email">
       </div>
-      <button class="btn-auth" id="resetBtn" onclick="handleReset()">リセットメールを送る</button>
+      <button class="btn-auth" id="resetBtn" onclick="handleReset()" disabled>Loading...</button>
       <div class="form-error" id="resetError"></div>
       <div class="form-success" id="resetSuccess">メールを確認してください。パスワードリセットのリンクをお送りしました。</div>
       <button class="form-link" style="text-align:center;margin-top:16px;display:block;" onclick="switchTab('login')">ログインに戻る</button>
@@ -332,18 +332,37 @@
 <script>
   let sbClient = null;
 
+  function enableAuthButtons() {
+    const labels = { loginBtn: 'ログイン', registerBtn: '登録する', resetBtn: 'リセットメールを送る' };
+    Object.entries(labels).forEach(([id, label]) => {
+      const btn = document.getElementById(id);
+      if (btn) { btn.disabled = false; btn.textContent = label; }
+    });
+  }
+
+  function showInitError() {
+    ['loginError', 'registerError', 'resetError'].forEach(id => {
+      showError(id, 'Connection error. Please refresh the page.');
+    });
+  }
+
   async function initSupabase() {
     try {
+      console.log('[Anew] initSupabase start');
       const res = await fetch('/api/config');
-      if (!res.ok) return;
+      if (!res.ok) throw new Error(`Config fetch failed: ${res.status}`);
       const { supabaseUrl, supabaseAnonKey } = await res.json();
-      if (!supabaseUrl || !supabaseAnonKey) return;
+      console.log('[Anew] config loaded, url present:', !!supabaseUrl, 'key present:', !!supabaseAnonKey);
+      if (!supabaseUrl || !supabaseAnonKey) throw new Error('Missing Supabase config');
+
       sbClient = supabase.createClient(supabaseUrl, supabaseAnonKey);
 
-      // Check existing session
+      // Check existing session — redirect if already logged in
       const { data: { session } } = await sbClient.auth.getSession();
       if (session) {
+        console.log('[Anew] existing session found, redirecting');
         await redirectByStatus(session);
+        return; // don't enable buttons if navigating away
       }
 
       // Listen for auth changes (e.g. email confirmation callback)
@@ -352,7 +371,13 @@
           await redirectByStatus(session);
         }
       });
-    } catch (_) {}
+
+      console.log('[Anew] init complete, enabling buttons');
+      enableAuthButtons();
+    } catch (e) {
+      console.error('[Anew] initSupabase error:', e);
+      showInitError();
+    }
   }
 
   async function redirectByStatus(session) {
@@ -402,6 +427,8 @@
   }
 
   async function handleLogin() {
+    console.log('[Anew] Login attempted');
+    console.log('[Anew] Supabase client:', sbClient ? 'initialized' : 'null');
     const email = document.getElementById('loginEmail').value.trim();
     const password = document.getElementById('loginPassword').value;
 
