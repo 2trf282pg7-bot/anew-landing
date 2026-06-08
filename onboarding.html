@@ -735,6 +735,8 @@
   let turnCount = 0;
   let readyToReflect = false;
   let currentState = 1;
+  const SUPABASE_URL = 'https://hzkkftsihitkvdinydju.supabase.co';
+  const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imh6a2tmdHNpaGl0a3ZkaW55ZGp1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzUyNzUyODksImV4cCI6MjA5MDg1MTI4OX0.D7QBobLt7JhMGJcNNhvlLvKjq2ysozYa2k9Z0Fj8ZGI';
   let isStreaming = false;
   let sessionId = null;
   let sbClient = null;
@@ -841,12 +843,7 @@ End with: 'Does that feel close to what\'s been happening?'`;
   // ─── Supabase init ───
   async function initSupabase() {
     try {
-      const res = await fetch('/api/config');
-      if (!res.ok) return;
-      const { supabaseUrl, supabaseAnonKey } = await res.json();
-      if (!supabaseUrl || !supabaseAnonKey) return;
-
-      sbClient = supabase.createClient(supabaseUrl, supabaseAnonKey);
+      sbClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
       // Redirect logged-in paid users straight to dashboard
       const { data: { session } } = await sbClient.auth.getSession();

@@ -66,13 +66,13 @@
 </main>
 
 <script>
+  const SUPABASE_URL = 'https://hzkkftsihitkvdinydju.supabase.co';
+  const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imh6a2tmdHNpaGl0a3ZkaW55ZGp1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzUyNzUyODksImV4cCI6MjA5MDg1MTI4OX0.D7QBobLt7JhMGJcNNhvlLvKjq2ysozYa2k9Z0Fj8ZGI';
   let sbClient = null, currentUser = null;
 
   async function init() {
     try {
-      const res = await fetch('/api/config');
-      const { supabaseUrl, supabaseAnonKey } = await res.json();
-      sbClient = supabase.createClient(supabaseUrl, supabaseAnonKey);
+      sbClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
       const { data: { session } } = await sbClient.auth.getSession();
       if (!session) { window.location.href = '/app.html'; return; }
       currentUser = session.user;
