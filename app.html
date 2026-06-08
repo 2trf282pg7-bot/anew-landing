@@ -94,9 +94,7 @@
   .auth-panel.active { display: block; }
 
   /* Form elements */
-  .form-group {
-    margin-bottom: 16px;
-  }
+  .form-group { margin-bottom: 16px; }
 
   .form-label {
     display: block;
@@ -125,6 +123,25 @@
 
   .form-input:focus { border-color: var(--clay); }
   .form-input::placeholder { color: var(--stone); }
+
+  /* Password toggle wrapper */
+  .pw-wrap { position: relative; }
+  .pw-wrap .form-input { padding-right: 44px; }
+  .pw-toggle {
+    position: absolute;
+    right: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: var(--stone);
+    font-size: 16px;
+    padding: 0;
+    line-height: 1;
+    transition: color 0.2s ease;
+  }
+  .pw-toggle:hover { color: var(--charcoal-soft); }
 
   .btn-auth {
     width: 100%;
@@ -192,15 +209,8 @@
   .form-success.show { display: block; }
 
   /* Email confirmation state */
-  .confirm-state {
-    text-align: center;
-    padding: 8px 0;
-  }
-
-  .confirm-icon {
-    font-size: 40px;
-    margin-bottom: 16px;
-  }
+  .confirm-state { text-align: center; padding: 8px 0; }
+  .confirm-icon { font-size: 40px; margin-bottom: 16px; }
 
   .confirm-title {
     font-family: 'Cormorant Garamond', serif;
@@ -218,11 +228,7 @@
   }
 
   /* Disclaimer */
-  .auth-disclaimer {
-    margin-top: 24px;
-    text-align: center;
-    max-width: 420px;
-  }
+  .auth-disclaimer { margin-top: 24px; text-align: center; max-width: 420px; }
 
   .auth-disclaimer p {
     font-family: 'DM Sans', sans-serif;
@@ -232,11 +238,7 @@
     margin-bottom: 8px;
   }
 
-  .auth-disclaimer-links {
-    display: flex;
-    justify-content: center;
-    gap: 16px;
-  }
+  .auth-disclaimer-links { display: flex; justify-content: center; gap: 16px; }
 
   .auth-disclaimer-links a {
     font-family: 'DM Sans', sans-serif;
@@ -261,20 +263,23 @@
   <div class="auth-card" id="authCard">
     <!-- Tabs -->
     <div class="auth-tabs">
-      <button class="auth-tab active" id="tabLogin" onclick="switchTab('login')">ログイン</button>
-      <button class="auth-tab" id="tabRegister" onclick="switchTab('register')">新規登録</button>
+      <button class="auth-tab active" id="tabLogin" onclick="switchTab('login')">Log in</button>
+      <button class="auth-tab" id="tabRegister" onclick="switchTab('register')">Sign up</button>
     </div>
 
     <!-- Login panel -->
     <div class="auth-panel active" id="panelLogin">
       <div class="form-group">
-        <label class="form-label" for="loginEmail">メールアドレス</label>
+        <label class="form-label" for="loginEmail">Email address</label>
         <input class="form-input" type="email" id="loginEmail" placeholder="you@example.com" autocomplete="email">
       </div>
       <div class="form-group">
-        <label class="form-label" for="loginPassword">パスワード</label>
-        <input class="form-input" type="password" id="loginPassword" placeholder="••••••••" autocomplete="current-password">
-        <button class="form-link" onclick="switchTab('reset')">パスワードを忘れた方</button>
+        <label class="form-label" for="loginPassword">Password</label>
+        <div class="pw-wrap">
+          <input class="form-input" type="password" id="loginPassword" placeholder="••••••••" autocomplete="current-password">
+          <button type="button" class="pw-toggle" onclick="togglePassword('loginPassword')" tabindex="-1">👁</button>
+        </div>
+        <button class="form-link" onclick="switchTab('reset')">Forgot your password?</button>
       </div>
       <button class="btn-auth" id="loginBtn" onclick="handleLogin()" disabled>Loading...</button>
       <div class="form-error" id="loginError"></div>
@@ -284,16 +289,22 @@
     <div class="auth-panel" id="panelRegister">
       <div id="regFormFields">
         <div class="form-group">
-          <label class="form-label" for="regEmail">メールアドレス</label>
+          <label class="form-label" for="regEmail">Email address</label>
           <input class="form-input" type="email" id="regEmail" placeholder="you@example.com" autocomplete="email">
         </div>
         <div class="form-group">
-          <label class="form-label" for="regPassword">パスワード（8文字以上）</label>
-          <input class="form-input" type="password" id="regPassword" placeholder="••••••••" autocomplete="new-password">
+          <label class="form-label" for="regPassword">Password (8+ characters)</label>
+          <div class="pw-wrap">
+            <input class="form-input" type="password" id="regPassword" placeholder="••••••••" autocomplete="new-password">
+            <button type="button" class="pw-toggle" onclick="togglePassword('regPassword')" tabindex="-1">👁</button>
+          </div>
         </div>
         <div class="form-group">
-          <label class="form-label" for="regConfirm">パスワード確認</label>
-          <input class="form-input" type="password" id="regConfirm" placeholder="••••••••" autocomplete="new-password">
+          <label class="form-label" for="regConfirm">Confirm password</label>
+          <div class="pw-wrap">
+            <input class="form-input" type="password" id="regConfirm" placeholder="••••••••" autocomplete="new-password">
+            <button type="button" class="pw-toggle" onclick="togglePassword('regConfirm')" tabindex="-1">👁</button>
+          </div>
         </div>
         <button class="btn-auth" id="registerBtn" onclick="handleRegister()" disabled>Loading...</button>
         <div class="form-error" id="registerError"></div>
@@ -302,21 +313,21 @@
       <!-- Email sent confirmation (hidden initially) -->
       <div id="confirmState" style="display:none;" class="confirm-state">
         <div class="confirm-icon">✉️</div>
-        <div class="confirm-title">確認メールを送りました</div>
-        <p class="confirm-text">メールに記載のリンクをクリックして、アカウントを有効化してください。</p>
+        <div class="confirm-title">Check your inbox</div>
+        <p class="confirm-text">Click the link in the email we sent you to activate your account.</p>
       </div>
     </div>
 
     <!-- Password reset panel -->
     <div class="auth-panel" id="panelReset">
       <div class="form-group">
-        <label class="form-label" for="resetEmail">メールアドレス</label>
+        <label class="form-label" for="resetEmail">Email address</label>
         <input class="form-input" type="email" id="resetEmail" placeholder="you@example.com" autocomplete="email">
       </div>
       <button class="btn-auth" id="resetBtn" onclick="handleReset()" disabled>Loading...</button>
       <div class="form-error" id="resetError"></div>
-      <div class="form-success" id="resetSuccess">メールを確認してください。パスワードリセットのリンクをお送りしました。</div>
-      <button class="form-link" style="text-align:center;margin-top:16px;display:block;" onclick="switchTab('login')">ログインに戻る</button>
+      <div class="form-success" id="resetSuccess">Check your email — we've sent a password reset link.</div>
+      <button class="form-link" style="text-align:center;margin-top:16px;display:block;" onclick="switchTab('login')">Back to log in</button>
     </div>
   </div>
 
@@ -335,7 +346,7 @@
   let sbClient = null;
 
   function enableAuthButtons() {
-    const labels = { loginBtn: 'ログイン', registerBtn: '登録する', resetBtn: 'リセットメールを送る' };
+    const labels = { loginBtn: 'Log in', registerBtn: 'Create account', resetBtn: 'Send reset email' };
     Object.entries(labels).forEach(([id, label]) => {
       const btn = document.getElementById(id);
       if (btn) { btn.disabled = false; btn.textContent = label; }
@@ -358,7 +369,7 @@
       if (session) {
         console.log('[Anew] existing session found, redirecting');
         await redirectByStatus(session);
-        return; // don't enable buttons if navigating away
+        return;
       }
 
       // Listen for auth changes (e.g. email confirmation callback)
@@ -403,7 +414,6 @@
     document.getElementById('tab' + tab.charAt(0).toUpperCase() + tab.slice(1))?.classList.add('active');
     document.getElementById('panel' + tab.charAt(0).toUpperCase() + tab.slice(1))?.classList.add('active');
 
-    // Clear errors
     ['loginError','registerError','resetError','resetSuccess'].forEach(id => {
       const el = document.getElementById(id);
       if (el) { el.classList.remove('show'); el.textContent = ''; }
@@ -415,18 +425,19 @@
     if (el) { el.textContent = msg; el.classList.add('show'); }
   }
 
-  function setLoading(btnId, loading) {
-    const btn = document.getElementById(btnId);
-    if (!btn) return;
-    btn.disabled = loading;
-    btn.textContent = loading ? '...' : btn.dataset.label;
+  function togglePassword(id) {
+    const input = document.getElementById(id);
+    const btn = input.parentElement.querySelector('.pw-toggle');
+    input.type = input.type === 'password' ? 'text' : 'password';
+    btn.textContent = input.type === 'password' ? '👁' : '🙈';
   }
 
   async function handleLogin() {
-    console.log('[Anew] Login attempted');
-    console.log('[Anew] Supabase client:', sbClient ? 'initialized' : 'null');
+    console.log('[Anew] login clicked');
     const email = document.getElementById('loginEmail').value.trim();
     const password = document.getElementById('loginPassword').value;
+    console.log('[Anew] email:', email);
+    console.log('[Anew] sbClient:', sbClient ? 'initialized' : 'null');
 
     if (!email) { showError('loginError', 'Please enter your email address.'); return; }
     if (!password) { showError('loginError', 'Please enter your password.'); return; }
@@ -440,9 +451,11 @@
 
     try {
       const { data, error } = await sbClient.auth.signInWithPassword({ email, password });
+      console.log('[Anew] login result — data:', data, 'error:', error);
       if (error) throw error;
       await redirectByStatus(data.session);
     } catch (e) {
+      console.error('[Anew] login error:', e);
       const msg = e.message || '';
       let display;
       if (msg.includes('Invalid login credentials')) {
@@ -454,7 +467,7 @@
       }
       showError('loginError', display);
       btn.disabled = false;
-      btn.textContent = 'ログイン';
+      btn.textContent = 'Log in';
     }
   }
 
@@ -489,14 +502,14 @@
     } catch (e) {
       showError('registerError', e.message || 'Something went wrong. Please try again.');
       btn.disabled = false;
-      btn.textContent = '登録する';
+      btn.textContent = 'Create account';
     }
   }
 
   async function handleReset() {
-    if (!sbClient) { showError('resetError', 'ページを再読み込みしてください。'); return; }
+    if (!sbClient) { showError('resetError', 'Something went wrong. Please try again.'); return; }
     const email = document.getElementById('resetEmail').value.trim();
-    if (!email) { showError('resetError', 'メールアドレスを入力してください。'); return; }
+    if (!email) { showError('resetError', 'Please enter your email address.'); return; }
 
     const btn = document.getElementById('resetBtn');
     btn.disabled = true;
@@ -511,10 +524,10 @@
       if (error) throw error;
       document.getElementById('resetSuccess').classList.add('show');
     } catch (e) {
-      showError('resetError', e.message || 'メール送信に失敗しました。');
+      showError('resetError', e.message || 'Something went wrong. Please try again.');
     } finally {
       btn.disabled = false;
-      btn.textContent = 'リセットメールを送る';
+      btn.textContent = 'Send reset email';
     }
   }
 
