@@ -44,32 +44,32 @@
   <div class="logo">Anew</div>
   <div class="card" id="cardWrap">
 
-    <!-- Register form (shown if not logged in) -->
+    <!-- Register form -->
     <div id="registerForm">
-      <div class="card-title">支払いが完了しました</div>
-      <div class="card-sub">アカウントを作成して、プロジェクトを受け取りましょう。</div>
+      <div class="card-title">Payment complete</div>
+      <div class="card-sub">Create your account to receive your recovery project.</div>
       <div class="form-group">
-        <label class="form-label" for="email">メールアドレス</label>
+        <label class="form-label" for="email">Email address</label>
         <input class="form-input" type="email" id="email" placeholder="you@example.com" autocomplete="email">
       </div>
       <div class="form-group">
-        <label class="form-label" for="password">パスワード（8文字以上）</label>
+        <label class="form-label" for="password">Password (8+ characters)</label>
         <input class="form-input" type="password" id="password" placeholder="••••••••" autocomplete="new-password">
       </div>
       <div class="form-group">
-        <label class="form-label" for="confirm">パスワード確認</label>
+        <label class="form-label" for="confirm">Confirm password</label>
         <input class="form-input" type="password" id="confirm" placeholder="••••••••" autocomplete="new-password">
       </div>
-      <button class="btn" id="submitBtn" onclick="handleRegister()">アカウントを作成</button>
+      <button class="btn" id="submitBtn" onclick="handleRegister()">Create account</button>
       <div class="form-error" id="formError"></div>
     </div>
 
-    <!-- Success state (shown after registration) -->
+    <!-- Success state -->
     <div id="successState" style="display:none" class="success-state">
       <div class="success-icon">🎉</div>
-      <div class="success-title">アカウントが作成されました</div>
-      <div class="success-text">あなたの90日間リカバリープロジェクトを生成しています。少々お待ちください。</div>
-      <a href="/dashboard.html" class="btn-next">ダッシュボードへ</a>
+      <div class="success-title">Account created</div>
+      <div class="success-text">Generating your 90-day recovery project. Please wait a moment.</div>
+      <a href="/dashboard.html" class="btn-next">Go to dashboard</a>
     </div>
 
   </div>
@@ -83,8 +83,6 @@
   async function init() {
     try {
       sbClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-
-      // If already signed in, generate project and redirect
       const { data: { session } } = await sbClient.auth.getSession();
       if (session) {
         await postRegisterFlow(session);
@@ -94,14 +92,14 @@
   }
 
   async function handleRegister() {
-    if (!sbClient) { showError('ページを再読み込みしてください。'); return; }
+    if (!sbClient) { showError('Please refresh the page.'); return; }
     const email = document.getElementById('email').value.trim();
     const password = document.getElementById('password').value;
     const confirm = document.getElementById('confirm').value;
 
-    if (!email || !password || !confirm) { showError('すべての項目を入力してください。'); return; }
-    if (password.length < 8) { showError('パスワードは8文字以上にしてください。'); return; }
-    if (password !== confirm) { showError('パスワードが一致しません。'); return; }
+    if (!email || !password || !confirm) { showError('Please fill in all fields.'); return; }
+    if (password.length < 8) { showError('Password must be at least 8 characters.'); return; }
+    if (password !== confirm) { showError('Passwords do not match.'); return; }
 
     const btn = document.getElementById('submitBtn');
     btn.disabled = true; btn.textContent = '...';
@@ -114,20 +112,19 @@
       if (data.session) {
         await postRegisterFlow(data.session);
       } else {
-        // Email confirmation required — show success with redirect link
         document.getElementById('registerForm').style.display = 'none';
         document.getElementById('successState').style.display = 'block';
-        document.querySelector('.success-text').textContent = '確認メールをお送りしました。メールのリンクをクリックしてログインしてください。';
+        document.querySelector('.success-text').textContent = "We've sent a confirmation email. Click the link to activate your account.";
       }
     } catch (e) {
-      showError(e.message || '登録に失敗しました。');
-      btn.disabled = false; btn.textContent = 'アカウントを作成';
+      showError(e.message || 'Registration failed. Please try again.');
+      btn.disabled = false; btn.textContent = 'Create account';
     }
   }
 
   async function postRegisterFlow(session) {
     const stripeSessionId = new URLSearchParams(window.location.search).get('session_id');
-    const onboardingSessionId = localStorage.getItem('anew_onboarding_session_id');
+    const onboardingSessionId = localStorage.getItem('anew_onboarding_session_id') || localStorage.getItem('anew_session_id');
 
     // Link Stripe checkout session to user
     if (stripeSessionId) {
@@ -140,6 +137,16 @@
           },
           body: JSON.stringify({ stripe_session_id: stripeSessionId })
         });
+      } catch (_) {}
+    }
+
+    // Link onboarding session to this user
+    if (onboardingSessionId && sbClient) {
+      try {
+        await sbClient
+          .from('sessions')
+          .update({ user_id: session.user.id })
+          .eq('id', onboardingSessionId);
       } catch (_) {}
     }
 

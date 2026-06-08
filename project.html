@@ -17,16 +17,25 @@
     --section-alt: #F5EFE8; --sage: #5E8A60;
   }
   html, body { min-height: 100dvh; font-family: 'DM Sans', sans-serif; background: var(--warm-white); color: var(--charcoal); }
-  .nav {
-    position: fixed; top: 0; left: 0; right: 0; height: 56px;
-    background: rgba(250,246,241,0.96); border-bottom: 1px solid var(--blush-deep);
-    display: flex; align-items: center; justify-content: space-between;
-    padding: 0 24px; z-index: 100; backdrop-filter: blur(4px);
-  }
+
+  /* NAV */
+  .nav { position: fixed; top: 0; left: 0; right: 0; height: 56px; background: rgba(250,246,241,0.96); border-bottom: 1px solid var(--blush-deep); display: flex; align-items: center; justify-content: space-between; padding: 0 24px; z-index: 100; backdrop-filter: blur(4px); }
   .nav-logo { font-family: 'Cormorant Garamond', serif; font-size: 22px; font-weight: 400; color: var(--charcoal); letter-spacing: 0.08em; text-decoration: none; }
-  .nav-icons { display: flex; gap: 8px; }
-  .nav-icon { width: 40px; height: 40px; border-radius: 8px; border: none; background: none; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 18px; color: var(--stone); text-decoration: none; transition: background 0.2s ease, color 0.2s ease; }
-  .nav-icon:hover, .nav-icon.active { background: var(--section-alt); color: var(--clay); }
+  .nav-hamburger { width: 40px; height: 40px; border-radius: 8px; border: none; background: none; cursor: pointer; display: flex; align-items: center; justify-content: center; color: var(--stone); transition: background 0.2s ease, color 0.2s ease; }
+  .nav-hamburger:hover { background: var(--section-alt); color: var(--clay); }
+
+  /* MENU */
+  .menu-overlay { display: none; position: fixed; inset: 0; background: rgba(28,22,20,0.3); z-index: 999; }
+  .menu-overlay.open { display: block; }
+  .menu-drawer { position: fixed; right: 0; top: 0; width: 240px; height: 100vh; background: white; z-index: 1000; box-shadow: -4px 0 20px rgba(28,22,20,0.1); transform: translateX(100%); transition: transform 0.25s ease; display: flex; flex-direction: column; }
+  .menu-drawer.open { transform: translateX(0); }
+  .menu-item { display: block; padding: 16px 24px; font-family: 'DM Sans', sans-serif; font-size: 15px; color: var(--charcoal); border-bottom: 1px solid var(--blush-deep); text-decoration: none; background: none; border-left: none; border-right: none; border-top: none; cursor: pointer; text-align: left; width: 100%; transition: background 0.15s ease; }
+  .menu-item:hover { background: var(--section-alt); }
+  .menu-item.active { color: var(--clay); }
+  .menu-divider { height: 1px; background: var(--blush-deep); }
+  .menu-item-logout { color: var(--stone); border-bottom: none; margin-top: auto; }
+
+  /* MAIN */
   .main { max-width: 680px; margin: 0 auto; padding: 80px 24px 48px; }
   .page-title { font-family: 'Cormorant Garamond', serif; font-size: 30px; font-weight: 300; color: var(--charcoal); margin-bottom: 28px; }
   .card { background: white; border-radius: 16px; padding: 24px 28px; box-shadow: 0 2px 16px rgba(28,22,20,0.06); margin-bottom: 20px; }
@@ -82,8 +91,6 @@
   .btn-primary:hover { background: var(--clay-dark); }
   .btn-secondary { background: none; color: var(--clay); font-family: 'DM Sans', sans-serif; font-size: 12px; font-weight: 500; text-transform: uppercase; letter-spacing: 0.1em; padding: 14px 24px; border-radius: 6px; border: 1.5px solid var(--clay); cursor: pointer; transition: opacity 0.2s ease; min-height: 48px; }
   .btn-secondary:hover { opacity: 0.75; }
-
-  /* Adjust banner */
   .adjust-banner { background: rgba(184,112,78,0.08); border: 1px solid rgba(184,112,78,0.2); border-radius: 10px; padding: 16px; margin-top: 16px; font-size: 14px; color: var(--charcoal-soft); line-height: 1.5; }
   .adjust-banner a { color: var(--clay); text-decoration: underline; }
 
@@ -106,12 +113,19 @@
 
 <nav class="nav">
   <a href="/dashboard.html" class="nav-logo">Anew</a>
-  <div class="nav-icons">
-    <a href="/dashboard.html" class="nav-icon" title="Home">💬</a>
-    <a href="/project.html" class="nav-icon active" title="Project">📋</a>
-    <a href="/history.html" class="nav-icon" title="History">📖</a>
-  </div>
+  <button class="nav-hamburger" onclick="openMenu()" aria-label="Menu">
+    <svg width="20" height="14" viewBox="0 0 20 14" fill="none"><path d="M0 1h20M0 7h20M0 13h20" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+  </button>
 </nav>
+
+<div class="menu-overlay" id="menuOverlay" onclick="closeMenu()"></div>
+<div class="menu-drawer" id="menuDrawer">
+  <a href="/project.html" class="menu-item active">My Project</a>
+  <a href="/history.html" class="menu-item">Conversation History</a>
+  <a href="/dashboard.html#account" class="menu-item" onclick="closeMenu()">Account</a>
+  <div class="menu-divider"></div>
+  <button class="menu-item menu-item-logout" onclick="handleLogout()">Log out</button>
+</div>
 
 <main class="main" id="mainContent" style="display:none">
   <h1 class="page-title">My Project</h1>
@@ -121,11 +135,11 @@
     <div class="consent-title" id="consentTitle">Your 90-day recovery project is ready.</div>
     <div class="consent-text" id="consentSummary"></div>
     <div class="consent-actions">
-      <button class="btn-primary" onclick="acceptProject()">はい、始めます</button>
-      <button class="btn-secondary" onclick="requestChange()">内容を変更したい</button>
+      <button class="btn-primary" onclick="acceptProject()">Start my project</button>
+      <button class="btn-secondary" onclick="requestChange()">Request a change</button>
     </div>
     <div class="adjust-banner" id="adjustBanner" style="display:none">
-      Anewとのチャットで詳しく話し合いましょう。<a href="/dashboard.html">チャットを開く</a>
+      Let's discuss this further in your Anew chat. <a href="/dashboard.html">Open chat</a>
     </div>
   </div>
 
@@ -182,6 +196,9 @@
       const { data: { session } } = await sbClient.auth.getSession();
       if (!session) { window.location.href = '/app.html'; return; }
       currentUser = session.user;
+      sbClient.auth.onAuthStateChange((event) => {
+        if (event === 'SIGNED_OUT') window.location.href = '/app.html';
+      });
       await loadProject();
     } catch (e) { window.location.href = '/app.html'; }
   }
@@ -232,14 +249,13 @@
     changeRequestCount++;
     if (changeRequestCount >= 3) {
       document.getElementById('adjustBanner').style.display = 'none';
-      // Force choice after 3 attempts
       const actions = document.querySelector('.consent-actions');
-      actions.innerHTML = '<p style="font-size:14px;color:var(--charcoal-soft);margin-bottom:16px">2つのどちらかをお選びください：</p>';
+      actions.innerHTML = '<p style="font-size:14px;color:var(--charcoal-soft);margin-bottom:16px">Please choose one:</p>';
       const b1 = document.createElement('button');
-      b1.className = 'btn-primary'; b1.textContent = 'このプロジェクトを始める';
+      b1.className = 'btn-primary'; b1.textContent = 'Start this project';
       b1.onclick = acceptProject;
       const b2 = document.createElement('button');
-      b2.className = 'btn-secondary'; b2.style.marginLeft = '12px'; b2.textContent = 'Anewとチャットで調整';
+      b2.className = 'btn-secondary'; b2.style.marginLeft = '12px'; b2.textContent = 'Adjust with Anew';
       b2.onclick = () => window.location.href = '/dashboard.html';
       actions.appendChild(b1); actions.appendChild(b2);
     } else {
@@ -254,13 +270,11 @@
     const roadmap = project.roadmap || [];
     const phase = roadmap[Math.min(weekIndex, roadmap.length - 1)];
 
-    // Progress
     document.getElementById('progressCard').style.display = 'block';
     const pct = Math.min(100, Math.round((diffDays / 90) * 100));
     document.getElementById('progressFill').style.width = pct + '%';
     document.getElementById('progressLabel').textContent = `Day ${diffDays} of 90`;
 
-    // Tasks
     if (phase?.tasks?.length) {
       document.getElementById('weekTasksCard').style.display = 'block';
       const list = document.getElementById('taskList');
@@ -286,7 +300,6 @@
       });
     }
 
-    // Roadmap
     if (roadmap.length) {
       document.getElementById('roadmapCard').style.display = 'block';
       const phases = document.getElementById('roadmapPhases');
@@ -314,7 +327,6 @@
       });
     }
 
-    // Schedule
     loadSchedule();
   }
 
@@ -355,10 +367,10 @@
   }
 
   function addCheckin() {
-    const dt = prompt('チェックイン日時を入力 (YYYY-MM-DD HH:MM)');
+    const dt = prompt('Enter check-in date and time (YYYY-MM-DD HH:MM)');
     if (!dt) return;
     const d = new Date(dt);
-    if (isNaN(d)) { alert('日時の形式が正しくありません'); return; }
+    if (isNaN(d)) { alert('Invalid date format. Please use YYYY-MM-DD HH:MM'); return; }
     if (!currentProject) return;
     sbClient.from('checkins').insert({
       project_id: currentProject.id, scheduled_at: d.toISOString()
@@ -381,6 +393,19 @@
   });
 
   function esc(s) { return (s || '').replace(/'/g, "\\'").replace(/"/g, '&quot;'); }
+
+  function openMenu() {
+    document.getElementById('menuOverlay').classList.add('open');
+    document.getElementById('menuDrawer').classList.add('open');
+  }
+  function closeMenu() {
+    document.getElementById('menuOverlay').classList.remove('open');
+    document.getElementById('menuDrawer').classList.remove('open');
+  }
+  async function handleLogout() {
+    if (sbClient) await sbClient.auth.signOut();
+    window.location.href = '/app.html';
+  }
 
   init();
 </script>

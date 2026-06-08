@@ -12,20 +12,14 @@
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
   :root {
     --warm-white: #FAF6F1;
-    --clay: #B8704E;
-    --clay-light: #D4906E;
-    --clay-dark: #8C4E32;
-    --charcoal: #1C1614;
-    --charcoal-soft: #5C4D45;
-    --stone: #8A7870;
-    --blush: #EDD4C6;
-    --blush-deep: #DBBAA6;
-    --section-alt: #F5EFE8;
-    --sage: #5E8A60;
+    --clay: #B8704E; --clay-dark: #8C4E32;
+    --charcoal: #1C1614; --charcoal-soft: #5C4D45;
+    --stone: #8A7870; --blush: #EDD4C6; --blush-deep: #DBBAA6;
+    --section-alt: #F5EFE8; --sage: #5E8A60;
   }
   html, body { min-height: 100dvh; font-family: 'DM Sans', sans-serif; background: var(--warm-white); color: var(--charcoal); }
 
-  /* NAV */
+  /* ── NAV ── */
   .nav {
     position: fixed; top: 0; left: 0; right: 0; height: 56px;
     background: rgba(250,246,241,0.96); border-bottom: 1px solid var(--blush-deep);
@@ -33,176 +27,219 @@
     padding: 0 24px; z-index: 100; backdrop-filter: blur(4px);
   }
   .nav-logo { font-family: 'Cormorant Garamond', serif; font-size: 22px; font-weight: 400; color: var(--charcoal); letter-spacing: 0.08em; text-decoration: none; }
-  .nav-icons { display: flex; gap: 8px; }
-  .nav-icon {
-    width: 40px; height: 40px; border-radius: 8px; border: none; background: none;
-    cursor: pointer; display: flex; align-items: center; justify-content: center;
-    font-size: 18px; color: var(--stone); text-decoration: none;
-    transition: background 0.2s ease, color 0.2s ease;
-  }
-  .nav-icon:hover, .nav-icon.active { background: var(--section-alt); color: var(--clay); }
+  .nav-hamburger { width: 40px; height: 40px; border-radius: 8px; border: none; background: none; cursor: pointer; display: flex; align-items: center; justify-content: center; color: var(--stone); transition: background 0.2s ease, color 0.2s ease; }
+  .nav-hamburger:hover { background: var(--section-alt); color: var(--clay); }
 
-  /* MAIN */
-  .main { max-width: 680px; margin: 0 auto; padding: 80px 24px 48px; }
+  /* ── MENU DRAWER ── */
+  .menu-overlay { display: none; position: fixed; inset: 0; background: rgba(28,22,20,0.3); z-index: 999; }
+  .menu-overlay.open { display: block; }
+  .menu-drawer { position: fixed; right: 0; top: 0; width: 240px; height: 100vh; background: white; z-index: 1000; box-shadow: -4px 0 20px rgba(28,22,20,0.1); transform: translateX(100%); transition: transform 0.25s ease; display: flex; flex-direction: column; }
+  .menu-drawer.open { transform: translateX(0); }
+  .menu-item { display: block; padding: 16px 24px; font-family: 'DM Sans', sans-serif; font-size: 15px; color: var(--charcoal); border-bottom: 1px solid var(--blush-deep); text-decoration: none; background: none; border-left: none; border-right: none; border-top: none; cursor: pointer; text-align: left; width: 100%; transition: background 0.15s ease; }
+  .menu-item:hover { background: var(--section-alt); }
+  .menu-item.active { color: var(--clay); }
+  .menu-divider { height: 1px; background: var(--blush-deep); }
+  .menu-item-logout { color: var(--stone); border-bottom: none; margin-top: auto; }
 
-  /* Greeting */
-  .greeting { margin-bottom: 32px; }
-  .greeting-name { font-family: 'Cormorant Garamond', serif; font-size: 32px; font-weight: 300; color: var(--charcoal); margin-bottom: 4px; }
-  .greeting-sub { font-size: 14px; color: var(--stone); }
+  /* ── LOADING ── */
+  .loading-screen { position: fixed; inset: 0; background: var(--warm-white); display: flex; align-items: center; justify-content: center; z-index: 200; }
+  .loading-logo { font-family: 'Cormorant Garamond', serif; font-size: 28px; color: var(--charcoal); letter-spacing: 0.1em; }
 
-  /* Cards */
-  .card {
-    background: white; border-radius: 16px; padding: 24px 28px;
-    box-shadow: 0 2px 16px rgba(28,22,20,0.06); margin-bottom: 20px;
-  }
-  .card-label {
-    font-family: 'DM Sans', sans-serif; font-size: 10px; font-weight: 500;
-    text-transform: uppercase; letter-spacing: 0.12em; color: var(--stone); margin-bottom: 12px;
-  }
-  .card-title { font-family: 'Cormorant Garamond', serif; font-size: 24px; font-style: italic; color: var(--charcoal); margin-bottom: 8px; }
-  .card-text { font-size: 14px; color: var(--charcoal-soft); line-height: 1.6; }
+  /* ── MAIN LAYOUT ── */
+  .main { max-width: 640px; margin: 0 auto; padding: 72px 20px 48px; }
 
-  /* Tasks */
-  .task-list { display: flex; flex-direction: column; gap: 12px; margin-top: 16px; }
-  .task-item {
-    display: flex; align-items: flex-start; gap: 12px;
-    padding: 14px 16px; background: var(--section-alt); border-radius: 10px;
+  /* ── GREETING ── */
+  .greeting {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 28px;
+    font-style: italic;
+    font-weight: 400;
+    color: var(--charcoal);
+    margin: 16px 0 24px;
+    line-height: 1.2;
   }
-  .task-check {
-    width: 22px; height: 22px; min-width: 22px; border-radius: 6px;
-    border: 1.5px solid var(--blush-deep); background: white;
-    cursor: pointer; appearance: none; margin-top: 1px;
-    transition: background 0.2s ease, border-color 0.2s ease;
-  }
-  .task-check:checked { background: var(--clay); border-color: var(--clay); }
-  .task-body { flex: 1; }
-  .task-title { font-size: 14px; font-weight: 500; color: var(--charcoal); margin-bottom: 2px; }
-  .task-freq { font-size: 12px; color: var(--stone); }
-  .task-info {
-    width: 28px; height: 28px; border-radius: 50%; border: 1.5px solid var(--blush-deep);
-    background: white; cursor: pointer; font-size: 13px; color: var(--stone);
-    display: flex; align-items: center; justify-content: center; flex-shrink: 0;
-    margin-top: 2px; transition: border-color 0.2s ease, color 0.2s ease;
-  }
-  .task-info:hover { border-color: var(--clay); color: var(--clay); }
 
-  /* Roadmap */
-  .roadmap-phases { display: flex; flex-direction: column; gap: 10px; margin-top: 16px; }
-  .phase-item {
-    border: 1.5px solid var(--blush-deep); border-radius: 10px; overflow: hidden;
+  /* ── SECTION LABEL ── */
+  .section-label {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 10px;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.14em;
+    color: var(--stone);
+    margin-bottom: 12px;
   }
-  .phase-header {
-    display: flex; align-items: center; justify-content: space-between;
-    padding: 14px 16px; cursor: pointer; background: white;
-    transition: background 0.2s ease;
-  }
-  .phase-header:hover { background: var(--section-alt); }
-  .phase-header.current { background: rgba(184,112,78,0.06); border-color: var(--clay); }
-  .phase-week { font-size: 11px; font-weight: 500; text-transform: uppercase; letter-spacing: 0.1em; color: var(--stone); }
-  .phase-focus { font-size: 14px; color: var(--charcoal); margin-top: 2px; }
-  .phase-badge {
-    font-size: 10px; padding: 3px 8px; border-radius: 100px;
-    background: var(--clay); color: white; white-space: nowrap;
-  }
-  .phase-body { padding: 0 16px; max-height: 0; overflow: hidden; transition: max-height 0.3s ease, padding 0.3s ease; }
-  .phase-body.open { max-height: 400px; padding: 0 16px 16px; }
-  .phase-theory { font-size: 13px; color: var(--charcoal-soft); line-height: 1.5; margin-bottom: 10px; font-style: italic; }
-  .phase-tasks-list { display: flex; flex-direction: column; gap: 6px; }
-  .phase-task { font-size: 13px; color: var(--charcoal); padding: 6px 0; border-bottom: 1px solid var(--section-alt); }
-  .phase-task:last-child { border-bottom: none; }
 
-  /* Chat section */
-  .chat-section { margin-bottom: 20px; }
-  .chat-box {
-    background: white; border-radius: 16px;
-    box-shadow: 0 2px 16px rgba(28,22,20,0.06); overflow: hidden;
+  /* ── CHECK-IN CHAT ── */
+  .checkin-card {
+    background: white;
+    border-radius: 16px;
+    box-shadow: 0 2px 20px rgba(28,22,20,0.07);
+    overflow: hidden;
+    margin-bottom: 16px;
+    display: flex;
+    flex-direction: column;
+    min-height: 360px;
+    max-height: calc(100dvh - 56px - 80px - 60px - 80px);
   }
+
   .chat-messages {
-    padding: 20px 24px 12px; min-height: 200px; max-height: 400px;
-    overflow-y: auto; display: flex; flex-direction: column; gap: 16px;
+    flex: 1;
+    overflow-y: auto;
+    padding: 20px 24px 8px;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    min-height: 200px;
   }
-  .chat-msg-ai {
-    font-family: 'Cormorant Garamond', serif; font-size: 18px;
-    color: var(--charcoal); line-height: 1.6; max-width: 480px;
+  .chat-messages::-webkit-scrollbar { width: 4px; }
+  .chat-messages::-webkit-scrollbar-track { background: transparent; }
+  .chat-messages::-webkit-scrollbar-thumb { background: var(--blush-deep); border-radius: 2px; }
+
+  .msg-ai {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 19px;
+    font-weight: 400;
+    color: var(--charcoal);
+    line-height: 1.65;
+    max-width: 480px;
   }
-  .chat-msg-user {
-    background: var(--blush-deep); border-radius: 14px 14px 4px 14px;
-    padding: 10px 16px; font-size: 14px; color: var(--charcoal);
-    align-self: flex-end; max-width: 360px; line-height: 1.5;
+
+  .msg-user {
+    background: var(--blush-deep);
+    border-radius: 14px 14px 4px 14px;
+    padding: 10px 16px;
+    font-size: 14px;
+    color: var(--charcoal);
+    align-self: flex-end;
+    max-width: 360px;
+    line-height: 1.5;
   }
-  .chat-input-bar {
-    border-top: 1px solid var(--blush-deep); padding: 12px 16px;
-    display: flex; align-items: flex-end; gap: 10px;
-  }
-  .chat-textarea {
-    flex: 1; border: 1.5px solid var(--blush-deep); border-radius: 10px;
-    padding: 10px 14px; font-family: 'DM Sans', sans-serif; font-size: 14px;
-    color: var(--charcoal); background: white; resize: none; min-height: 44px;
-    max-height: 100px; line-height: 1.5; outline: none; transition: border-color 0.2s ease;
-  }
-  .chat-textarea:focus { border-color: var(--clay); }
-  .chat-send {
-    width: 40px; height: 40px; border-radius: 50%; background: var(--clay);
-    border: none; cursor: pointer; display: flex; align-items: center;
-    justify-content: center; transition: background 0.2s ease; flex-shrink: 0;
-  }
-  .chat-send:hover { background: var(--clay-dark); }
-  .chat-send:disabled { background: var(--blush-deep); cursor: not-allowed; }
+
+  .word { opacity: 0; transition: opacity 0.15s ease; display: inline; }
+  .word.visible { opacity: 1; }
+
   .typing-dots { display: flex; gap: 4px; align-items: center; padding: 4px 0; }
-  .typing-dots span {
-    width: 6px; height: 6px; border-radius: 50%; background: var(--stone);
-    animation: dotPulse 1.2s ease-in-out infinite;
-  }
+  .typing-dots span { width: 6px; height: 6px; border-radius: 50%; background: var(--stone); animation: dotPulse 1.2s ease-in-out infinite; }
   .typing-dots span:nth-child(2) { animation-delay: 0.2s; }
   .typing-dots span:nth-child(3) { animation-delay: 0.4s; }
   @keyframes dotPulse { 0%,80%,100%{opacity:0.3;transform:scale(0.85)} 40%{opacity:1;transform:scale(1)} }
 
-  /* Checkin */
-  .checkin-row { display: flex; align-items: center; justify-content: space-between; }
-  .checkin-date { font-family: 'Cormorant Garamond', serif; font-size: 20px; color: var(--charcoal); }
-  .btn-link {
-    font-size: 12px; color: var(--clay); background: none; border: none;
-    cursor: pointer; text-decoration: underline; text-underline-offset: 3px;
+  .chat-input-bar {
+    border-top: 1px solid var(--blush-deep);
+    padding: 12px 16px;
+    display: flex;
+    align-items: flex-end;
+    gap: 10px;
+    background: white;
   }
+
+  .chat-textarea {
+    flex: 1;
+    border: 1.5px solid var(--blush-deep);
+    border-radius: 10px;
+    padding: 10px 14px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14px;
+    color: var(--charcoal);
+    background: white;
+    resize: none;
+    min-height: 44px;
+    max-height: 100px;
+    line-height: 1.5;
+    outline: none;
+    transition: border-color 0.2s ease;
+  }
+  .chat-textarea:focus { border-color: var(--clay); }
+  .chat-textarea::placeholder { color: var(--stone); }
+
+  .chat-send {
+    width: 40px; height: 40px; border-radius: 50%;
+    background: var(--clay); border: none; cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    transition: background 0.2s ease; flex-shrink: 0;
+  }
+  .chat-send:hover { background: var(--clay-dark); }
+  .chat-send:disabled { background: var(--blush-deep); cursor: not-allowed; }
+
+  /* ── COLLAPSIBLE SECTIONS ── */
+  .collapsible {
+    background: white;
+    border-radius: 14px;
+    box-shadow: 0 2px 12px rgba(28,22,20,0.05);
+    margin-bottom: 12px;
+    overflow: hidden;
+  }
+
+  .collapsible-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 16px 20px;
+    cursor: pointer;
+    transition: background 0.15s ease;
+  }
+  .collapsible-header:hover { background: var(--section-alt); }
+
+  .collapsible-label {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 10px;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.14em;
+    color: var(--stone);
+  }
+
+  .collapsible-value {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 17px;
+    color: var(--charcoal);
+    margin-top: 2px;
+  }
+
+  .collapsible-chevron {
+    color: var(--stone);
+    transition: transform 0.2s ease;
+    flex-shrink: 0;
+  }
+  .collapsible-chevron.open { transform: rotate(180deg); }
+
+  .collapsible-body {
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.25s ease, padding 0.25s ease;
+  }
+  .collapsible-body.open { max-height: 400px; }
+
+  .collapsible-inner {
+    padding: 0 20px 16px;
+    border-top: 1px solid var(--section-alt);
+  }
+
+  .focus-text { font-size: 14px; color: var(--charcoal-soft); line-height: 1.6; padding-top: 12px; }
+
+  .checkin-row { display: flex; align-items: center; justify-content: space-between; padding-top: 12px; }
+  .checkin-date { font-family: 'Cormorant Garamond', serif; font-size: 18px; color: var(--charcoal); }
+  .btn-link { font-size: 12px; color: var(--clay); background: none; border: none; cursor: pointer; text-decoration: underline; text-underline-offset: 3px; }
   .btn-link:hover { color: var(--clay-dark); }
 
-  /* Settings */
-  .settings-section { margin-top: 40px; padding-top: 32px; border-top: 1px solid var(--blush-deep); }
-  .settings-title { font-size: 12px; font-weight: 500; text-transform: uppercase; letter-spacing: 0.1em; color: var(--stone); margin-bottom: 16px; }
-  .settings-row { display: flex; align-items: center; justify-content: space-between; padding: 12px 0; border-bottom: 1px solid var(--section-alt); }
-  .settings-row:last-child { border-bottom: none; }
-  .settings-plan { font-size: 14px; color: var(--charcoal); }
-  .settings-plan-sub { font-size: 12px; color: var(--stone); margin-top: 2px; }
-  .btn-cancel { font-size: 13px; color: var(--stone); background: none; border: 1px solid var(--blush-deep); border-radius: 6px; padding: 8px 14px; cursor: pointer; transition: color 0.2s ease, border-color 0.2s ease; }
-  .btn-cancel:hover { color: var(--clay-dark); border-color: var(--clay-dark); }
-
-  /* Modal */
-  .modal-overlay {
-    display: none; position: fixed; inset: 0; background: rgba(28,22,20,0.4);
-    z-index: 1000; align-items: center; justify-content: center;
-  }
+  /* ── ACCOUNT MODAL ── */
+  .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(28,22,20,0.4); z-index: 1000; align-items: center; justify-content: center; }
   .modal-overlay.open { display: flex; }
-  .modal {
-    background: white; border-radius: 16px; padding: 32px 28px;
-    max-width: 400px; width: calc(100% - 48px); position: relative;
-  }
+  .modal { background: white; border-radius: 16px; padding: 32px 28px; max-width: 400px; width: calc(100% - 48px); }
   .modal-title { font-family: 'Cormorant Garamond', serif; font-size: 24px; font-weight: 400; color: var(--charcoal); margin-bottom: 12px; }
   .modal-text { font-size: 14px; color: var(--charcoal-soft); line-height: 1.6; margin-bottom: 24px; }
   .modal-actions { display: flex; gap: 12px; }
-  .btn-modal-cancel { flex: 1; padding: 14px; border: 1.5px solid var(--blush-deep); border-radius: 6px; background: none; cursor: pointer; font-size: 13px; color: var(--charcoal-soft); transition: border-color 0.2s ease; }
-  .btn-modal-cancel:hover { border-color: var(--charcoal-soft); }
-  .btn-modal-confirm { flex: 1; padding: 14px; background: var(--clay-dark); border: none; border-radius: 6px; cursor: pointer; font-size: 13px; color: white; transition: background 0.2s ease; }
-  .btn-modal-confirm:hover { background: #7A3B20; }
+  .btn-modal-keep { flex: 1; padding: 14px; border: 1.5px solid var(--blush-deep); border-radius: 6px; background: none; cursor: pointer; font-size: 13px; color: var(--charcoal-soft); transition: border-color 0.2s ease; }
+  .btn-modal-keep:hover { border-color: var(--charcoal-soft); }
+  .btn-modal-cancel { flex: 1; padding: 14px; background: var(--clay-dark); border: none; border-radius: 6px; cursor: pointer; font-size: 13px; color: white; transition: background 0.2s ease; }
+  .btn-modal-cancel:hover { background: #7A3B20; }
+  .btn-modal-cancel:disabled { background: var(--blush-deep); cursor: not-allowed; }
 
-  /* Theory modal */
-  .modal-theory { font-size: 14px; color: var(--charcoal-soft); line-height: 1.7; }
-  .modal-close { position: absolute; top: 14px; right: 18px; background: none; border: none; font-size: 22px; color: var(--stone); cursor: pointer; }
-
-  .loading-screen {
-    position: fixed; inset: 0; background: var(--warm-white);
-    display: flex; align-items: center; justify-content: center; z-index: 200;
-  }
-  .loading-logo { font-family: 'Cormorant Garamond', serif; font-size: 28px; color: var(--charcoal); letter-spacing: 0.1em; }
+  .plan-info { font-size: 14px; color: var(--charcoal); margin-bottom: 4px; }
+  .plan-status { font-size: 12px; color: var(--stone); margin-bottom: 20px; }
+  .btn-open-cancel { font-size: 13px; color: var(--stone); background: none; border: 1px solid var(--blush-deep); border-radius: 6px; padding: 10px 16px; cursor: pointer; transition: color 0.2s ease, border-color 0.2s ease; }
+  .btn-open-cancel:hover { color: var(--clay-dark); border-color: var(--clay-dark); }
 </style>
 </head>
 <body>
@@ -213,96 +250,98 @@
 
 <nav class="nav">
   <a href="/dashboard.html" class="nav-logo">Anew</a>
-  <div class="nav-icons">
-    <a href="/dashboard.html" class="nav-icon active" title="Home">💬</a>
-    <a href="/project.html" class="nav-icon" title="Project">📋</a>
-    <a href="/history.html" class="nav-icon" title="History">📖</a>
-  </div>
+  <button class="nav-hamburger" onclick="openMenu()" aria-label="Menu">
+    <svg width="20" height="14" viewBox="0 0 20 14" fill="none"><path d="M0 1h20M0 7h20M0 13h20" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+  </button>
 </nav>
+
+<div class="menu-overlay" id="menuOverlay" onclick="closeMenu()"></div>
+<div class="menu-drawer" id="menuDrawer">
+  <a href="/project.html" class="menu-item">My Project</a>
+  <a href="/history.html" class="menu-item">Conversation History</a>
+  <a href="#" class="menu-item" onclick="openAccountModal(); closeMenu();">Account</a>
+  <div class="menu-divider"></div>
+  <button class="menu-item menu-item-logout" onclick="handleLogout()">Log out</button>
+</div>
 
 <main class="main" id="mainContent" style="display:none">
 
   <!-- Greeting -->
-  <div class="greeting">
-    <div class="greeting-name" id="greetingName">Welcome back.</div>
-    <div class="greeting-sub" id="greetingDay"></div>
-  </div>
+  <div class="greeting" id="greeting">Good morning.</div>
 
-  <!-- This week's focus -->
-  <div class="card" id="focusCard" style="display:none">
-    <div class="card-label">This week's focus</div>
-    <div class="card-title" id="focusText"></div>
-    <div class="card-text" id="focusTheory"></div>
-  </div>
-
-  <!-- Tasks -->
-  <div class="card" id="tasksCard" style="display:none">
-    <div class="card-label">This week's tasks</div>
-    <div class="task-list" id="taskList"></div>
-  </div>
-
-  <!-- Next check-in -->
-  <div class="card">
-    <div class="card-label">Next check-in</div>
-    <div class="checkin-row">
-      <div class="checkin-date" id="checkinDate">Not scheduled</div>
-      <button class="btn-link" onclick="openCheckinModal()">Change</button>
+  <!-- Weekly check-in -->
+  <div class="section-label">Your weekly check-in</div>
+  <div class="checkin-card">
+    <div class="chat-messages" id="chatMessages"></div>
+    <div class="chat-input-bar">
+      <textarea class="chat-textarea" id="chatInput" placeholder="Write here..." rows="1"></textarea>
+      <button class="chat-send" id="chatSendBtn" onclick="sendChat()">
+        <svg width="16" height="16" viewBox="0 0 18 18" fill="none">
+          <path d="M3 9H15M15 9L10 4M15 9L10 14" stroke="white" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </button>
     </div>
   </div>
 
-  <!-- Chat with Anew -->
-  <div class="chat-section">
-    <div class="card-label" style="margin-bottom:12px">Chat with Anew</div>
-    <div class="chat-box">
-      <div class="chat-messages" id="chatMessages"></div>
-      <div class="chat-input-bar">
-        <textarea class="chat-textarea" id="chatInput" placeholder="How are you feeling today?" rows="1"></textarea>
-        <button class="chat-send" id="chatSendBtn" onclick="sendChat()">
-          <svg width="16" height="16" viewBox="0 0 18 18" fill="none">
-            <path d="M3 9H15M15 9L10 4M15 9L10 14" stroke="white" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
-          </svg>
-        </button>
-      </div>
-    </div>
-  </div>
-
-  <!-- 90-day roadmap -->
-  <div class="card" id="roadmapCard" style="display:none">
-    <div class="card-label">90-day roadmap</div>
-    <div class="roadmap-phases" id="roadmapPhases"></div>
-  </div>
-
-  <!-- Settings -->
-  <div class="settings-section">
-    <div class="settings-title">Account</div>
-    <div class="settings-row">
+  <!-- This week's focus (collapsible, hidden if no project) -->
+  <div class="collapsible" id="focusCollapsible" style="display:none">
+    <div class="collapsible-header" onclick="toggleCollapsible('focus')">
       <div>
-        <div class="settings-plan" id="planName">Anew Monthly</div>
-        <div class="settings-plan-sub" id="planStatus"></div>
+        <div class="collapsible-label">This week's focus</div>
+        <div class="collapsible-value" id="focusValuePreview">—</div>
       </div>
-      <button class="btn-cancel" onclick="openCancelModal()">解約する</button>
+      <svg class="collapsible-chevron" id="focusChevron" width="16" height="16" viewBox="0 0 16 16" fill="none">
+        <path d="M4 6l4 4 4-4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+    </div>
+    <div class="collapsible-body" id="focusBody">
+      <div class="collapsible-inner">
+        <div class="focus-text" id="focusFullText"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Next check-in (collapsible) -->
+  <div class="collapsible">
+    <div class="collapsible-header" onclick="toggleCollapsible('checkin')">
+      <div>
+        <div class="collapsible-label">Next check-in</div>
+        <div class="collapsible-value" id="checkinValuePreview">Not scheduled</div>
+      </div>
+      <svg class="collapsible-chevron" id="checkinChevron" width="16" height="16" viewBox="0 0 16 16" fill="none">
+        <path d="M4 6l4 4 4-4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+    </div>
+    <div class="collapsible-body" id="checkinBody">
+      <div class="collapsible-inner">
+        <div class="checkin-row">
+          <div class="checkin-date" id="checkinDateFull">Not scheduled</div>
+          <button class="btn-link" onclick="scheduleCheckin()">Change</button>
+        </div>
+      </div>
     </div>
   </div>
 
 </main>
 
-<!-- Theory modal -->
-<div class="modal-overlay" id="theoryModal">
+<!-- Account modal -->
+<div class="modal-overlay" id="accountModal">
   <div class="modal">
-    <button class="modal-close" onclick="closeTheoryModal()">×</button>
-    <div class="modal-title" id="theoryModalTitle">Why this task?</div>
-    <div class="modal-theory" id="theoryModalText"></div>
+    <div class="modal-title">Account</div>
+    <div class="plan-info" id="planName">Anew Monthly</div>
+    <div class="plan-status" id="planStatus"></div>
+    <button class="btn-open-cancel" onclick="openCancelConfirm()">Cancel subscription</button>
   </div>
 </div>
 
-<!-- Cancel modal -->
+<!-- Cancel confirm modal -->
 <div class="modal-overlay" id="cancelModal">
   <div class="modal">
-    <div class="modal-title">サブスクリプションを解約しますか？</div>
-    <div class="modal-text">現在の期間終了まで引き続きご利用いただけます。データは90日間保持されます。</div>
+    <div class="modal-title">Cancel your subscription?</div>
+    <div class="modal-text">You'll continue to have access until the end of your current period. Your data will be retained for 90 days.</div>
     <div class="modal-actions">
-      <button class="btn-modal-cancel" onclick="closeCancelModal()">キャンセル</button>
-      <button class="btn-modal-confirm" id="confirmCancelBtn" onclick="confirmCancel()">解約する</button>
+      <button class="btn-modal-keep" onclick="closeCancelModal()">Keep subscription</button>
+      <button class="btn-modal-cancel" id="confirmCancelBtn" onclick="confirmCancel()">Cancel subscription</button>
     </div>
   </div>
 </div>
@@ -310,29 +349,34 @@
 <script>
   const SUPABASE_URL = 'https://hzkkftsihitkvdinydju.supabase.co';
   const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imh6a2tmdHNpaGl0a3ZkaW55ZGp1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzUyNzUyODksImV4cCI6MjA5MDg1MTI4OX0.D7QBobLt7JhMGJcNNhvlLvKjq2ysozYa2k9Z0Fj8ZGI';
-  let sbClient = null;
-  let currentUser = null;
-  let currentProject = null;
-  let chatMessages = [];
-  let chatStreaming = false;
 
-  const COACH_SYSTEM = `You are Anew, an AI relationship coach.
-STRICT RULES:
-- Only discuss topics related to the user's relationship recovery project.
-- Never answer questions unrelated to relationships, the user's project, or emotional wellbeing in the context of their relationship.
-- Never perform web searches, write code, or assist with tasks outside your scope.
-- If asked about unrelated topics, respond: 'I'm here to support your relationship recovery. Is there something about your project you'd like to talk through?'
-Persona: Warm, unhurried, supportive. Short responses. Ask one question at a time.`;
+  let sbClient = null, currentUser = null, currentProject = null;
+  let chatHistory = [], chatStreaming = false, checkinSessionId = null;
 
+  const CHECKIN_SYSTEM = `You are Anew, an AI relationship coach.
+The user has an active recovery project.
+Your role right now is to conduct a warm, focused weekly check-in.
+
+Ask about:
+- How the week's task went
+- How their partner responded
+- How they're feeling about the progress
+
+Keep responses short (1-3 sentences).
+Be warm, non-judgmental.
+Do not give unsolicited advice.
+Only discuss topics related to their relationship recovery.
+Never answer questions unrelated to relationships or their project.`;
+
+  // ── Init ──
   async function init() {
     try {
       sbClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-
       const { data: { session } } = await sbClient.auth.getSession();
       if (!session) { window.location.href = '/app.html'; return; }
       currentUser = session.user;
 
-      sbClient.auth.onAuthStateChange((event, s) => {
+      sbClient.auth.onAuthStateChange((event) => {
         if (event === 'SIGNED_OUT') window.location.href = '/app.html';
       });
 
@@ -345,10 +389,10 @@ Persona: Warm, unhurried, supportive. Short responses. Ask one question at a tim
 
   async function loadDashboard() {
     // Greeting
-    const days = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
-    document.getElementById('greetingDay').textContent = days[new Date().getDay()];
-    const email = currentUser.email;
-    document.getElementById('greetingName').textContent = `Welcome back${email ? ', ' + email.split('@')[0] : ''}.`;
+    const hour = new Date().getHours();
+    const period = hour < 12 ? 'morning' : hour < 17 ? 'afternoon' : 'evening';
+    const name = currentUser.email?.split('@')[0] || '';
+    document.getElementById('greeting').textContent = `Good ${period}${name ? ', ' + name : ''}.`;
 
     // Load project
     const { data: projects } = await sbClient
@@ -360,24 +404,24 @@ Persona: Warm, unhurried, supportive. Short responses. Ask one question at a tim
 
     if (projects && projects.length > 0) {
       currentProject = projects[0];
-      renderProject(currentProject);
+      renderProjectInfo(currentProject);
     }
 
     // Load subscription status
     const { data: userData } = await sbClient
       .from('users')
-      .select('subscription_status, stripe_subscription_id')
+      .select('subscription_status')
       .eq('id', currentUser.id)
       .single();
 
     if (userData) {
       document.getElementById('planStatus').textContent =
         userData.subscription_status === 'trial' ? '7-day free trial' :
-        userData.subscription_status === 'active' ? 'Active' :
+        userData.subscription_status === 'active' ? 'Active subscription' :
         userData.subscription_status === 'canceled' ? 'Canceled — access until period end' : '';
     }
 
-    // Load next check-in (via project, since checkins has no user_id)
+    // Load next check-in
     if (currentProject) {
       const { data: checkins } = await sbClient
         .from('checkins')
@@ -389,22 +433,26 @@ Persona: Warm, unhurried, supportive. Short responses. Ask one question at a tim
 
       if (checkins && checkins.length > 0) {
         const d = new Date(checkins[0].scheduled_at);
-        document.getElementById('checkinDate').textContent =
-          d.toLocaleDateString('en-US', { weekday:'long', month:'long', day:'numeric' }) +
-          ' at ' + d.toLocaleTimeString('en-US', { hour:'2-digit', minute:'2-digit' });
+        const str = d.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' }) +
+          ' at ' + d.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
+        document.getElementById('checkinValuePreview').textContent = d.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' });
+        document.getElementById('checkinDateFull').textContent = str;
       }
     }
 
-    // Start chat
-    addChatMessage('ai', "How are you doing with your project this week? Is there anything you'd like to work through together?");
+    // Create checkin session
+    await createCheckinSession();
 
+    // Show opening message and reveal content
     document.getElementById('loadingScreen').style.display = 'none';
     document.getElementById('mainContent').style.display = 'block';
+
+    const opening = "How did it go this week? Tell me what happened — even if it's hard to put into words.";
+    addMessage('ai', opening);
+    saveMessage('assistant', opening);
   }
 
-  function renderProject(project) {
-    if (!project) return;
-
+  function renderProjectInfo(project) {
     const startDate = new Date(project.started_at || project.created_at);
     const diffDays = Math.floor((Date.now() - startDate) / (1000 * 60 * 60 * 24));
     const weekIndex = Math.max(0, Math.floor(diffDays / 7));
@@ -412,144 +460,65 @@ Persona: Warm, unhurried, supportive. Short responses. Ask one question at a tim
     const phase = roadmap[Math.min(weekIndex, roadmap.length - 1)];
 
     if (phase) {
-      document.getElementById('focusCard').style.display = 'block';
-      document.getElementById('focusText').textContent = phase.focus;
-      document.getElementById('focusTheory').textContent = phase.theory_explanation || '';
-
-      // Tasks
-      if (phase.tasks && phase.tasks.length > 0) {
-        document.getElementById('tasksCard').style.display = 'block';
-        const list = document.getElementById('taskList');
-        list.innerHTML = '';
-        phase.tasks.forEach((task, i) => {
-          const item = document.createElement('div');
-          item.className = 'task-item';
-          item.innerHTML = `
-            <input type="checkbox" class="task-check" id="task-${i}" onchange="toggleTask(this, '${task.title}')">
-            <div class="task-body">
-              <div class="task-title">${task.title}</div>
-              <div class="task-freq">${task.frequency}</div>
-            </div>
-            <button class="task-info" onclick="openTheory('${escHtml(task.title)}','${escHtml(task.theory_basis || task.description)}')">ⓘ</button>
-          `;
-          list.appendChild(item);
-        });
-      }
-    }
-
-    // Roadmap
-    if (roadmap.length > 0) {
-      document.getElementById('roadmapCard').style.display = 'block';
-      const phases = document.getElementById('roadmapPhases');
-      phases.innerHTML = '';
-      roadmap.forEach((p, i) => {
-        const isCurrent = i === Math.min(weekIndex, roadmap.length - 1);
-        const div = document.createElement('div');
-        div.className = 'phase-item';
-        div.innerHTML = `
-          <div class="phase-header ${isCurrent ? 'current' : ''}" onclick="togglePhase(this)">
-            <div>
-              <div class="phase-week">${p.week_range}</div>
-              <div class="phase-focus">${p.focus}</div>
-            </div>
-            ${isCurrent ? '<span class="phase-badge">Current</span>' : ''}
-          </div>
-          <div class="phase-body ${isCurrent ? 'open' : ''}">
-            <p class="phase-theory">${p.theory}: ${p.theory_explanation}</p>
-            <div class="phase-tasks-list">
-              ${(p.tasks || []).map(t => `<div class="phase-task">${t.title}</div>`).join('')}
-            </div>
-          </div>
-        `;
-        phases.appendChild(div);
-      });
+      document.getElementById('focusCollapsible').style.display = 'block';
+      document.getElementById('focusValuePreview').textContent = phase.focus;
+      document.getElementById('focusFullText').textContent =
+        (phase.theory_explanation ? phase.theory + ': ' + phase.theory_explanation : phase.focus);
     }
   }
 
-  function togglePhase(header) {
-    const body = header.nextElementSibling;
-    body.classList.toggle('open');
-  }
-
-  function escHtml(str) {
-    return (str || '').replace(/'/g, "\\'").replace(/"/g, '&quot;');
-  }
-
-  async function toggleTask(checkbox, title) {
-    if (!sbClient || !currentUser || !currentProject) return;
-    await sbClient.from('actions').insert({
-      project_id: currentProject.id,
-      description: title,
-      status: checkbox.checked ? 'done' : 'pending',
-    });
-  }
-
-  function openTheory(title, text) {
-    document.getElementById('theoryModalTitle').textContent = title;
-    document.getElementById('theoryModalText').textContent = text;
-    document.getElementById('theoryModal').classList.add('open');
-  }
-  function closeTheoryModal() { document.getElementById('theoryModal').classList.remove('open'); }
-  document.getElementById('theoryModal').addEventListener('click', (e) => {
-    if (e.target === document.getElementById('theoryModal')) closeTheoryModal();
-  });
-
-  function openCancelModal() { document.getElementById('cancelModal').classList.add('open'); }
-  function closeCancelModal() { document.getElementById('cancelModal').classList.remove('open'); }
-  document.getElementById('cancelModal').addEventListener('click', (e) => {
-    if (e.target === document.getElementById('cancelModal')) closeCancelModal();
-  });
-
-  async function confirmCancel() {
-    const btn = document.getElementById('confirmCancelBtn');
-    btn.disabled = true; btn.textContent = '...';
+  async function createCheckinSession() {
     try {
-      const { data: { session } } = await sbClient.auth.getSession();
-      const res = await fetch('/api/cancel-subscription', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${session.access_token}`
-        }
-      });
-      if (!res.ok) throw new Error('Failed');
-      closeCancelModal();
-      document.getElementById('planStatus').textContent = 'Canceled — access until period end';
-    } catch (e) {
-      alert('Something went wrong. Please try again.');
-    } finally {
-      btn.disabled = false; btn.textContent = '解約する';
-    }
+      const { data, error } = await sbClient
+        .from('sessions')
+        .insert({ user_id: currentUser.id, type: 'checkin' })
+        .select('id')
+        .single();
+      if (!error && data) {
+        checkinSessionId = data.id;
+      }
+    } catch (_) {}
   }
 
-  function openCheckinModal() {
-    const dt = prompt('次のチェックイン日時を入力してください (YYYY-MM-DD HH:MM)');
-    if (!dt) return;
-    const d = new Date(dt);
-    if (isNaN(d)) { alert('日時の形式が正しくありません'); return; }
-    sbClient.from('checkins').insert({
-      user_id: currentUser.id,
-      scheduled_at: d.toISOString(),
-      reminder_sent: false,
-    }).then(() => {
-      document.getElementById('checkinDate').textContent =
-        d.toLocaleDateString('en-US', { weekday:'long', month:'long', day:'numeric' }) +
-        ' at ' + d.toLocaleTimeString('en-US', { hour:'2-digit', minute:'2-digit' });
-    });
+  async function saveMessage(role, content) {
+    if (!sbClient || !checkinSessionId) return;
+    try {
+      await sbClient.from('messages').insert({ session_id: checkinSessionId, role, content });
+    } catch (_) {}
   }
 
   // ── Chat ──
-  function addChatMessage(role, text) {
+  function addMessage(role, text) {
     const area = document.getElementById('chatMessages');
     const el = document.createElement('div');
-    el.className = role === 'ai' ? 'chat-msg-ai' : 'chat-msg-user';
-    el.textContent = text;
+    if (role === 'ai') {
+      el.className = 'msg-ai';
+      animateWords(el, text);
+    } else {
+      el.className = 'msg-user';
+      el.textContent = text;
+    }
     area.appendChild(el);
     area.scrollTop = area.scrollHeight;
-    if (role !== 'typing') {
-      chatMessages.push({ role: role === 'ai' ? 'assistant' : 'user', content: text });
-    }
+    chatHistory.push({ role: role === 'ai' ? 'assistant' : 'user', content: text });
     return el;
+  }
+
+  function animateWords(el, text) {
+    const words = text.split(' ');
+    el.innerHTML = '';
+    words.forEach((w, i) => {
+      const span = document.createElement('span');
+      span.className = 'word';
+      span.textContent = (i === 0 ? '' : ' ') + w;
+      el.appendChild(span);
+    });
+    let i = 0;
+    const spans = el.querySelectorAll('.word');
+    function showNext() {
+      if (i < spans.length) { spans[i].classList.add('visible'); i++; setTimeout(showNext, 22); }
+    }
+    showNext();
   }
 
   function showTyping() {
@@ -578,46 +547,124 @@ Persona: Warm, unhurried, supportive. Short responses. Ask one question at a tim
     chatStreaming = true;
     document.getElementById('chatSendBtn').disabled = true;
 
-    addChatMessage('user', text);
-
-    // Save to Supabase
-    if (sbClient && currentUser) {
-      const sessionId = localStorage.getItem('anew_session_id');
-      if (sessionId) {
-        await sbClient.from('messages').insert({ session_id: sessionId, role: 'user', content: text });
-      }
-    }
+    addMessage('user', text);
+    saveMessage('user', text);
 
     showTyping();
     try {
+      const systemPrompt = CHECKIN_SYSTEM +
+        (currentProject ? `\n\nUser's project: ${currentProject.project_title || ''}. Current focus: ${currentProject.roadmap?.[0]?.focus || ''}.` : '');
+
       const res = await fetch('/api/chat', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           model: 'claude-sonnet-4-6',
           max_tokens: 300,
-          system: COACH_SYSTEM + (currentProject ? `\n\nUser's project: ${currentProject.project_title}. Current focus: ${currentProject.roadmap?.[0]?.focus || ''}` : ''),
-          messages: chatMessages
+          system: systemPrompt,
+          messages: chatHistory
         })
       });
       if (!res.ok) throw new Error('API error');
       const data = await res.json();
       const reply = data.content[0].text;
       hideTyping();
-      addChatMessage('ai', reply);
-
-      if (sbClient && currentUser) {
-        const sessionId = localStorage.getItem('anew_session_id');
-        if (sessionId) {
-          await sbClient.from('messages').insert({ session_id: sessionId, role: 'assistant', content: reply });
-        }
-      }
+      addMessage('ai', reply);
+      saveMessage('assistant', reply);
     } catch (e) {
       hideTyping();
-      addChatMessage('ai', 'Something went wrong. Please try again.');
+      const area = document.getElementById('chatMessages');
+      const el = document.createElement('div');
+      el.className = 'msg-ai';
+      el.textContent = 'Something went wrong. Please try again.';
+      area.appendChild(el);
     } finally {
       chatStreaming = false;
       document.getElementById('chatSendBtn').disabled = false;
+    }
+  }
+
+  // ── Collapsibles ──
+  function toggleCollapsible(id) {
+    const body = document.getElementById(id + 'Body');
+    const chevron = document.getElementById(id + 'Chevron');
+    body.classList.toggle('open');
+    chevron.classList.toggle('open');
+  }
+
+  // ── Check-in scheduling ──
+  function scheduleCheckin() {
+    const dt = prompt('Enter date and time for your next check-in (YYYY-MM-DD HH:MM)');
+    if (!dt) return;
+    const d = new Date(dt);
+    if (isNaN(d)) { alert('Invalid date format. Please use YYYY-MM-DD HH:MM'); return; }
+    if (!currentProject) return;
+    sbClient.from('checkins').insert({
+      project_id: currentProject.id,
+      scheduled_at: d.toISOString()
+    }).then(() => {
+      const str = d.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' }) +
+        ' at ' + d.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
+      document.getElementById('checkinValuePreview').textContent = d.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' });
+      document.getElementById('checkinDateFull').textContent = str;
+    });
+  }
+
+  // ── Hamburger menu ──
+  function openMenu() {
+    document.getElementById('menuOverlay').classList.add('open');
+    document.getElementById('menuDrawer').classList.add('open');
+  }
+  function closeMenu() {
+    document.getElementById('menuOverlay').classList.remove('open');
+    document.getElementById('menuDrawer').classList.remove('open');
+  }
+  async function handleLogout() {
+    if (sbClient) await sbClient.auth.signOut();
+    window.location.href = '/app.html';
+  }
+
+  // ── Account / Cancel ──
+  function openAccountModal() {
+    document.getElementById('accountModal').classList.add('open');
+  }
+  function closeAccountModal() {
+    document.getElementById('accountModal').classList.remove('open');
+  }
+  document.getElementById('accountModal').addEventListener('click', (e) => {
+    if (e.target === document.getElementById('accountModal')) closeAccountModal();
+  });
+
+  function openCancelConfirm() {
+    closeAccountModal();
+    document.getElementById('cancelModal').classList.add('open');
+  }
+  function closeCancelModal() {
+    document.getElementById('cancelModal').classList.remove('open');
+  }
+  document.getElementById('cancelModal').addEventListener('click', (e) => {
+    if (e.target === document.getElementById('cancelModal')) closeCancelModal();
+  });
+
+  async function confirmCancel() {
+    const btn = document.getElementById('confirmCancelBtn');
+    btn.disabled = true; btn.textContent = '...';
+    try {
+      const { data: { session } } = await sbClient.auth.getSession();
+      const res = await fetch('/api/cancel-subscription', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${session.access_token}`
+        }
+      });
+      if (!res.ok) throw new Error('Failed');
+      closeCancelModal();
+      document.getElementById('planStatus').textContent = 'Canceled — access until period end';
+    } catch (e) {
+      alert('Something went wrong. Please try again.');
+    } finally {
+      btn.disabled = false; btn.textContent = 'Cancel subscription';
     }
   }
 

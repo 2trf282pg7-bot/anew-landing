@@ -17,19 +17,33 @@
     --section-alt: #F5EFE8;
   }
   html, body { min-height: 100dvh; font-family: 'DM Sans', sans-serif; background: var(--warm-white); color: var(--charcoal); }
+
+  /* NAV */
   .nav { position: fixed; top: 0; left: 0; right: 0; height: 56px; background: rgba(250,246,241,0.96); border-bottom: 1px solid var(--blush-deep); display: flex; align-items: center; justify-content: space-between; padding: 0 24px; z-index: 100; backdrop-filter: blur(4px); }
   .nav-logo { font-family: 'Cormorant Garamond', serif; font-size: 22px; font-weight: 400; color: var(--charcoal); letter-spacing: 0.08em; text-decoration: none; }
-  .nav-icons { display: flex; gap: 8px; }
-  .nav-icon { width: 40px; height: 40px; border-radius: 8px; border: none; background: none; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 18px; color: var(--stone); text-decoration: none; transition: background 0.2s ease, color 0.2s ease; }
-  .nav-icon:hover, .nav-icon.active { background: var(--section-alt); color: var(--clay); }
+  .nav-hamburger { width: 40px; height: 40px; border-radius: 8px; border: none; background: none; cursor: pointer; display: flex; align-items: center; justify-content: center; color: var(--stone); transition: background 0.2s ease, color 0.2s ease; }
+  .nav-hamburger:hover { background: var(--section-alt); color: var(--clay); }
+
+  /* MENU */
+  .menu-overlay { display: none; position: fixed; inset: 0; background: rgba(28,22,20,0.3); z-index: 999; }
+  .menu-overlay.open { display: block; }
+  .menu-drawer { position: fixed; right: 0; top: 0; width: 240px; height: 100vh; background: white; z-index: 1000; box-shadow: -4px 0 20px rgba(28,22,20,0.1); transform: translateX(100%); transition: transform 0.25s ease; display: flex; flex-direction: column; }
+  .menu-drawer.open { transform: translateX(0); }
+  .menu-item { display: block; padding: 16px 24px; font-family: 'DM Sans', sans-serif; font-size: 15px; color: var(--charcoal); border-bottom: 1px solid var(--blush-deep); text-decoration: none; background: none; border-left: none; border-right: none; border-top: none; cursor: pointer; text-align: left; width: 100%; transition: background 0.15s ease; }
+  .menu-item:hover { background: var(--section-alt); }
+  .menu-item.active { color: var(--clay); }
+  .menu-divider { height: 1px; background: var(--blush-deep); }
+  .menu-item-logout { color: var(--stone); border-bottom: none; margin-top: auto; }
+
+  /* MAIN */
   .main { max-width: 680px; margin: 0 auto; padding: 80px 24px 48px; }
   .page-title { font-family: 'Cormorant Garamond', serif; font-size: 30px; font-weight: 300; color: var(--charcoal); margin-bottom: 28px; }
+  .session-type-label { font-size: 10px; font-weight: 500; text-transform: uppercase; letter-spacing: 0.12em; color: var(--clay); margin-bottom: 4px; }
   .session-list { display: flex; flex-direction: column; gap: 16px; }
   .session-card { background: white; border-radius: 16px; padding: 24px 28px; box-shadow: 0 2px 16px rgba(28,22,20,0.06); cursor: pointer; transition: box-shadow 0.2s ease; }
   .session-card:hover { box-shadow: 0 4px 24px rgba(28,22,20,0.10); }
   .session-date { font-family: 'Cormorant Garamond', serif; font-size: 18px; color: var(--charcoal); margin-bottom: 4px; }
-  .session-overview { font-size: 14px; color: var(--stone); margin-bottom: 12px; }
-  .session-summary { font-size: 14px; color: var(--charcoal-soft); line-height: 1.65; }
+  .session-overview { font-size: 14px; color: var(--stone); }
   .session-body { display: none; margin-top: 16px; border-top: 1px solid var(--section-alt); padding-top: 16px; }
   .session-body.open { display: block; }
   .session-msg { margin-bottom: 12px; }
@@ -51,18 +65,23 @@
 
 <nav class="nav">
   <a href="/dashboard.html" class="nav-logo">Anew</a>
-  <div class="nav-icons">
-    <a href="/dashboard.html" class="nav-icon" title="Home">💬</a>
-    <a href="/project.html" class="nav-icon" title="Project">📋</a>
-    <a href="/history.html" class="nav-icon active" title="History">📖</a>
-  </div>
+  <button class="nav-hamburger" onclick="openMenu()" aria-label="Menu">
+    <svg width="20" height="14" viewBox="0 0 20 14" fill="none"><path d="M0 1h20M0 7h20M0 13h20" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+  </button>
 </nav>
+
+<div class="menu-overlay" id="menuOverlay" onclick="closeMenu()"></div>
+<div class="menu-drawer" id="menuDrawer">
+  <a href="/project.html" class="menu-item">My Project</a>
+  <a href="/history.html" class="menu-item active">Conversation History</a>
+  <a href="#" class="menu-item" onclick="closeMenu()">Account</a>
+  <div class="menu-divider"></div>
+  <button class="menu-item menu-item-logout" onclick="handleLogout()">Log out</button>
+</div>
 
 <main class="main">
   <h1 class="page-title">Conversation history</h1>
-  <div class="session-list" id="sessionList">
-    <!-- Sessions rendered by JS -->
-  </div>
+  <div class="session-list" id="sessionList"></div>
 </main>
 
 <script>
@@ -76,25 +95,21 @@
       const { data: { session } } = await sbClient.auth.getSession();
       if (!session) { window.location.href = '/app.html'; return; }
       currentUser = session.user;
+      sbClient.auth.onAuthStateChange((event) => {
+        if (event === 'SIGNED_OUT') window.location.href = '/app.html';
+      });
       await loadHistory();
     } catch (e) { window.location.href = '/app.html'; }
   }
 
   async function loadHistory() {
-    // sessions has no user_id; look up via users.session_id
-    const { data: userData } = await sbClient
-      .from('users')
-      .select('session_id')
-      .eq('id', currentUser.id)
-      .single();
-
-    const sessionId = userData?.session_id;
-    const sessions = sessionId
-      ? (await sbClient.from('sessions').select('id, created_at').eq('id', sessionId)).data
-      : null;
+    const { data: sessions } = await sbClient
+      .from('sessions')
+      .select('id, created_at, type')
+      .eq('user_id', currentUser.id)
+      .order('created_at', { ascending: false });
 
     document.getElementById('loadingScreen').style.display = 'none';
-
     const list = document.getElementById('sessionList');
 
     if (!sessions || sessions.length === 0) {
@@ -102,8 +117,7 @@
         <div class="empty-state">
           <div class="empty-title">No conversations yet.</div>
           <div class="empty-sub">Your sessions will appear here once you start talking with Anew.</div>
-        </div>
-      `;
+        </div>`;
       return;
     }
 
@@ -111,9 +125,11 @@
     sessions.forEach(session => {
       const d = new Date(session.created_at);
       const dateStr = d.toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+      const typeLabel = session.type === 'checkin' ? 'Weekly Check-in' : 'Onboarding';
       const card = document.createElement('div');
       card.className = 'session-card';
       card.innerHTML = `
+        <div class="session-type-label">${typeLabel}</div>
         <div class="session-date">${dateStr}</div>
         <div class="session-overview">Conversation with Anew</div>
         <div class="session-body" id="body-${session.id}"></div>
@@ -126,18 +142,9 @@
   async function toggleSession(sessionId) {
     const body = document.getElementById('body-' + sessionId);
     if (!body) return;
+    if (body.classList.contains('open')) { body.classList.remove('open'); return; }
+    if (body.dataset.loaded) { body.classList.add('open'); return; }
 
-    if (body.classList.contains('open')) {
-      body.classList.remove('open');
-      return;
-    }
-
-    if (body.dataset.loaded) {
-      body.classList.add('open');
-      return;
-    }
-
-    // Load messages
     const { data: msgs } = await sbClient
       .from('messages')
       .select('role, content, created_at')
@@ -154,13 +161,25 @@
         </div>
       `).join('');
     }
-
     body.dataset.loaded = '1';
     body.classList.add('open');
   }
 
   function escHtml(str) {
     return (str || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  }
+
+  function openMenu() {
+    document.getElementById('menuOverlay').classList.add('open');
+    document.getElementById('menuDrawer').classList.add('open');
+  }
+  function closeMenu() {
+    document.getElementById('menuOverlay').classList.remove('open');
+    document.getElementById('menuDrawer').classList.remove('open');
+  }
+  async function handleLogout() {
+    if (sbClient) await sbClient.auth.signOut();
+    window.location.href = '/app.html';
   }
 
   init();
