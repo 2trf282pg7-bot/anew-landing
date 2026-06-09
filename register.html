@@ -68,8 +68,8 @@
     <div id="successState" style="display:none" class="success-state">
       <div class="success-icon">🎉</div>
       <div class="success-title">Account created</div>
-      <div class="success-text">Generating your 90-day recovery project. Please wait a moment.</div>
-      <a href="/dashboard.html" class="btn-next">Go to dashboard</a>
+      <div class="success-text">Your account is ready. Taking you to your recovery project now.</div>
+      <a href="/project-setup.html" class="btn-next">Continue</a>
     </div>
 
   </div>
@@ -150,28 +150,10 @@
       } catch (_) {}
     }
 
-    // Trigger project generation in background
-    if (onboardingSessionId) {
-      try {
-        await fetch('/api/generate-project', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${session.access_token}`
-          },
-          body: JSON.stringify({
-            session_id: onboardingSessionId,
-            user_id: session.user.id
-          })
-        });
-        localStorage.removeItem('anew_onboarding_session_id');
-      } catch (_) {}
-    }
-
     document.getElementById('registerForm').style.display = 'none';
     document.getElementById('successState').style.display = 'block';
 
-    setTimeout(() => { window.location.href = '/dashboard.html'; }, 2000);
+    setTimeout(() => { window.location.href = '/project-setup.html'; }, 1500);
   }
 
   function showError(msg) {

@@ -4,7 +4,7 @@ const { createClient } = require('@supabase/supabase-js');
 module.exports = async (req, res) => {
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
 
-  const { session_id, user_id } = req.body;
+  const { session_id, user_id, adjustment_note } = req.body;
   if (!session_id) return res.status(400).json({ error: 'session_id required' });
 
   const supabase = createClient(
@@ -13,7 +13,6 @@ module.exports = async (req, res) => {
   );
 
   try {
-    // 1. Fetch all messages for the session
     const { data: msgs, error: msgErr } = await supabase
       .from('messages')
       .select('role, content')
@@ -27,16 +26,19 @@ module.exports = async (req, res) => {
       .map(m => `${m.role === 'assistant' ? 'Anew' : 'User'}: ${m.content}`)
       .join('\n');
 
-    // 2. Call Claude API
+    const adjustmentSection = adjustment_note
+      ? `\n\nThe user has reviewed a previous version and requested the following changes:\n"${adjustment_note}"\nIncorporate these changes into the new plan.`
+      : '';
+
     const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
     const response = await client.messages.create({
-      model: 'claude-sonnet-4-20250514',
+      model: 'claude-sonnet-4-6',
       max_tokens: 4096,
       messages: [{
         role: 'user',
         content: `You are an expert relationship therapist using evidence-based methods including Gottman Method, EFT, MI, Sensate Focus, CBT, and IBCT.
 
-Based on the conversation below, create a personalized 90-day recovery project.
+Based on the conversation below, create a personalized 90-day recovery project.${adjustmentSection}
 
 Conversation:
 ${conversation}
@@ -61,7 +63,7 @@ Output JSON only, no other text:
           "title": "string",
           "description": "string",
           "frequency": "daily|weekly|once",
-          "theory_basis": "string (shown when user taps info)"
+          "theory_basis": "string"
         }
       ]
     }
@@ -80,15 +82,15 @@ Output JSON only, no other text:
     if (!jsonMatch) throw new Error('No JSON in response');
     const project = JSON.parse(jsonMatch[0]);
 
-    // 3. Save to projects table
     const insertData = {
-      session_id,
       user_id: user_id || null,
       pattern_analysis: project.pattern_analysis,
+      recovery_plan: {
+        roadmap: project.roadmap,
+        first_week_task: project.first_week_task,
+      },
       project_title: project.project_title,
       project_summary: project.project_summary,
-      roadmap: project.roadmap,
-      first_week_task: project.first_week_task,
       status: 'pending',
     };
 

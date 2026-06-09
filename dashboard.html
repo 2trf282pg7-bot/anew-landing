@@ -258,6 +258,7 @@
 <div class="menu-overlay" id="menuOverlay" onclick="closeMenu()"></div>
 <div class="menu-drawer" id="menuDrawer">
   <a href="/project.html" class="menu-item">My Project</a>
+  <a href="/project-review.html" class="menu-item">Review project</a>
   <a href="/history.html" class="menu-item">Conversation History</a>
   <a href="#" class="menu-item" onclick="openAccountModal(); closeMenu();">Account</a>
   <div class="menu-divider"></div>
@@ -448,7 +449,7 @@ Never answer questions unrelated to relationships or their project.`;
     document.getElementById('mainContent').style.display = 'block';
 
     const opening = "How did it go this week? Tell me what happened — even if it's hard to put into words.";
-    addMessage('ai', opening);
+    addMessage('ai', opening, false);
     saveMessage('assistant', opening);
   }
 
@@ -456,7 +457,7 @@ Never answer questions unrelated to relationships or their project.`;
     const startDate = new Date(project.started_at || project.created_at);
     const diffDays = Math.floor((Date.now() - startDate) / (1000 * 60 * 60 * 24));
     const weekIndex = Math.max(0, Math.floor(diffDays / 7));
-    const roadmap = project.roadmap || [];
+    const roadmap = project.recovery_plan?.roadmap || project.roadmap || [];
     const phase = roadmap[Math.min(weekIndex, roadmap.length - 1)];
 
     if (phase) {
@@ -488,7 +489,7 @@ Never answer questions unrelated to relationships or their project.`;
   }
 
   // ── Chat ──
-  function addMessage(role, text) {
+  function addMessage(role, text, addToHistory = true) {
     const area = document.getElementById('chatMessages');
     const el = document.createElement('div');
     if (role === 'ai') {
@@ -500,7 +501,7 @@ Never answer questions unrelated to relationships or their project.`;
     }
     area.appendChild(el);
     area.scrollTop = area.scrollHeight;
-    chatHistory.push({ role: role === 'ai' ? 'assistant' : 'user', content: text });
+    if (addToHistory) chatHistory.push({ role: role === 'ai' ? 'assistant' : 'user', content: text });
     return el;
   }
 
@@ -539,6 +540,20 @@ Never answer questions unrelated to relationships or their project.`;
     this.style.height = Math.min(this.scrollHeight, 100) + 'px';
   });
 
+  async function callAPI(sys, hist) {
+    const res = await fetch('/api/chat', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ model: 'claude-sonnet-4-6', max_tokens: 300, system: sys, messages: hist })
+    });
+    if (!res.ok) {
+      const errData = await res.json().catch(() => ({}));
+      throw new Error(errData.error || `API error ${res.status}`);
+    }
+    const data = await res.json();
+    return data.content[0].text;
+  }
+
   async function sendChat() {
     const input = document.getElementById('chatInput');
     const text = input.value.trim();
@@ -552,22 +567,10 @@ Never answer questions unrelated to relationships or their project.`;
 
     showTyping();
     try {
+      const roadmap = currentProject?.recovery_plan?.roadmap || currentProject?.roadmap || [];
       const systemPrompt = CHECKIN_SYSTEM +
-        (currentProject ? `\n\nUser's project: ${currentProject.project_title || ''}. Current focus: ${currentProject.roadmap?.[0]?.focus || ''}.` : '');
-
-      const res = await fetch('/api/chat', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          model: 'claude-sonnet-4-6',
-          max_tokens: 300,
-          system: systemPrompt,
-          messages: chatHistory
-        })
-      });
-      if (!res.ok) throw new Error('API error');
-      const data = await res.json();
-      const reply = data.content[0].text;
+        (currentProject ? `\n\nUser's project: "${currentProject.project_title || ''}". Current focus: "${roadmap[0]?.focus || ''}".` : '');
+      const reply = await callAPI(systemPrompt, chatHistory);
       hideTyping();
       addMessage('ai', reply);
       saveMessage('assistant', reply);
@@ -578,6 +581,7 @@ Never answer questions unrelated to relationships or their project.`;
       el.className = 'msg-ai';
       el.textContent = 'Something went wrong. Please try again.';
       area.appendChild(el);
+      console.error('[Anew] chat error:', e.message);
     } finally {
       chatStreaming = false;
       document.getElementById('chatSendBtn').disabled = false;
