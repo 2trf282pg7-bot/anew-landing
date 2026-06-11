@@ -267,7 +267,7 @@
     const startDate = new Date(project.started_at || project.created_at);
     const diffDays = Math.floor((Date.now() - startDate) / (1000 * 60 * 60 * 24));
     const weekIndex = Math.max(0, Math.floor(diffDays / 7));
-    const roadmap = project.roadmap || [];
+    const roadmap = project.recovery_plan?.roadmap || project.roadmap || [];
     const phase = roadmap[Math.min(weekIndex, roadmap.length - 1)];
 
     document.getElementById('progressCard').style.display = 'block';

@@ -420,6 +420,13 @@ Never answer questions unrelated to relationships or their project.`;
         userData.subscription_status === 'trial' ? '7-day free trial' :
         userData.subscription_status === 'active' ? 'Active subscription' :
         userData.subscription_status === 'canceled' ? 'Canceled — access until period end' : '';
+
+      // Allow active, trial, and canceled users; redirect others
+      const allowed = ['active', 'trial', 'canceled'];
+      if (userData.subscription_status && !allowed.includes(userData.subscription_status)) {
+        window.location.href = '/app.html';
+        return;
+      }
     }
 
     // Load next check-in
@@ -568,8 +575,13 @@ Never answer questions unrelated to relationships or their project.`;
     showTyping();
     try {
       const roadmap = currentProject?.recovery_plan?.roadmap || currentProject?.roadmap || [];
+      const diffDays = currentProject
+        ? Math.floor((Date.now() - new Date(currentProject.started_at || currentProject.created_at)) / (1000 * 60 * 60 * 24))
+        : 0;
+      const weekIndex = Math.max(0, Math.floor(diffDays / 7));
+      const phase = roadmap[Math.min(weekIndex, roadmap.length - 1)];
       const systemPrompt = CHECKIN_SYSTEM +
-        (currentProject ? `\n\nUser's project: "${currentProject.project_title || ''}". Current focus: "${roadmap[0]?.focus || ''}".` : '');
+        (currentProject ? `\n\nUser's project: "${currentProject.project_title || ''}". Current focus: "${phase?.focus || ''}".` : '');
       const reply = await callAPI(systemPrompt, chatHistory);
       hideTyping();
       addMessage('ai', reply);

@@ -6,6 +6,10 @@ module.exports = async (req, res) => {
   const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
   const { session_id } = req.body;
 
+  const origin = req.headers.origin
+    || req.headers.referer?.replace(/\/[^/]*$/, '')
+    || 'https://anewapp.net';
+
   try {
     const session = await stripe.checkout.sessions.create({
       mode: 'subscription',
@@ -24,8 +28,8 @@ module.exports = async (req, res) => {
         metadata: { anew_session_id: session_id || '' },
       },
       metadata: { anew_session_id: session_id || '' },
-      success_url: `${process.env.NEXT_PUBLIC_BASE_URL || 'https://anewapp.net'}/register.html?session_id={CHECKOUT_SESSION_ID}`,
-      cancel_url: `${process.env.NEXT_PUBLIC_BASE_URL || 'https://anewapp.net'}/onboarding.html`,
+      success_url: `${origin}/register.html?session_id={CHECKOUT_SESSION_ID}`,
+      cancel_url: `${origin}/onboarding.html`,
     });
 
     res.status(200).json({ url: session.url });

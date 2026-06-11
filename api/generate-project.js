@@ -33,7 +33,7 @@ module.exports = async (req, res) => {
     const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
     const response = await client.messages.create({
       model: 'claude-sonnet-4-6',
-      max_tokens: 4096,
+      max_tokens: 8192,
       messages: [{
         role: 'user',
         content: `You are an expert relationship therapist using evidence-based methods including Gottman Method, EFT, MI, Sensate Focus, CBT, and IBCT.
