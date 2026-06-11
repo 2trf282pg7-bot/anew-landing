@@ -707,19 +707,22 @@ SAFETY PROTOCOL: If the user mentions self-harm, suicidal thoughts, abuse, or vi
     }
   }
 
-  // Past-due recovery: send the user back through checkout to refresh billing (item 25)
+  // Past-due recovery: open the Stripe Billing Portal to update payment (item 25)
   async function updatePayment() {
     const btn = document.getElementById('payDueBtn');
     btn.disabled = true; btn.textContent = 'Opening…';
     try {
-      const res = await fetch('/api/create-checkout-session', {
+      const { data: { session } } = await sbClient.auth.getSession();
+      const res = await fetch('/api/billing-portal', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({})
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${session.access_token}`
+        }
       });
       const data = await res.json();
       if (data.url) { window.location.href = data.url; return; }
-      throw new Error('No checkout URL');
+      throw new Error('No portal URL');
     } catch (e) {
       btn.disabled = false; btn.textContent = 'Update payment method';
       document.getElementById('payDueBanner').querySelector('.paydue-text').textContent =

@@ -5,6 +5,17 @@ module.exports = async (req, res) => {
     return res.status(405).json({ error: 'Method not allowed' });
   }
 
+  // Guard against public invocation. Vercel sends this header for cron jobs when
+  // CRON_SECRET is set. If it isn't set, the endpoint stays locked.
+  const CRON_SECRET = process.env.CRON_SECRET;
+  if (CRON_SECRET) {
+    if (req.headers.authorization !== `Bearer ${CRON_SECRET}`) {
+      return res.status(401).json({ error: 'Unauthorized' });
+    }
+  } else {
+    return res.status(401).json({ error: 'CRON_SECRET not configured' });
+  }
+
   const supabase = createClient(
     process.env.SUPABASE_URL,
     process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_ANON_KEY
@@ -200,6 +211,9 @@ module.exports = async (req, res) => {
 
 /*
   ── Manual test (item 14) ──
+  0. Set CRON_SECRET. Requests must carry `Authorization: Bearer <CRON_SECRET>`,
+     otherwise 401 (this is what Vercel cron sends automatically). With no
+     CRON_SECRET set, the endpoint is locked (401) by design.
   1. Insert a `users` row: subscription_status='trial', trial_started_at = now()-interval '3 days',
      trial_day3_sent=false, with an active project. Hit GET /api/send-reminder.
      Expect a Day-3 email and trial_day3_sent flips to true; a second run sends nothing.
