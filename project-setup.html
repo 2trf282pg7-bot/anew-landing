@@ -227,7 +227,20 @@
     document.getElementById('mainContent').style.display = 'none';
     document.getElementById('errorView').style.display = 'none';
 
-    const sessionId = localStorage.getItem('anew_onboarding_session_id') || localStorage.getItem('anew_session_id');
+    let sessionId = localStorage.getItem('anew_onboarding_session_id') || localStorage.getItem('anew_session_id');
+    // Fallback for cross-device / cleared localStorage: postRegisterFlow links the
+    // onboarding session to the user, so look up their latest session by user_id.
+    if (!sessionId) {
+      try {
+        const { data } = await sbClient
+          .from('sessions')
+          .select('id')
+          .eq('user_id', currentUser.id)
+          .order('created_at', { ascending: false })
+          .limit(1);
+        if (data && data.length) sessionId = data[0].id;
+      } catch (_) {}
+    }
     if (!sessionId) {
       showError('No onboarding session found. Please complete the onboarding first.');
       return;
@@ -250,8 +263,11 @@
       });
 
       if (!res.ok) {
-        const errData = await res.json().catch(() => ({}));
-        throw new Error(errData.error || `Error ${res.status}`);
+        // Surface the server's actual error text so testers can see the cause.
+        let serverMsg = '';
+        try { serverMsg = (await res.json()).error || ''; }
+        catch (_) { try { serverMsg = await res.text(); } catch (_) {} }
+        throw new Error(serverMsg || `Error ${res.status}`);
       }
 
       const result = await res.json();

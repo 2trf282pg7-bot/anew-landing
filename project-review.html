@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, interactive-widget=resizes-content">
 <title>Anew — Review Your Project</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -453,6 +453,16 @@ ${phase?.theory_explanation ? 'Theory context: ' + phase.theory_explanation : ''
       this.style.height = 'auto';
       this.style.height = Math.min(this.scrollHeight, 100) + 'px';
     });
+
+    // iOS keyboard (items 15-16): keep the focused chat input above the keyboard
+    const keepInputVisible = () => {
+      const input = document.getElementById('chatInput');
+      if (input && document.activeElement === input) {
+        input.scrollIntoView({ block: 'center', behavior: 'smooth' });
+      }
+    };
+    if (window.visualViewport) window.visualViewport.addEventListener('resize', keepInputVisible);
+    document.getElementById('chatInput').addEventListener('focus', () => setTimeout(keepInputVisible, 250));
   });
 
   init();

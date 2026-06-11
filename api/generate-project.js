@@ -112,8 +112,17 @@ module.exports = async (req, res) => {
 
     const raw = response.content[0].text;
     const jsonMatch = raw.match(/\{[\s\S]*\}/);
-    if (!jsonMatch) throw new Error('No JSON in response');
-    const project = JSON.parse(jsonMatch[0]);
+    if (!jsonMatch) {
+      console.error('[generate-project] Model output contained no JSON object. Raw model text:\n' + raw);
+      throw new Error('The model did not return a usable project. Please try again.');
+    }
+    let project;
+    try {
+      project = JSON.parse(jsonMatch[0]);
+    } catch (parseErr) {
+      console.error('[generate-project] Failed to parse model JSON (' + parseErr.message + '). Raw model text:\n' + raw);
+      throw new Error('The model returned malformed data. Please try again.');
+    }
 
     // ── Gate handling (items 1-3): refer / needs_more are returned, never saved ──
     if (project.status === 'refer') {
