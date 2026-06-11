@@ -96,6 +96,20 @@
   .error-title { font-family: 'Cormorant Garamond', serif; font-size: 22px; color: var(--charcoal); margin-bottom: 8px; }
   .error-text { font-size: 14px; color: var(--charcoal-soft); margin-bottom: 16px; }
   .btn-retry { background: var(--clay); color: white; border: none; border-radius: 6px; padding: 12px 24px; font-size: 13px; cursor: pointer; }
+
+  /* Gentle guidance cards (needs_more / refer) */
+  .guide-card { background: white; border-radius: 16px; padding: 32px 28px; box-shadow: 0 2px 16px rgba(28,22,20,0.06); }
+  .guide-eyebrow { font-size: 10px; font-weight: 500; text-transform: uppercase; letter-spacing: 0.14em; color: var(--clay); margin-bottom: 12px; }
+  .guide-title { font-family: 'Cormorant Garamond', serif; font-size: 26px; font-weight: 300; color: var(--charcoal); line-height: 1.3; margin-bottom: 14px; }
+  .guide-text { font-size: 15px; color: var(--charcoal-soft); line-height: 1.7; margin-bottom: 20px; }
+  .guide-questions { display: flex; flex-direction: column; gap: 12px; margin-bottom: 26px; }
+  .guide-question { background: var(--section-alt); border-left: 3px solid var(--blush-deep); border-radius: 8px; padding: 14px 16px; font-family: 'Cormorant Garamond', serif; font-size: 17px; color: var(--charcoal); line-height: 1.5; }
+  .btn-guide { display: block; width: 100%; background: var(--clay); color: white; font-family: 'DM Sans', sans-serif; font-size: 12px; font-weight: 500; text-transform: uppercase; letter-spacing: 0.12em; padding: 18px; border-radius: 8px; border: none; cursor: pointer; text-align: center; text-decoration: none; min-height: 44px; transition: background 0.2s ease; }
+  .btn-guide:hover { background: var(--clay-dark); }
+  .refer-resources { display: flex; flex-direction: column; gap: 10px; margin-top: 4px; }
+  .refer-resource { background: var(--section-alt); border-radius: 8px; padding: 14px 16px; }
+  .refer-resource-name { font-size: 13px; font-weight: 500; color: var(--charcoal); margin-bottom: 2px; }
+  .refer-resource-contact { font-size: 15px; color: var(--clay-dark); letter-spacing: 0.02em; }
 </style>
 </head>
 <body>
@@ -150,6 +164,25 @@
       <div class="error-title">Something went wrong</div>
       <div class="error-text" id="errorText">We couldn't generate your project. Please try again.</div>
       <button class="btn-retry" onclick="generateProject()">Try again</button>
+    </div>
+  </div>
+
+  <div id="needsMoreView" style="display:none">
+    <div class="guide-card">
+      <div class="guide-eyebrow">Before I build your project</div>
+      <div class="guide-title">I want to understand a little more first</div>
+      <div class="guide-text">There are a couple of things I'd love to hear more about, so the project I build truly fits your situation — not a generic one.</div>
+      <div class="guide-questions" id="needsMoreQuestions"></div>
+      <a href="/dashboard.html" class="btn-guide">Continue the conversation</a>
+    </div>
+  </div>
+
+  <div id="referView" style="display:none">
+    <div class="guide-card">
+      <div class="guide-eyebrow">A note from Anew</div>
+      <div class="guide-title">Thank you for trusting me with this</div>
+      <div class="guide-text" id="referMessage"></div>
+      <div class="refer-resources" id="referResources"></div>
     </div>
   </div>
 
@@ -221,12 +254,53 @@
         throw new Error(errData.error || `Error ${res.status}`);
       }
 
-      currentProject = await res.json();
+      const result = await res.json();
+
+      // Gate branches (item 4) — shown as warm cards, never as errors
+      if (result.status === 'needs_more') { showNeedsMore(result.questions || []); return; }
+      if (result.status === 'refer') { showRefer(result); return; }
+
+      currentProject = result;
       renderProject(currentProject);
     } catch (e) {
       console.error('[Anew] generate-project error:', e);
       showError(e.message);
     }
+  }
+
+  function showNeedsMore(questions) {
+    const box = document.getElementById('needsMoreQuestions');
+    box.innerHTML = '';
+    questions.forEach(q => {
+      const el = document.createElement('div');
+      el.className = 'guide-question';
+      el.textContent = q;
+      box.appendChild(el);
+    });
+    document.getElementById('loadingScreen').style.display = 'none';
+    document.getElementById('mainContent').style.display = 'block';
+    document.getElementById('projectView').style.display = 'none';
+    document.getElementById('errorView').style.display = 'none';
+    document.getElementById('referView').style.display = 'none';
+    document.getElementById('needsMoreView').style.display = 'block';
+  }
+
+  function showRefer(result) {
+    document.getElementById('referMessage').textContent = result.message || '';
+    const box = document.getElementById('referResources');
+    box.innerHTML = '';
+    (result.resources || []).forEach(r => {
+      const el = document.createElement('div');
+      el.className = 'refer-resource';
+      el.innerHTML = `<div class="refer-resource-name">${esc(r.name)}</div><div class="refer-resource-contact">${esc(r.contact)}</div>`;
+      box.appendChild(el);
+    });
+    document.getElementById('loadingScreen').style.display = 'none';
+    document.getElementById('mainContent').style.display = 'block';
+    document.getElementById('projectView').style.display = 'none';
+    document.getElementById('errorView').style.display = 'none';
+    document.getElementById('needsMoreView').style.display = 'none';
+    document.getElementById('referView').style.display = 'block';
   }
 
   function renderProject(project) {
@@ -275,6 +349,9 @@
 
     document.getElementById('loadingScreen').style.display = 'none';
     document.getElementById('mainContent').style.display = 'block';
+    document.getElementById('errorView').style.display = 'none';
+    document.getElementById('needsMoreView').style.display = 'none';
+    document.getElementById('referView').style.display = 'none';
     document.getElementById('projectView').style.display = 'block';
   }
 
@@ -380,6 +457,18 @@
   });
 
   init();
+
+  /*
+    ── Manual test (item 4) ──
+    1. Sparse onboarding session -> generate-project returns status:"needs_more".
+       Expect the warm "I want to understand a little more first" card with the
+       returned questions and a "Continue the conversation" button to /dashboard.html.
+       It must NOT look like an error and must NOT show a retry button.
+    2. Onboarding mentioning self-harm/violence -> status:"refer".
+       Expect the calm "Thank you for trusting me with this" card with the message
+       and resource list (name + contact). No retry button.
+    3. Sufficient session -> status:"ok" renders the project as before.
+  */
 </script>
 </body>
 </html>

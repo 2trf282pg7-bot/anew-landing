@@ -240,6 +240,14 @@
   .plan-status { font-size: 12px; color: var(--stone); margin-bottom: 20px; }
   .btn-open-cancel { font-size: 13px; color: var(--stone); background: none; border: 1px solid var(--blush-deep); border-radius: 6px; padding: 10px 16px; cursor: pointer; transition: color 0.2s ease, border-color 0.2s ease; }
   .btn-open-cancel:hover { color: var(--clay-dark); border-color: var(--clay-dark); }
+
+  /* Past-due payment banner (item 25) */
+  .paydue-banner { background: rgba(184,112,78,0.08); border: 1px solid var(--blush-deep); border-radius: 12px; padding: 18px 20px; margin-bottom: 24px; }
+  .paydue-title { font-family: 'Cormorant Garamond', serif; font-size: 19px; color: var(--charcoal); margin-bottom: 6px; }
+  .paydue-text { font-size: 14px; color: var(--charcoal-soft); line-height: 1.6; margin-bottom: 14px; }
+  .btn-paydue { display: inline-block; background: var(--clay); color: white; font-size: 12px; font-weight: 500; text-transform: uppercase; letter-spacing: 0.1em; padding: 13px 20px; min-height: 44px; border: none; border-radius: 8px; cursor: pointer; transition: background 0.2s ease; }
+  .btn-paydue:hover { background: var(--clay-dark); }
+  .btn-paydue:disabled { background: var(--blush-deep); cursor: not-allowed; }
 </style>
 </head>
 <body>
@@ -269,6 +277,13 @@
 
   <!-- Greeting -->
   <div class="greeting" id="greeting">Good morning.</div>
+
+  <!-- Past-due payment notice (item 25) -->
+  <div class="paydue-banner" id="payDueBanner" style="display:none">
+    <div class="paydue-title">There was a problem with your last payment</div>
+    <div class="paydue-text">Your access is still here for now. To keep it going, please update your payment method — it only takes a moment.</div>
+    <button class="btn-paydue" id="payDueBtn" onclick="updatePayment()">Update payment method</button>
+  </div>
 
   <!-- Weekly check-in -->
   <div class="section-label">Your weekly check-in</div>
@@ -367,7 +382,9 @@ Keep responses short (1-3 sentences).
 Be warm, non-judgmental.
 Do not give unsolicited advice.
 Only discuss topics related to their relationship recovery.
-Never answer questions unrelated to relationships or their project.`;
+Never answer questions unrelated to relationships or their project.
+
+SAFETY PROTOCOL: If the user mentions self-harm, suicidal thoughts, abuse, or violence, stop the regular flow. Respond with warmth, do not minimize, and share: 988 Suicide & Crisis Lifeline (call/text 988) or the National Domestic Violence Hotline (1-800-799-7233), whichever fits. Encourage reaching out to a professional. Do not return to task discussion in the same message.`;
 
   // ── Init ──
   async function init() {
@@ -419,10 +436,16 @@ Never answer questions unrelated to relationships or their project.`;
       document.getElementById('planStatus').textContent =
         userData.subscription_status === 'trial' ? '7-day free trial' :
         userData.subscription_status === 'active' ? 'Active subscription' :
+        userData.subscription_status === 'past_due' ? 'Payment needs attention' :
         userData.subscription_status === 'canceled' ? 'Canceled — access until period end' : '';
 
-      // Allow active, trial, and canceled users; redirect others
-      const allowed = ['active', 'trial', 'canceled'];
+      // past_due keeps grace access but sees a payment-update banner (item 25)
+      if (userData.subscription_status === 'past_due') {
+        document.getElementById('payDueBanner').style.display = 'block';
+      }
+
+      // Allow active, trial, canceled, and past_due (grace); redirect others
+      const allowed = ['active', 'trial', 'canceled', 'past_due'];
       if (userData.subscription_status && !allowed.includes(userData.subscription_status)) {
         window.location.href = '/app.html';
         return;
@@ -681,6 +704,26 @@ Never answer questions unrelated to relationships or their project.`;
       alert('Something went wrong. Please try again.');
     } finally {
       btn.disabled = false; btn.textContent = 'Cancel subscription';
+    }
+  }
+
+  // Past-due recovery: send the user back through checkout to refresh billing (item 25)
+  async function updatePayment() {
+    const btn = document.getElementById('payDueBtn');
+    btn.disabled = true; btn.textContent = 'Opening…';
+    try {
+      const res = await fetch('/api/create-checkout-session', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({})
+      });
+      const data = await res.json();
+      if (data.url) { window.location.href = data.url; return; }
+      throw new Error('No checkout URL');
+    } catch (e) {
+      btn.disabled = false; btn.textContent = 'Update payment method';
+      document.getElementById('payDueBanner').querySelector('.paydue-text').textContent =
+        'We couldn\'t open the payment page just now. Please try again in a moment.';
     }
   }
 

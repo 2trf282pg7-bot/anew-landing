@@ -36,6 +36,7 @@ module.exports = async (req, res) => {
       stripe_customer_id: customerId,
       stripe_subscription_id: subscriptionId,
       subscription_status: 'trial',
+      trial_started_at: new Date().toISOString(),
       updated_at: new Date().toISOString(),
     }, { onConflict: 'id' });
 

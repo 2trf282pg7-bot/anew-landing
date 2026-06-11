@@ -37,7 +37,17 @@ module.exports = async (req, res) => {
     return r.json();
   }
 
-  const results = { task_reminders: 0, checkin_reminders: 0, errors: [] };
+  const results = { task_reminders: 0, checkin_reminders: 0, trial_day3: 0, trial_day6: 0, errors: [] };
+
+  const emailShell = (inner) =>
+    `<!DOCTYPE html><html><body style="font-family:'DM Sans',sans-serif;background:#FAF6F1;margin:0;padding:32px">
+<div style="max-width:480px;margin:0 auto;background:white;border-radius:12px;padding:32px">
+  <h1 style="font-family:'Cormorant Garamond',serif;font-weight:400;font-size:28px;color:#1C1614;margin-bottom:8px">Anew</h1>
+  ${inner}
+  <a href="https://anewapp.net/dashboard.html" style="display:block;background:#B8704E;color:white;text-align:center;padding:16px;border-radius:6px;text-decoration:none;font-size:13px;font-weight:500;letter-spacing:0.08em;text-transform:uppercase;margin-top:8px">Open Anew</a>
+  <p style="font-size:11px;color:#8A7870;margin-top:20px;text-align:center">Anew is not a substitute for professional therapy or medical advice.</p>
+</div>
+</body></html>`;
 
   try {
     // ── Task reminders: send on day 3 of each week ──
@@ -124,9 +134,76 @@ module.exports = async (req, res) => {
       } catch (e) { results.errors.push(e.message); }
     }
 
+    // ── Trial nudges (item 14): Day 3 warm reminder, Day 6 end-of-trial notice ──
+    const { data: trialUsers } = await supabase
+      .from('users')
+      .select('id, email, trial_started_at, trial_day3_sent, trial_day6_sent')
+      .eq('subscription_status', 'trial')
+      .not('trial_started_at', 'is', null);
+
+    for (const u of trialUsers || []) {
+      if (!u.email || !u.trial_started_at) continue;
+      const startDate = new Date(u.trial_started_at);
+      const diffDays = Math.floor((now - startDate) / (1000 * 60 * 60 * 24));
+      const name = u.email.split('@')[0];
+
+      // Day 3 — warm reminder of this week's tasks
+      if (diffDays === 3 && !u.trial_day3_sent) {
+        try {
+          const { data: projects } = await supabase
+            .from('projects')
+            .select('roadmap, first_week_task')
+            .eq('user_id', u.id)
+            .eq('status', 'active')
+            .limit(1);
+          const phase = projects?.[0]?.roadmap?.[0];
+          const tasks = (phase?.tasks || []).slice(0, 3);
+          const taskList = tasks.length
+            ? `<ul style="color:#1C1614;font-size:15px;padding-left:20px;margin-bottom:24px">${tasks.map(t => `<li style="margin-bottom:8px">${t.title}</li>`).join('')}</ul>`
+            : `<p style="color:#5C4D45;font-size:15px;line-height:1.6;margin-bottom:24px">Your first week's work is waiting whenever you're ready.</p>`;
+
+          await sendEmail(u.email,
+            `How's this week going, ${name}?`,
+            emailShell(
+              `<p style="color:#5C4D45;font-size:15px;line-height:1.6;margin-bottom:16px">A few days into your trial — no pressure, just a gentle nudge. If you have a quiet moment, here's what this week is about${phase?.focus ? `: <strong>${phase.focus}</strong>` : '.'}</p>
+  ${taskList}`
+            )
+          );
+          await supabase.from('users').update({ trial_day3_sent: true }).eq('id', u.id);
+          results.trial_day3++;
+        } catch (e) { results.errors.push(e.message); }
+      }
+
+      // Day 6 — explicit end-of-trial + billing notice (FTC: clear, not buried)
+      if (diffDays === 6 && !u.trial_day6_sent) {
+        try {
+          await sendEmail(u.email,
+            'Your Anew trial ends tomorrow',
+            emailShell(
+              `<p style="color:#5C4D45;font-size:15px;line-height:1.6;margin-bottom:16px">Your free trial ends tomorrow. After that, your Anew subscription begins at <strong>$19/month</strong>, billed to the card you provided, and renews monthly until you cancel.</p>
+  <p style="color:#5C4D45;font-size:15px;line-height:1.6;margin-bottom:16px">If Anew isn't the right fit right now, you can cancel any time before tomorrow and you won't be charged. To cancel, open Anew, go to your account menu, and choose "Cancel subscription." It takes effect immediately and you keep access through the end of your trial.</p>
+  <p style="color:#5C4D45;font-size:15px;line-height:1.6;margin-bottom:24px">Either way, we're glad you started.</p>`
+            )
+          );
+          await supabase.from('users').update({ trial_day6_sent: true }).eq('id', u.id);
+          results.trial_day6++;
+        } catch (e) { results.errors.push(e.message); }
+      }
+    }
+
     res.status(200).json({ ok: true, ...results });
   } catch (err) {
     console.error('send-reminder error:', err);
     res.status(500).json({ error: err.message });
   }
 };
+
+/*
+  ── Manual test (item 14) ──
+  1. Insert a `users` row: subscription_status='trial', trial_started_at = now()-interval '3 days',
+     trial_day3_sent=false, with an active project. Hit GET /api/send-reminder.
+     Expect a Day-3 email and trial_day3_sent flips to true; a second run sends nothing.
+  2. Set trial_started_at = now()-interval '6 days', trial_day6_sent=false. Run again.
+     Expect the Day-6 end-of-trial email naming $19/month + how to cancel; trial_day6_sent -> true.
+  3. Cron runs daily at 09:00 UTC (vercel.json).
+*/
