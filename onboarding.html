@@ -864,15 +864,28 @@ End with: 'Does that feel close to what\'s been happening?'`;
       if (stored) {
         sessionId = stored;
       } else {
-        const { data, error } = await sbClient.from('sessions').insert({}).select('id').single();
-        if (!error && data) {
-          sessionId = data.id;
+        // Generate the id client-side and insert WITHOUT a RETURNING round-trip.
+        // The anon role has INSERT on sessions but no SELECT policy, so
+        // `.insert().select()` (INSERT ... RETURNING) is rejected with 401.
+        const newId = makeUUID();
+        const { error } = await sbClient.from('sessions').insert({ id: newId });
+        if (!error) {
+          sessionId = newId;
           localStorage.setItem('anew_session_id', sessionId);
         }
       }
     } catch (_) {
       // app works without Supabase
     }
+  }
+
+  function makeUUID() {
+    if (window.crypto && crypto.randomUUID) return crypto.randomUUID();
+    return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, (c) => {
+      const r = (Math.random() * 16) | 0;
+      const v = c === 'x' ? r : (r & 0x3) | 0x8;
+      return v.toString(16);
+    });
   }
 
   async function saveMessage(role, content) {
@@ -986,6 +999,27 @@ End with: 'Does that feel close to what\'s been happening?'`;
     });
   }
 
+  // ─── Sanitize history for the Anthropic API ───
+  // Guards against the 400s seen in state 4: empty-content messages (from
+  // over-stripped replies), a leading assistant message, and consecutive
+  // same-role messages. Operates on a copy; never mutates `messages`.
+  function sanitizeMessages(msgs) {
+    const out = [];
+    for (const m of msgs) {
+      const content = (m.content || '').trim();
+      if (!content) continue;                       // drop empty content
+      const role = m.role === 'assistant' ? 'assistant' : 'user';
+      if (out.length === 0 && role !== 'user') continue; // must start with user
+      const last = out[out.length - 1];
+      if (last && last.role === role) {
+        last.content += '\n\n' + content;           // merge consecutive same-role
+      } else {
+        out.push({ role, content });
+      }
+    }
+    return out;
+  }
+
   // ─── API call ───
   async function callAPI(sysPrompt, msgHistory) {
     const response = await fetch('/api/chat', {
@@ -995,7 +1029,7 @@ End with: 'Does that feel close to what\'s been happening?'`;
         model: 'claude-sonnet-4-6',
         max_tokens: 300,
         system: sysPrompt,
-        messages: msgHistory
+        messages: sanitizeMessages(msgHistory)
       })
     });
 
@@ -1008,24 +1042,34 @@ End with: 'Does that feel close to what\'s been happening?'`;
   function processAIText(raw) {
     const hasReflectTag = raw.includes('[READY_TO_REFLECT]');
 
-    const clean = raw
+    let clean = raw
       .replace(/\*\*Internal scoring:.*$/m, '')
       .replace(/Internal scoring:[\s\S]*?(\n\n|$)/g, '')
       .replace(/\d+\.\s+.*[✓✗].*$/gm, '')
       .replace(/\[READY_TO_REFLECT\]/g, '')
       .trim();
 
+    // Never return empty content — an empty assistant turn poisons the next request.
+    if (!clean) clean = raw.replace(/\[READY_TO_REFLECT\]/g, '').trim();
+    if (!clean) clean = 'Thank you for sharing that. Tell me a little more.';
+
     return { clean, hasReflectTag };
   }
 
-  // ─── Show error ───
+  // ─── Show / clear error ───
+  // Errors persist until the next user action (so testers can read them),
+  // rather than auto-removing after a timeout.
+  function clearErrors() {
+    chatInner.querySelectorAll('.error-msg').forEach((e) => e.remove());
+  }
+
   function showError() {
+    clearErrors();
     const err = document.createElement('div');
     err.className = 'error-msg fade-in';
     err.textContent = 'Something went wrong. Please try again.';
     chatInner.appendChild(err);
     scrollToBottom();
-    setTimeout(() => err.remove(), 5000);
   }
 
   // ─── Opening message ───
@@ -1058,6 +1102,7 @@ End with: 'Does that feel close to what\'s been happening?'`;
     const text = userInput.value.trim();
     if (!text) return;
 
+    clearErrors();
     userInput.value = '';
     userInput.style.height = 'auto';
     disableInput();
@@ -1142,6 +1187,12 @@ End with: 'Does that feel close to what\'s been happening?'`;
   async function transitionToState4() {
     currentState = 4;
     document.getElementById('reflectionBtns')?.remove();
+    clearErrors();
+
+    // The "Yes, go ahead" click is a user action — represent it so the request
+    // ends on a user turn (a proper generation request, not a trailing-assistant
+    // prefill). Kept in-memory only; the persisted transcript doesn't need it.
+    messages.push({ role: 'user', content: 'Yes, go ahead.' });
 
     const reflectionSystem = SYSTEM_PROMPT + REFLECTION_SYSTEM_ADDITION;
     showTyping();
