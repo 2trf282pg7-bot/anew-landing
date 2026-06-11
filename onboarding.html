@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, interactive-widget=resizes-content">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, interactive-widget=resizes-content">
 <title>Anew — Private Relationship Support</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -27,11 +27,11 @@
 
   html, body {
     height: 100%;
-    height: 100dvh;
+    overflow: hidden;
+    overscroll-behavior: none;
     font-family: 'DM Sans', sans-serif;
     background: var(--warm-white);
     color: var(--charcoal);
-    overflow: hidden;
   }
 
   /* ─── STATE 1: Welcome ─── */
@@ -108,6 +108,7 @@
     display: none;
     flex-direction: column;
     height: 100dvh;
+    position: relative;
     background: var(--warm-white);
     opacity: 0;
     transition: opacity 0.5s ease;
@@ -116,6 +117,7 @@
   #state2.visible { opacity: 1; }
 
   .top-bar {
+    position: static;
     flex-shrink: 0;
     height: 56px;
     background: rgba(250,246,241,0.96);
@@ -145,11 +147,11 @@
   }
 
   .chat-area {
-    flex: 1;
+    flex: 1 1 auto;
     min-height: 0;
     overflow-y: auto;
     -webkit-overflow-scrolling: touch;
-    padding: 24px 24px 20px;
+    padding: 16px 24px;
     display: flex;
     flex-direction: column;
     gap: 20px;
@@ -212,15 +214,15 @@
     40% { opacity: 1; transform: scale(1); }
   }
 
-  /* Input bar — sits in normal flow at the bottom of the flex column so it
-     always rides directly above the keyboard (no position:fixed). */
+  /* Input bar — normal flow at the bottom of the flex column (no position:fixed).
+     The flex column is pinned to the visible viewport via JS (syncViewport), so
+     the bar always rides directly above the keyboard. */
   .input-bar {
+    position: static;
     flex-shrink: 0;
     background: white;
     border-top: 1px solid var(--blush-deep);
-    padding: 12px 16px;
-    padding-bottom: calc(12px + env(safe-area-inset-bottom));
-    z-index: 100;
+    padding: 12px 16px calc(12px + env(safe-area-inset-bottom));
   }
 
   .input-bar-inner {
@@ -472,7 +474,7 @@
 
   /* ─── Feedback button ─── */
   #feedbackBtn {
-    position: fixed;
+    position: absolute;
     bottom: 90px;
     right: 24px;
     background: white;
@@ -701,10 +703,10 @@
       </button>
     </div>
   </div>
-</div>
 
-<!-- Feedback button -->
-<button id="feedbackBtn">Feedback</button>
+  <!-- Feedback button (absolute within #state2 so it tracks the visible viewport) -->
+  <button id="feedbackBtn">Feedback</button>
+</div>
 
 <!-- Feedback modal -->
 <div id="feedbackOverlay">
@@ -904,7 +906,7 @@ End with: 'Does that feel close to what\'s been happening?'`;
         });
       });
       currentState = 2;
-      fitViewport();
+      syncViewport();
       loadOpeningMessage();
     }, 500);
   });
@@ -927,24 +929,25 @@ End with: 'Does that feel close to what\'s been happening?'`;
     if (!isStreaming) handleSend();
   });
 
-  // ─── iOS keyboard: size the chat column to the visible viewport ───
-  // The input bar is in normal flow at the bottom of #state2, so matching the
-  // column height to visualViewport.height keeps it directly above the keyboard
-  // and the latest message visible — with no detached fixed bar.
-  const vv = window.visualViewport;
-  function fitViewport() {
-    if (!vv || currentState < 2) return;
-    state2El.style.height = vv.height + 'px';
-    chatArea.scrollTop = chatArea.scrollHeight;
+  // ─── iOS keyboard: pin the flex column to the visible viewport ───
+  // On iOS the keyboard overlays the page and the browser scrolls the document;
+  // visualViewport.offsetTop captures that scroll, and translateY pins #state2 to
+  // the visible area so the input bar stays above the keyboard.
+  function syncViewport() {
+    if (!window.visualViewport) return;
+    const s2 = document.getElementById('state2');
+    if (!s2 || s2.style.display === 'none') return;
+    const vv = window.visualViewport;
+    s2.style.height = vv.height + 'px';
+    s2.style.transform = 'translateY(' + vv.offsetTop + 'px)';
+    requestAnimationFrame(() => { chatArea.scrollTop = chatArea.scrollHeight; });
   }
-  if (vv) {
-    vv.addEventListener('resize', fitViewport);
-    vv.addEventListener('scroll', fitViewport);
+  if (window.visualViewport) {
+    window.visualViewport.addEventListener('resize', syncViewport);
+    window.visualViewport.addEventListener('scroll', syncViewport);
   }
-  userInput.addEventListener('focus', () => {
-    // Wait for the keyboard animation, then re-fit and reveal the latest message.
-    setTimeout(fitViewport, 250);
-  });
+  userInput.addEventListener('focus', () => setTimeout(syncViewport, 300));
+  userInput.addEventListener('blur', () => setTimeout(syncViewport, 100));
 
   // ─── Append message to chat ───
   function appendMessage(role, text) {
