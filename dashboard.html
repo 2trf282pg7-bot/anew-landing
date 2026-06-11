@@ -248,6 +248,44 @@
   .btn-paydue { display: inline-block; background: var(--clay); color: white; font-size: 12px; font-weight: 500; text-transform: uppercase; letter-spacing: 0.1em; padding: 13px 20px; min-height: 44px; border: none; border-radius: 8px; cursor: pointer; transition: background 0.2s ease; }
   .btn-paydue:hover { background: var(--clay-dark); }
   .btn-paydue:disabled { background: var(--blush-deep); cursor: not-allowed; }
+
+  /* Progress — Day X of 90 (item 10) */
+  .progress-block { margin: 0 0 24px; }
+  .progress-day { font-size: 11px; font-weight: 500; text-transform: uppercase; letter-spacing: 0.12em; color: var(--stone); margin-bottom: 8px; }
+  .progress-bar { height: 6px; background: var(--blush); border-radius: 3px; overflow: hidden; }
+  .progress-fill { height: 100%; width: 0; background: var(--clay); border-radius: 3px; transition: width 0.5s ease; }
+
+  /* Wrap-up + session close (item 6) */
+  .wrapup-bar { margin: 12px 0 16px; text-align: center; }
+  .btn-wrapup { background: none; border: 1.5px solid var(--blush-deep); color: var(--charcoal-soft); font-family: 'DM Sans', sans-serif; font-size: 13px; padding: 13px 22px; min-height: 44px; border-radius: 8px; cursor: pointer; transition: border-color 0.2s ease, color 0.2s ease; }
+  .btn-wrapup:hover { border-color: var(--stone); color: var(--charcoal); }
+
+  .summary-card { background: linear-gradient(135deg, var(--blush) 0%, var(--blush-deep) 100%); border-radius: 16px; padding: 22px 24px; margin: 0 0 16px; }
+  .summary-label { font-size: 10px; font-weight: 500; text-transform: uppercase; letter-spacing: 0.14em; color: var(--clay-dark); margin-bottom: 8px; }
+  .summary-body { font-family: 'Cormorant Garamond', serif; font-size: 18px; color: var(--charcoal); line-height: 1.6; }
+
+  /* Partner reaction chooser (item 21) */
+  .reaction-card { background: white; border-radius: 16px; box-shadow: 0 2px 16px rgba(28,22,20,0.06); padding: 22px 24px; margin: 0 0 16px; }
+  .reaction-q { font-family: 'Cormorant Garamond', serif; font-size: 19px; color: var(--charcoal); line-height: 1.5; margin-bottom: 16px; }
+  .reaction-opts { display: flex; flex-direction: column; gap: 10px; }
+  .reaction-btn { width: 100%; text-align: left; background: var(--section-alt); border: 1.5px solid transparent; color: var(--charcoal); font-family: 'DM Sans', sans-serif; font-size: 15px; padding: 14px 16px; min-height: 44px; border-radius: 10px; cursor: pointer; transition: border-color 0.2s ease, background 0.2s ease; }
+  .reaction-btn:hover { border-color: var(--blush-deep); background: white; }
+  .reaction-skip { align-self: center; background: none; border: none; color: var(--stone); font-size: 13px; padding: 12px; min-height: 44px; cursor: pointer; text-decoration: underline; text-underline-offset: 3px; }
+  .reaction-skip:hover { color: var(--charcoal-soft); }
+
+  /* Intro bottom sheet — nickname + anniversary (items 11, 23, 26) */
+  .sheet-overlay { display: none; position: fixed; inset: 0; background: rgba(28,22,20,0.4); z-index: 1100; align-items: flex-end; justify-content: center; }
+  .sheet-overlay.open { display: flex; }
+  .sheet { background: white; border-radius: 20px 20px 0 0; padding: 28px 24px calc(28px + env(safe-area-inset-bottom)); width: 100%; max-width: 640px; box-shadow: 0 -4px 24px rgba(28,22,20,0.12); transform: translateY(0); }
+  .sheet-title { font-family: 'Cormorant Garamond', serif; font-size: 24px; font-weight: 400; color: var(--charcoal); margin-bottom: 6px; }
+  .sheet-intro { font-size: 14px; color: var(--charcoal-soft); line-height: 1.6; margin-bottom: 20px; }
+  .sheet-label { display: block; font-size: 14px; color: var(--charcoal); margin-bottom: 8px; line-height: 1.5; }
+  .sheet-input { width: 100%; border: 1.5px solid var(--blush-deep); border-radius: 10px; padding: 13px 14px; font-family: 'DM Sans', sans-serif; font-size: 16px; color: var(--charcoal); background: white; min-height: 44px; outline: none; margin-bottom: 20px; transition: border-color 0.2s ease; }
+  .sheet-input:focus { border-color: var(--clay); }
+  .sheet-save { width: 100%; background: var(--clay); color: white; font-family: 'DM Sans', sans-serif; font-size: 12px; font-weight: 500; text-transform: uppercase; letter-spacing: 0.12em; padding: 16px; min-height: 44px; border: none; border-radius: 10px; cursor: pointer; transition: background 0.2s ease; }
+  .sheet-save:hover { background: var(--clay-dark); }
+  .sheet-skip { width: 100%; background: none; border: none; color: var(--stone); font-size: 13px; padding: 14px; min-height: 44px; cursor: pointer; margin-top: 4px; }
+  .sheet-skip:hover { color: var(--charcoal-soft); }
 </style>
 </head>
 <body>
@@ -278,6 +316,12 @@
   <!-- Greeting -->
   <div class="greeting" id="greeting">Good morning.</div>
 
+  <!-- Progress: Day X of 90 (item 10) -->
+  <div class="progress-block" id="progressBlock" style="display:none">
+    <div class="progress-day" id="progressDay">Day 1 of 90</div>
+    <div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div>
+  </div>
+
   <!-- Past-due payment notice (item 25) -->
   <div class="paydue-banner" id="payDueBanner" style="display:none">
     <div class="paydue-title">There was a problem with your last payment</div>
@@ -297,6 +341,29 @@
         </svg>
       </button>
     </div>
+  </div>
+
+  <!-- Wrap-up affordance (item 6) -->
+  <div class="wrapup-bar" id="wrapUpBar" style="display:none">
+    <button class="btn-wrapup" onclick="startWrapUp()">Wrap up this week</button>
+  </div>
+
+  <!-- Partner reaction chooser (item 21) -->
+  <div class="reaction-card" id="partnerReaction" style="display:none">
+    <div class="reaction-q">How did it go with your partner this week?</div>
+    <div class="reaction-opts">
+      <button class="reaction-btn" onclick="recordReaction('It went better than I expected')">It went better than I expected</button>
+      <button class="reaction-btn" onclick="recordReaction(&quot;They didn't really respond&quot;)">They didn't really respond</button>
+      <button class="reaction-btn" onclick="recordReaction(&quot;It didn't go well&quot;)">It didn't go well</button>
+      <button class="reaction-btn" onclick="recordReaction(&quot;I'm not sure yet&quot;)">I'm not sure yet</button>
+      <button class="reaction-skip" onclick="skipReaction()">Skip</button>
+    </div>
+  </div>
+
+  <!-- This week summary card (item 6) -->
+  <div class="summary-card" id="summaryCard" style="display:none">
+    <div class="summary-label">This week</div>
+    <div class="summary-body" id="summaryBody"></div>
   </div>
 
   <!-- This week's focus (collapsible, hidden if no project) -->
@@ -340,6 +407,20 @@
 
 </main>
 
+<!-- Intro bottom sheet: nickname + anniversary (items 11, 23, 26) -->
+<div class="sheet-overlay" id="introOverlay">
+  <div class="sheet">
+    <div class="sheet-title">Before we begin</div>
+    <div class="sheet-intro">A couple of small things, so this feels like yours. Both are optional.</div>
+    <label class="sheet-label" for="nicknameInput">What should I call you?</label>
+    <input class="sheet-input" id="nicknameInput" type="text" placeholder="Your name or nickname" maxlength="40" autocomplete="given-name" />
+    <label class="sheet-label" for="anniversaryInput">Is there a date that matters to you two? (anniversary, the day you met — optional)</label>
+    <input class="sheet-input" id="anniversaryInput" type="date" />
+    <button class="sheet-save" id="introSaveBtn" onclick="saveIntro()">Save</button>
+    <button class="sheet-skip" onclick="skipIntro()">Skip for now</button>
+  </div>
+</div>
+
 <!-- Account modal -->
 <div class="modal-overlay" id="accountModal">
   <div class="modal">
@@ -368,6 +449,10 @@
 
   let sbClient = null, currentUser = null, currentProject = null;
   let chatHistory = [], chatStreaming = false, checkinSessionId = null;
+  let nicknameValue = null, lastSessionSummary = '';
+  let userTurnCount = 0, checkinClosed = false, partnerReactionDone = false;
+
+  const SUMMARY_SYSTEM = `You are Anew. Summarize this weekly check-in in 3-4 sentences for the user's own record. Warm, interpretation tone — never diagnosis. Include the user's own words in quotation marks where it feels natural. Write to the user as "you". Output only the summary, no preamble.`;
 
   const CHECKIN_SYSTEM = `You are Anew, an AI relationship coach.
 The user has an active recovery project.
@@ -405,12 +490,18 @@ SAFETY PROTOCOL: If the user mentions self-harm, suicidal thoughts, abuse, or vi
     }
   }
 
-  async function loadDashboard() {
-    // Greeting
+  function setGreeting() {
     const hour = new Date().getHours();
     const period = hour < 12 ? 'morning' : hour < 17 ? 'afternoon' : 'evening';
-    const name = currentUser.email?.split('@')[0] || '';
+    // Priority: nickname (if non-empty) > email local part (item 11/23)
+    const name = (nicknameValue && nicknameValue.trim())
+      ? nicknameValue.trim()
+      : (currentUser.email?.split('@')[0] || '');
     document.getElementById('greeting').textContent = `Good ${period}${name ? ', ' + name : ''}.`;
+  }
+
+  async function loadDashboard() {
+    setGreeting();
 
     // Load project
     const { data: projects } = await sbClient
@@ -425,14 +516,17 @@ SAFETY PROTOCOL: If the user mentions self-harm, suicidal thoughts, abuse, or vi
       renderProjectInfo(currentProject);
     }
 
-    // Load subscription status
+    // Load subscription status + profile (nickname for greeting, item 11/23)
     const { data: userData } = await sbClient
       .from('users')
-      .select('subscription_status')
+      .select('subscription_status, nickname')
       .eq('id', currentUser.id)
       .single();
 
     if (userData) {
+      nicknameValue = userData.nickname; // null = never asked; '' = asked & skipped
+      setGreeting();
+
       document.getElementById('planStatus').textContent =
         userData.subscription_status === 'trial' ? '7-day free trial' :
         userData.subscription_status === 'active' ? 'Active subscription' :
@@ -471,16 +565,99 @@ SAFETY PROTOCOL: If the user mentions self-harm, suicidal thoughts, abuse, or vi
       }
     }
 
-    // Create checkin session
+    // Load last check-in's summary BEFORE creating today's session (item 5)
+    await loadLastSession();
+
+    // Create today's checkin session
     await createCheckinSession();
 
-    // Show opening message and reveal content
+    // Reveal content
     document.getElementById('loadingScreen').style.display = 'none';
     document.getElementById('mainContent').style.display = 'block';
 
-    const opening = "How did it go this week? Tell me what happened — even if it's hard to put into words.";
+    // Opening message — continues from last week when we have context (item 5)
+    const defaultOpening = "How did it go this week? Tell me what happened — even if it's hard to put into words.";
+    let opening = defaultOpening;
+    if (lastSessionSummary) {
+      showTyping();
+      try {
+        opening = await callAPI(
+          checkinSystemPrompt() + '\n\nThis is the very first message of a new weekly check-in. In 1-2 warm sentences, greet them and gently pick up from where you left off last time. Do not list tasks or ask more than one thing.',
+          [{ role: 'user', content: '(Begin this week\'s check-in.)' }]
+        );
+      } catch (_) { opening = defaultOpening; }
+      hideTyping();
+    }
     addMessage('ai', opening, false);
     saveMessage('assistant', opening);
+
+    // First-run profile sheet (items 11, 23, 26)
+    maybeShowIntro();
+  }
+
+  // Item 5: pull the most recent prior check-in's summary (or last few messages).
+  // Prefer a session that actually has a summary — page reloads create empty
+  // sessions, so the newest row is often not the meaningful "last week".
+  async function loadLastSession() {
+    try {
+      const { data: summarized } = await sbClient
+        .from('sessions')
+        .select('summary')
+        .eq('user_id', currentUser.id)
+        .eq('type', 'checkin')
+        .not('summary', 'is', null)
+        .order('created_at', { ascending: false })
+        .limit(1);
+      if (summarized && summarized.length && summarized[0].summary) {
+        lastSessionSummary = summarized[0].summary;
+        return;
+      }
+
+      // Fallback: latest prior session's last few messages
+      const { data } = await sbClient
+        .from('sessions')
+        .select('id')
+        .eq('user_id', currentUser.id)
+        .eq('type', 'checkin')
+        .order('created_at', { ascending: false })
+        .limit(1);
+      if (!data || !data.length) return;
+      const { data: msgs } = await sbClient
+        .from('messages')
+        .select('role, content')
+        .eq('session_id', data[0].id)
+        .order('created_at', { ascending: false })
+        .limit(6);
+      if (msgs && msgs.length) {
+        lastSessionSummary = msgs.reverse()
+          .map(m => `${m.role === 'assistant' ? 'Anew' : 'User'}: ${m.content}`)
+          .join(' ');
+      }
+    } catch (_) {}
+  }
+
+  function currentWeekIndex() {
+    if (!currentProject) return 0;
+    const startDate = new Date(currentProject.started_at || currentProject.created_at);
+    const diffDays = Math.floor((Date.now() - startDate) / (1000 * 60 * 60 * 24));
+    return Math.max(0, Math.floor(diffDays / 7));
+  }
+
+  // Shared check-in system prompt (project context + last-session injection + close nudge)
+  function checkinSystemPrompt() {
+    const roadmap = currentProject?.recovery_plan?.roadmap || currentProject?.roadmap || [];
+    const phase = roadmap[Math.min(currentWeekIndex(), roadmap.length - 1)];
+    let p = CHECKIN_SYSTEM;
+    if (currentProject) {
+      p += `\n\nUser's project: "${currentProject.project_title || ''}". Current focus: "${phase?.focus || ''}".`;
+    }
+    if (lastSessionSummary) {
+      p += `\n\nLast session the user said: ${lastSessionSummary}`;
+    }
+    if (userTurnCount >= 5) {
+      p += `\n\nThis check-in has covered several exchanges. In your next reply, gently begin bringing the conversation to a warm close — reflect back what they shared and offer encouragement. Do not open a new line of questioning.`;
+    }
+    return p;
   }
 
   function renderProjectInfo(project) {
@@ -489,6 +666,12 @@ SAFETY PROTOCOL: If the user mentions self-harm, suicidal thoughts, abuse, or vi
     const weekIndex = Math.max(0, Math.floor(diffDays / 7));
     const roadmap = project.recovery_plan?.roadmap || project.roadmap || [];
     const phase = roadmap[Math.min(weekIndex, roadmap.length - 1)];
+
+    // Day X of 90 progress (item 10)
+    const dayNum = Math.min(90, Math.max(1, diffDays + 1));
+    document.getElementById('progressBlock').style.display = 'block';
+    document.getElementById('progressDay').textContent = `Day ${dayNum} of 90`;
+    document.getElementById('progressFill').style.width = (dayNum / 90 * 100) + '%';
 
     if (phase) {
       document.getElementById('focusCollapsible').style.display = 'block';
@@ -587,28 +770,25 @@ SAFETY PROTOCOL: If the user mentions self-harm, suicidal thoughts, abuse, or vi
   async function sendChat() {
     const input = document.getElementById('chatInput');
     const text = input.value.trim();
-    if (!text || chatStreaming) return;
+    if (!text || chatStreaming || checkinClosed) return;
     input.value = ''; input.style.height = 'auto';
     chatStreaming = true;
     document.getElementById('chatSendBtn').disabled = true;
 
     addMessage('user', text);
     saveMessage('user', text);
+    userTurnCount++;
 
     showTyping();
     try {
-      const roadmap = currentProject?.recovery_plan?.roadmap || currentProject?.roadmap || [];
-      const diffDays = currentProject
-        ? Math.floor((Date.now() - new Date(currentProject.started_at || currentProject.created_at)) / (1000 * 60 * 60 * 24))
-        : 0;
-      const weekIndex = Math.max(0, Math.floor(diffDays / 7));
-      const phase = roadmap[Math.min(weekIndex, roadmap.length - 1)];
-      const systemPrompt = CHECKIN_SYSTEM +
-        (currentProject ? `\n\nUser's project: "${currentProject.project_title || ''}". Current focus: "${phase?.focus || ''}".` : '');
-      const reply = await callAPI(systemPrompt, chatHistory);
+      const reply = await callAPI(checkinSystemPrompt(), chatHistory);
       hideTyping();
       addMessage('ai', reply);
       saveMessage('assistant', reply);
+      // Offer to wrap up once the conversation has run a while (item 6)
+      if (userTurnCount >= 5 && !checkinClosed) {
+        document.getElementById('wrapUpBar').style.display = 'block';
+      }
     } catch (e) {
       hideTyping();
       const area = document.getElementById('chatMessages');
@@ -620,6 +800,83 @@ SAFETY PROTOCOL: If the user mentions self-harm, suicidal thoughts, abuse, or vi
     } finally {
       chatStreaming = false;
       document.getElementById('chatSendBtn').disabled = false;
+    }
+  }
+
+  // ── Session close flow (items 6 + 21) ──
+  function startWrapUp() {
+    document.getElementById('wrapUpBar').style.display = 'none';
+    if (!partnerReactionDone && currentProject) {
+      document.getElementById('partnerReaction').style.display = 'block';
+      document.getElementById('partnerReaction').scrollIntoView({ behavior: 'smooth', block: 'center' });
+    } else {
+      finalizeCheckin();
+    }
+  }
+
+  // Record the partner reaction, then let the AI acknowledge it (item 21)
+  async function recordReaction(choice) {
+    partnerReactionDone = true;
+    document.getElementById('partnerReaction').style.display = 'none';
+
+    if (currentProject) {
+      try {
+        await sbClient.from('actions').insert({
+          project_id: currentProject.id,
+          type: 'partner_reaction',
+          description: choice,
+          week_index: currentWeekIndex(),
+        });
+      } catch (e) { console.error('[Anew] reaction save error:', e.message); }
+    }
+
+    // Include the choice in the conversation so the reply lands on it
+    addMessage('user', choice);
+    saveMessage('user', choice);
+    showTyping();
+    try {
+      const reply = await callAPI(
+        checkinSystemPrompt() + '\n\nThe user just shared how it went with their partner this week. Respond in one or two warm sentences that receive what they chose, without judgment. Do not ask a new question.',
+        chatHistory
+      );
+      hideTyping();
+      addMessage('ai', reply);
+      saveMessage('assistant', reply);
+    } catch (e) {
+      hideTyping();
+    }
+    finalizeCheckin();
+  }
+
+  function skipReaction() {
+    partnerReactionDone = true;
+    document.getElementById('partnerReaction').style.display = 'none';
+    finalizeCheckin();
+  }
+
+  // Generate + store the weekly summary and show the card (item 6)
+  async function finalizeCheckin() {
+    if (checkinClosed) return;
+    checkinClosed = true;
+    document.getElementById('chatInput').disabled = true;
+    document.getElementById('chatSendBtn').disabled = true;
+    document.getElementById('wrapUpBar').style.display = 'none';
+
+    try {
+      const transcript = chatHistory
+        .map(m => `${m.role === 'assistant' ? 'Anew' : 'User'}: ${m.content}`)
+        .join('\n');
+      const summary = await callAPI(SUMMARY_SYSTEM, [{ role: 'user', content: transcript }]);
+      if (summary && checkinSessionId) {
+        try { await sbClient.from('sessions').update({ summary }).eq('id', checkinSessionId); } catch (_) {}
+      }
+      if (summary) {
+        document.getElementById('summaryBody').textContent = summary;
+        document.getElementById('summaryCard').style.display = 'block';
+        document.getElementById('summaryCard').scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }
+    } catch (e) {
+      console.error('[Anew] summary error:', e.message);
     }
   }
 
@@ -730,7 +987,61 @@ SAFETY PROTOCOL: If the user mentions self-harm, suicidal thoughts, abuse, or vi
     }
   }
 
+  // ── First-run profile sheet: nickname + anniversary (items 11, 23, 26) ──
+  function maybeShowIntro() {
+    // null = never asked. '' or a value = already handled, don't re-show.
+    if (nicknameValue === null || typeof nicknameValue === 'undefined') {
+      document.getElementById('introOverlay').classList.add('open');
+      setTimeout(() => document.getElementById('nicknameInput').focus(), 250);
+    }
+  }
+
+  async function saveIntro() {
+    const btn = document.getElementById('introSaveBtn');
+    btn.disabled = true; btn.textContent = 'Saving…';
+    const nick = document.getElementById('nicknameInput').value.trim();
+    const anniversary = document.getElementById('anniversaryInput').value; // '' or YYYY-MM-DD
+    const update = { nickname: nick }; // '' marks it as asked so we don't show again
+    if (anniversary) update.anniversary_date = anniversary;
+    try {
+      await sbClient.from('users').update(update).eq('id', currentUser.id);
+    } catch (e) { console.error('[Anew] intro save error:', e.message); }
+    nicknameValue = nick;
+    setGreeting();
+    closeIntro();
+  }
+
+  async function skipIntro() {
+    // Mark as asked (empty string) so it never reappears
+    try { await sbClient.from('users').update({ nickname: '' }).eq('id', currentUser.id); } catch (_) {}
+    nicknameValue = '';
+    closeIntro();
+  }
+
+  function closeIntro() {
+    document.getElementById('introOverlay').classList.remove('open');
+    const btn = document.getElementById('introSaveBtn');
+    btn.disabled = false; btn.textContent = 'Save';
+  }
+
   init();
+
+  /*
+    ── Manual test (Batch B) ──
+    Item 5:  Complete a check-in (so a session summary exists), reload. The opening
+             AI message should reference last week instead of the generic greeting.
+    Item 6:  Send 5+ messages -> "Wrap up this week" appears. Finishing writes a
+             3-4 sentence summary to sessions.summary and shows the "This week" card;
+             input becomes disabled.
+    Item 10: With an active project, "Day X of 90" + clay progress bar show under the
+             greeting (scales with days since started_at). Hidden with no project.
+    Item 11/23/26: First load with users.nickname = null opens the bottom sheet.
+             Save stores nickname (+ anniversary_date if set); greeting updates.
+             Skip stores nickname='' and the sheet never returns. Inputs are 16px / 44px.
+    Item 21: During wrap-up, the 4-choice partner-reaction card appears. Choosing inserts
+             an actions row (type='partner_reaction', week_index) and the AI acknowledges
+             it; "Skip" proceeds without recording. Neither blocks finishing.
+  */
 </script>
 </body>
 </html>

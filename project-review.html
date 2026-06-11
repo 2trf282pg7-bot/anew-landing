@@ -162,6 +162,9 @@
   let sbClient = null, currentUser = null, currentProject = null;
   let chatHistory = [], isStreaming = false;
   let pendingChange = null;
+  let reviewSessionId = null, leaving = false;
+
+  const SUMMARY_SYSTEM = `You are Anew. Summarize this weekly project review in 3-4 sentences for the user's own record. Warm, interpretation tone — never diagnosis. Include the user's own words in quotation marks where it feels natural. Write to the user as "you". Output only the summary, no preamble.`;
 
   const REVIEW_SYSTEM = `You are Anew, an AI relationship coach conducting a weekly project review.
 The user has an active 90-day recovery project. Your role is to:
@@ -207,9 +210,22 @@ SAFETY PROTOCOL: If the user mentions self-harm, suicidal thoughts, abuse, or vi
 
     currentProject = projects[0];
     renderProjectInfo();
+    await createReviewSession();
     document.getElementById('loadingScreen').style.display = 'none';
     document.getElementById('mainContent').style.display = 'block';
     showOpeningMessage();
+  }
+
+  // Item 22: every review now has a sessions row so a summary can be stored
+  async function createReviewSession() {
+    try {
+      const { data, error } = await sbClient
+        .from('sessions')
+        .insert({ user_id: currentUser.id, type: 'review' })
+        .select('id')
+        .single();
+      if (!error && data) reviewSessionId = data.id;
+    } catch (_) {}
   }
 
   function renderProjectInfo() {
@@ -380,7 +396,41 @@ ${phase?.theory_explanation ? 'Theory context: ' + phase.theory_explanation : ''
     document.getElementById('chatMessages').appendChild(el);
   }
 
-  function goToDashboard() { window.location.href = '/dashboard.html'; }
+  // Item 22: on exit, save a weekly summary if the review had 2+ exchanges
+  async function goToDashboard() {
+    if (leaving) return;
+    leaving = true;
+    const btn = document.querySelector('.btn-done');
+    const userTurns = chatHistory.filter(m => m.role === 'user').length;
+
+    if (userTurns >= 2 && reviewSessionId) {
+      if (btn) { btn.disabled = true; btn.textContent = 'Saving your week…'; }
+      try {
+        const transcript = chatHistory
+          .map(m => `${m.role === 'assistant' ? 'Anew' : 'User'}: ${m.content}`)
+          .join('\n');
+        const res = await fetch('/api/chat', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            model: 'claude-sonnet-4-6', max_tokens: 400,
+            system: SUMMARY_SYSTEM,
+            messages: [{ role: 'user', content: transcript }]
+          })
+        });
+        if (res.ok) {
+          const data = await res.json();
+          const summary = data.content?.[0]?.text?.trim();
+          if (summary) {
+            await sbClient.from('sessions').update({ summary }).eq('id', reviewSessionId);
+          }
+        }
+      } catch (e) {
+        console.error('[Anew] review summary error:', e.message);
+      }
+    }
+    window.location.href = '/dashboard.html';
+  }
 
   function openMenu() {
     document.getElementById('menuOverlay').classList.add('open');
@@ -406,6 +456,17 @@ ${phase?.theory_explanation ? 'Theory context: ' + phase.theory_explanation : ''
   });
 
   init();
+
+  /*
+    ── Manual test (item 22) ──
+    1. Open project-review.html with an active project -> a `sessions` row of
+       type='review' is created on load (check the table).
+    2. Exchange at least 2 user messages, then press "Return to dashboard".
+       Button shows "Saving your week…", a 3-4 sentence summary is written to that
+       session's `summary`, then it redirects.
+    3. Press "Return to dashboard" with fewer than 2 user turns -> no summary,
+       immediate redirect.
+  */
 </script>
 </body>
 </html>
