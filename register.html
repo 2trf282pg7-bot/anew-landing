@@ -113,6 +113,18 @@
       <div class="form-toggle">Need to create an account? <button type="button" onclick="showRegister()">Sign up</button></div>
     </div>
 
+    <!-- Interstitial when an existing session is detected (C-4) -->
+    <div id="interstitial" style="display:none" class="success-state">
+      <div class="success-icon">
+        <svg width="48" height="48" viewBox="0 0 48 48" fill="none">
+          <circle cx="24" cy="24" r="22" stroke="#5E8A60" stroke-width="1.5"/>
+          <path d="M15 24.5l6 6 12-13" stroke="#5E8A60" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </div>
+      <div class="success-title">Welcome back</div>
+      <div class="success-text" id="interstitialText"></div>
+    </div>
+
     <!-- Success state -->
     <div id="successState" style="display:none" class="success-state">
       <div class="success-icon">
@@ -162,7 +174,13 @@
       sbClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
       const { data: { session } } = await sbClient.auth.getSession();
       if (session) {
-        await postRegisterFlow(session);
+        // Make the skip legible: show who's signed in before redirecting (C-4)
+        document.getElementById('registerForm').style.display = 'none';
+        document.getElementById('loginForm').style.display = 'none';
+        document.getElementById('interstitialText').textContent =
+          `Signed in as ${session.user.email} — picking up where you left off…`;
+        document.getElementById('interstitial').style.display = 'block';
+        await postRegisterFlow(session, { keepUI: true });
         return;
       }
     } catch (e) {}
@@ -229,7 +247,7 @@
     }
   }
 
-  async function postRegisterFlow(session) {
+  async function postRegisterFlow(session, opts = {}) {
     const stripeSessionId = new URLSearchParams(window.location.search).get('session_id');
     const onboardingSessionId = localStorage.getItem('anew_onboarding_session_id') || localStorage.getItem('anew_session_id');
 
@@ -257,9 +275,11 @@
       } catch (_) {}
     }
 
-    document.getElementById('registerForm').style.display = 'none';
-    document.getElementById('loginForm').style.display = 'none';
-    document.getElementById('successState').style.display = 'block';
+    if (!opts.keepUI) {
+      document.getElementById('registerForm').style.display = 'none';
+      document.getElementById('loginForm').style.display = 'none';
+      document.getElementById('successState').style.display = 'block';
+    }
 
     setTimeout(() => { window.location.href = '/project-setup.html'; }, 1500);
   }

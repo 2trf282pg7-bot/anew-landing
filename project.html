@@ -27,7 +27,7 @@
   /* MENU */
   .menu-overlay { display: none; position: fixed; inset: 0; background: rgba(28,22,20,0.3); z-index: 999; }
   .menu-overlay.open { display: block; }
-  .menu-drawer { position: fixed; right: 0; top: 0; width: 240px; height: 100vh; background: white; z-index: 1000; box-shadow: -4px 0 20px rgba(28,22,20,0.1); transform: translateX(100%); transition: transform 0.25s ease; display: flex; flex-direction: column; }
+  .menu-drawer { position: fixed; right: 0; top: 0; width: 240px; height: 100dvh; background: white; z-index: 1000; box-shadow: -4px 0 20px rgba(28,22,20,0.1); transform: translateX(100%); transition: transform 0.25s ease; display: flex; flex-direction: column; }
   .menu-drawer.open { transform: translateX(0); }
   .menu-item { display: block; padding: 16px 24px; font-family: 'DM Sans', sans-serif; font-size: 15px; color: var(--charcoal); border-bottom: 1px solid var(--blush-deep); text-decoration: none; background: none; border-left: none; border-right: none; border-top: none; cursor: pointer; text-align: left; width: 100%; transition: background 0.15s ease; }
   .menu-item:hover { background: var(--section-alt); }
@@ -47,8 +47,10 @@
   .task-body { flex: 1; }
   .task-title { font-size: 14px; font-weight: 500; color: var(--charcoal); margin-bottom: 2px; }
   .task-deadline { font-size: 12px; color: var(--stone); }
-  .task-info { width: 28px; height: 28px; border-radius: 50%; border: 1.5px solid var(--blush-deep); background: white; cursor: pointer; font-size: 13px; color: var(--stone); display: flex; align-items: center; justify-content: center; flex-shrink: 0; margin-top: 2px; transition: border-color 0.2s ease, color 0.2s ease; }
-  .task-info:hover { border-color: var(--clay); color: var(--clay); }
+  /* 44px tap target with an 18px icon (item 19) */
+  .task-info { width: 44px; height: 44px; border: none; background: none; cursor: pointer; color: var(--stone); display: flex; align-items: center; justify-content: center; flex-shrink: 0; transition: color 0.2s ease; }
+  .task-info:hover { color: var(--clay); }
+  .task-info svg { width: 18px; height: 18px; }
   .empty-state { font-size: 14px; color: var(--stone); font-style: italic; padding: 8px 0; }
 
   /* Roadmap */
@@ -103,6 +105,26 @@
   .modal-theory { font-size: 14px; color: var(--charcoal-soft); line-height: 1.7; }
   .loading-screen { position: fixed; inset: 0; background: var(--warm-white); display: flex; align-items: center; justify-content: center; z-index: 200; }
   .loading-logo { font-family: 'Cormorant Garamond', serif; font-size: 28px; color: var(--charcoal); letter-spacing: 0.1em; }
+
+  /* Bottom sheet (check-in scheduler) */
+  .sheet-overlay { display: none; position: fixed; inset: 0; background: rgba(28,22,20,0.4); z-index: 1100; align-items: flex-end; justify-content: center; }
+  .sheet-overlay.open { display: flex; }
+  .sheet { background: white; border-radius: 20px 20px 0 0; padding: 28px 24px calc(28px + env(safe-area-inset-bottom)); width: 100%; max-width: 680px; box-shadow: 0 -4px 24px rgba(28,22,20,0.12); }
+  .sheet-title { font-family: 'Cormorant Garamond', serif; font-size: 24px; font-weight: 400; color: var(--charcoal); margin-bottom: 6px; }
+  .sheet-intro { font-size: 14px; color: var(--charcoal-soft); line-height: 1.6; margin-bottom: 20px; }
+  .sheet-label { display: block; font-size: 14px; color: var(--charcoal); margin-bottom: 8px; }
+  .sheet-input { width: 100%; border: 1.5px solid var(--blush-deep); border-radius: 10px; padding: 13px 14px; font-family: 'DM Sans', sans-serif; font-size: 16px; color: var(--charcoal); background: white; min-height: 44px; outline: none; margin-bottom: 16px; transition: border-color 0.2s ease; }
+  .sheet-input:focus { border-color: var(--clay); }
+  .sheet-save { width: 100%; background: var(--clay); color: white; font-family: 'DM Sans', sans-serif; font-size: 12px; font-weight: 500; text-transform: uppercase; letter-spacing: 0.12em; padding: 16px; min-height: 44px; border: none; border-radius: 10px; cursor: pointer; transition: background 0.2s ease; }
+  .sheet-save:hover { background: var(--clay-dark); }
+  .sheet-save:disabled { background: var(--blush-deep); cursor: not-allowed; }
+  .sheet-skip { width: 100%; background: none; border: none; color: var(--stone); font-size: 13px; padding: 14px; min-height: 44px; cursor: pointer; margin-top: 4px; }
+  .sheet-skip:hover { color: var(--charcoal-soft); }
+  .preset-row { display: flex; gap: 10px; margin-bottom: 18px; flex-wrap: wrap; }
+  .preset-btn { flex: 1; min-width: 130px; min-height: 44px; background: var(--section-alt); border: 1.5px solid transparent; border-radius: 10px; padding: 12px 14px; font-family: 'DM Sans', sans-serif; font-size: 14px; color: var(--charcoal); cursor: pointer; transition: border-color 0.2s ease, background 0.2s ease; }
+  .preset-btn:hover { border-color: var(--blush-deep); background: white; }
+  .sheet-error { font-size: 13px; color: var(--clay-dark); margin: -6px 0 14px; display: none; }
+  .sheet-error.show { display: block; }
 </style>
 </head>
 <body>
@@ -120,9 +142,10 @@
 
 <div class="menu-overlay" id="menuOverlay" onclick="closeMenu()"></div>
 <div class="menu-drawer" id="menuDrawer">
+  <a href="/dashboard.html" class="menu-item">Check-in</a>
   <a href="/project.html" class="menu-item active">My Project</a>
   <a href="/history.html" class="menu-item">Conversation History</a>
-  <a href="/dashboard.html#account" class="menu-item" onclick="closeMenu()">Account</a>
+  <a href="/account.html" class="menu-item">Account</a>
   <div class="menu-divider"></div>
   <button class="menu-item menu-item-logout" onclick="handleLogout()">Log out</button>
 </div>
@@ -174,6 +197,23 @@
   </div>
 
 </main>
+
+<!-- Check-in scheduler bottom sheet (items 17, C-6) -->
+<div class="sheet-overlay" id="checkinSheet">
+  <div class="sheet">
+    <div class="sheet-title">Schedule a check-in</div>
+    <div class="sheet-intro">Most people check in once a week. Pick whatever fits.</div>
+    <div class="preset-row">
+      <button class="preset-btn" type="button" onclick="presetNextWeek()">Same time next week</button>
+      <button class="preset-btn" type="button" onclick="presetSundayEvening()">Sunday evening</button>
+    </div>
+    <label class="sheet-label" for="checkinInput">Date &amp; time</label>
+    <input class="sheet-input" id="checkinInput" type="datetime-local" />
+    <div class="sheet-error" id="checkinSheetError"></div>
+    <button class="sheet-save" id="checkinSaveBtn" onclick="saveCheckin()">Save check-in</button>
+    <button class="sheet-skip" onclick="closeCheckinSheet()">Cancel</button>
+  </div>
+</div>
 
 <!-- Theory modal -->
 <div class="modal-overlay" id="theoryModal">
@@ -289,15 +329,16 @@
         const item = document.createElement('div');
         item.className = 'task-item';
         item.innerHTML = `
-          <input type="checkbox" class="task-check" id="ptask-${i}" onchange="toggleTask(this,'${esc(task.title)}')">
+          <input type="checkbox" class="task-check" id="ptask-${i}" data-title="${esc(task.title)}" onchange="toggleTask(this,'${esc(task.title)}')">
           <div class="task-body">
             <div class="task-title">${task.title}</div>
             <div class="task-deadline">Due: ${deadlineStr} · ${task.frequency}</div>
           </div>
-          <button class="task-info" onclick="openTheory('${esc(task.title)}','${esc(task.theory_basis || task.description)}')">ⓘ</button>
+          <button class="task-info" onclick="openTheory('${esc(task.title)}','${esc(task.theory_basis || task.description)}')" aria-label="Why this task"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="12" cy="12" r="9"/><line x1="12" y1="11" x2="12" y2="16"/><circle cx="12" cy="8" r="0.6" fill="currentColor" stroke="none"/></svg></button>
         `;
         list.appendChild(item);
       });
+      restoreTaskStates(weekIndex); // item 20
     }
 
     if (roadmap.length) {
@@ -357,24 +398,94 @@
     }).join('');
   }
 
-  async function toggleTask(checkbox, title) {
+  function currentWeekIndex() {
+    if (!currentProject) return 0;
+    const start = new Date(currentProject.started_at || currentProject.created_at);
+    return Math.max(0, Math.floor((Date.now() - start) / (1000 * 60 * 60 * 24) / 7));
+  }
+
+  // Restore checkbox state from saved actions for this week (item 20)
+  async function restoreTaskStates(weekIndex) {
     if (!currentProject) return;
-    await sbClient.from('actions').insert({
-      project_id: currentProject.id,
-      description: title,
-      status: checkbox.checked ? 'done' : 'pending',
+    const { data } = await sbClient
+      .from('actions')
+      .select('description, status, created_at')
+      .eq('project_id', currentProject.id)
+      .eq('type', 'task')
+      .eq('week_index', weekIndex)
+      .order('created_at', { ascending: true });
+    if (!data) return;
+    const latest = {}; // description -> latest status
+    data.forEach(a => { latest[a.description] = a.status; });
+    document.querySelectorAll('.task-check').forEach(cb => {
+      const t = cb.getAttribute('data-title');
+      if (t && latest[t] !== undefined) cb.checked = latest[t] === 'done';
     });
   }
 
-  function addCheckin() {
-    const dt = prompt('Enter check-in date and time (YYYY-MM-DD HH:MM)');
-    if (!dt) return;
-    const d = new Date(dt);
-    if (isNaN(d)) { alert('Invalid date format. Please use YYYY-MM-DD HH:MM'); return; }
+  // Update the existing row for this task+week, or insert once (no infinite inserts, item 20)
+  async function toggleTask(checkbox, title) {
     if (!currentProject) return;
-    sbClient.from('checkins').insert({
-      project_id: currentProject.id, scheduled_at: d.toISOString()
-    }).then(() => loadSchedule());
+    const wk = currentWeekIndex();
+    const status = checkbox.checked ? 'done' : 'pending';
+    try {
+      const { data: existing } = await sbClient
+        .from('actions')
+        .select('id')
+        .eq('project_id', currentProject.id)
+        .eq('type', 'task')
+        .eq('week_index', wk)
+        .eq('description', title)
+        .limit(1);
+      if (existing && existing.length) {
+        await sbClient.from('actions').update({ status }).eq('id', existing[0].id);
+      } else {
+        await sbClient.from('actions').insert({
+          project_id: currentProject.id, type: 'task', description: title, week_index: wk, status,
+        });
+      }
+    } catch (e) { console.error('[Anew] toggleTask error:', e.message); }
+  }
+
+  function addCheckin() {
+    document.getElementById('checkinInput').value = toLocalInput(defaultCheckinDate());
+    document.getElementById('checkinSheetError').classList.remove('show');
+    document.getElementById('checkinSheet').classList.add('open');
+  }
+  function closeCheckinSheet() { document.getElementById('checkinSheet').classList.remove('open'); }
+  function toLocalInput(d) {
+    const pad = (n) => String(n).padStart(2, '0');
+    return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
+  }
+  function defaultCheckinDate() {
+    const d = new Date(); d.setDate(d.getDate() + 7); d.setHours(19, 0, 0, 0); return d;
+  }
+  function presetNextWeek() { document.getElementById('checkinInput').value = toLocalInput(defaultCheckinDate()); }
+  function presetSundayEvening() {
+    const d = new Date();
+    const days = (7 - d.getDay()) % 7 || 7;
+    d.setDate(d.getDate() + days); d.setHours(19, 0, 0, 0);
+    document.getElementById('checkinInput').value = toLocalInput(d);
+  }
+  async function saveCheckin() {
+    const err = document.getElementById('checkinSheetError');
+    const val = document.getElementById('checkinInput').value;
+    if (!val) { err.textContent = 'Please choose a date and time.'; err.classList.add('show'); return; }
+    const d = new Date(val);
+    if (isNaN(d.getTime())) { err.textContent = 'That date doesn\'t look right.'; err.classList.add('show'); return; }
+    if (d.getTime() <= Date.now()) { err.textContent = 'Please choose a time in the future.'; err.classList.add('show'); return; }
+    if (!currentProject) { closeCheckinSheet(); return; }
+    const btn = document.getElementById('checkinSaveBtn');
+    btn.disabled = true; btn.textContent = 'Saving…';
+    try {
+      await sbClient.from('checkins').insert({ project_id: currentProject.id, scheduled_at: d.toISOString() });
+      closeCheckinSheet();
+      loadSchedule();
+    } catch (e) {
+      err.textContent = 'Couldn\'t save just now. Please try again.'; err.classList.add('show');
+    } finally {
+      btn.disabled = false; btn.textContent = 'Save check-in';
+    }
   }
 
   async function deleteCheckin(id) {
@@ -390,6 +501,9 @@
 
   document.getElementById('theoryModal').addEventListener('click', (e) => {
     if (e.target === document.getElementById('theoryModal')) document.getElementById('theoryModal').classList.remove('open');
+  });
+  document.getElementById('checkinSheet').addEventListener('click', (e) => {
+    if (e.target === document.getElementById('checkinSheet')) closeCheckinSheet();
   });
 
   function esc(s) { return (s || '').replace(/'/g, "\\'").replace(/"/g, '&quot;'); }

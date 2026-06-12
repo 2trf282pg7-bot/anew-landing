@@ -33,7 +33,7 @@
   /* ── MENU DRAWER ── */
   .menu-overlay { display: none; position: fixed; inset: 0; background: rgba(28,22,20,0.3); z-index: 999; }
   .menu-overlay.open { display: block; }
-  .menu-drawer { position: fixed; right: 0; top: 0; width: 240px; height: 100vh; background: white; z-index: 1000; box-shadow: -4px 0 20px rgba(28,22,20,0.1); transform: translateX(100%); transition: transform 0.25s ease; display: flex; flex-direction: column; }
+  .menu-drawer { position: fixed; right: 0; top: 0; width: 240px; height: 100dvh; background: white; z-index: 1000; box-shadow: -4px 0 20px rgba(28,22,20,0.1); transform: translateX(100%); transition: transform 0.25s ease; display: flex; flex-direction: column; }
   .menu-drawer.open { transform: translateX(0); }
   .menu-item { display: block; padding: 16px 24px; font-family: 'DM Sans', sans-serif; font-size: 15px; color: var(--charcoal); border-bottom: 1px solid var(--blush-deep); text-decoration: none; background: none; border-left: none; border-right: none; border-top: none; cursor: pointer; text-align: left; width: 100%; transition: background 0.15s ease; }
   .menu-item:hover { background: var(--section-alt); }
@@ -140,7 +140,7 @@
     border-radius: 10px;
     padding: 10px 14px;
     font-family: 'DM Sans', sans-serif;
-    font-size: 14px;
+    font-size: 16px;
     color: var(--charcoal);
     background: white;
     resize: none;
@@ -217,6 +217,12 @@
   }
 
   .focus-text { font-size: 14px; color: var(--charcoal-soft); line-height: 1.6; padding-top: 12px; }
+  /* Theory info mark (C-2) */
+  .focus-theory-name { font-weight: 500; color: var(--charcoal); }
+  .focus-theory-text { font-size: 14px; color: var(--charcoal-soft); line-height: 1.6; margin-top: 6px; }
+  .theory-info { display: inline-flex; align-items: center; justify-content: center; width: 32px; height: 32px; vertical-align: middle; border: none; background: none; color: var(--stone); cursor: pointer; padding: 0; transition: color 0.2s ease; }
+  .theory-info:hover { color: var(--clay); }
+  .theory-info svg { width: 18px; height: 18px; }
 
   .checkin-row { display: flex; align-items: center; justify-content: space-between; padding-top: 12px; }
   .checkin-date { font-family: 'Cormorant Garamond', serif; font-size: 18px; color: var(--charcoal); }
@@ -284,6 +290,11 @@
   .sheet-input:focus { border-color: var(--clay); }
   .sheet-save { width: 100%; background: var(--clay); color: white; font-family: 'DM Sans', sans-serif; font-size: 12px; font-weight: 500; text-transform: uppercase; letter-spacing: 0.12em; padding: 16px; min-height: 44px; border: none; border-radius: 10px; cursor: pointer; transition: background 0.2s ease; }
   .sheet-save:hover { background: var(--clay-dark); }
+  .preset-row { display: flex; gap: 10px; margin-bottom: 18px; flex-wrap: wrap; }
+  .preset-btn { flex: 1; min-width: 130px; min-height: 44px; background: var(--section-alt); border: 1.5px solid transparent; border-radius: 10px; padding: 12px 14px; font-family: 'DM Sans', sans-serif; font-size: 14px; color: var(--charcoal); cursor: pointer; transition: border-color 0.2s ease, background 0.2s ease; }
+  .preset-btn:hover { border-color: var(--blush-deep); background: white; }
+  .sheet-error { font-size: 13px; color: var(--clay-dark); margin: -10px 0 14px; display: none; }
+  .sheet-error.show { display: block; }
   .sheet-skip { width: 100%; background: none; border: none; color: var(--stone); font-size: 13px; padding: 14px; min-height: 44px; cursor: pointer; margin-top: 4px; }
   .sheet-skip:hover { color: var(--charcoal-soft); }
 </style>
@@ -306,7 +317,7 @@
   <a href="/project.html" class="menu-item">My Project</a>
   <a href="/project-review.html" class="menu-item">Review project</a>
   <a href="/history.html" class="menu-item">Conversation History</a>
-  <a href="#" class="menu-item" onclick="openAccountModal(); closeMenu();">Account</a>
+  <a href="/account.html" class="menu-item">Account</a>
   <div class="menu-divider"></div>
   <button class="menu-item menu-item-logout" onclick="handleLogout()">Log out</button>
 </div>
@@ -343,9 +354,9 @@
     </div>
   </div>
 
-  <!-- Wrap-up affordance (item 6) -->
+  <!-- End check-in affordance — always available so there's a clear exit (items 6, C-3) -->
   <div class="wrapup-bar" id="wrapUpBar" style="display:none">
-    <button class="btn-wrapup" onclick="startWrapUp()">Wrap up this week</button>
+    <button class="btn-wrapup" onclick="startWrapUp()">End check-in</button>
   </div>
 
   <!-- Partner reaction chooser (item 21) -->
@@ -421,6 +432,34 @@
   </div>
 </div>
 
+<!-- Check-in scheduler bottom sheet (items 17, C-5, C-6) -->
+<div class="sheet-overlay" id="checkinSheet">
+  <div class="sheet">
+    <div class="sheet-title">Schedule your next check-in</div>
+    <div class="sheet-intro">Most people check in once a week. Pick whatever fits.</div>
+    <div class="preset-row">
+      <button class="preset-btn" type="button" onclick="presetNextWeek()">Same time next week</button>
+      <button class="preset-btn" type="button" onclick="presetSundayEvening()">Sunday evening</button>
+    </div>
+    <label class="sheet-label" for="checkinInput">Date &amp; time</label>
+    <input class="sheet-input" id="checkinInput" type="datetime-local" />
+    <div class="sheet-error" id="checkinSheetError"></div>
+    <button class="sheet-save" id="checkinSaveBtn" onclick="saveCheckin()">Save check-in</button>
+    <button class="sheet-skip" onclick="closeCheckinSheet()">Cancel</button>
+  </div>
+</div>
+
+<!-- Theory info modal (C-2) -->
+<div class="modal-overlay" id="theoryInfoModal">
+  <div class="modal">
+    <div class="modal-title" id="theoryInfoTitle"></div>
+    <div class="modal-text" id="theoryInfoText"></div>
+    <div class="modal-actions">
+      <button class="btn-modal-keep" onclick="document.getElementById('theoryInfoModal').classList.remove('open')">Got it</button>
+    </div>
+  </div>
+</div>
+
 <!-- Account modal -->
 <div class="modal-overlay" id="accountModal">
   <div class="modal">
@@ -449,7 +488,7 @@
 
   let sbClient = null, currentUser = null, currentProject = null;
   let chatHistory = [], chatStreaming = false, checkinSessionId = null;
-  let nicknameValue = null, lastSessionSummary = '';
+  let nicknameValue = null, lastSessionSummary = '', nextCheckinStr = '';
   let userTurnCount = 0, checkinClosed = false, partnerReactionDone = false;
 
   const SUMMARY_SYSTEM = `You are Anew. Summarize this weekly check-in in 3-4 sentences for the user's own record. Warm, interpretation tone — never diagnosis. Include the user's own words in quotation marks where it feels natural. Write to the user as "you". Output only the summary, no preamble.`;
@@ -468,6 +507,8 @@ Be warm, non-judgmental.
 Do not give unsolicited advice.
 Only discuss topics related to their relationship recovery.
 Never answer questions unrelated to relationships or their project.
+
+CLOSURE: If the user gives minimal or stuck replies twice (e.g. "I don't know", one or two words), or after about 6-8 exchanges, do not ask another feelings question. Instead, offer closure: briefly reflect what they shared, tell them this is enough for today, mention when their next check-in is if you know it, and explicitly let them know they can close the app now and come back next time. Never leave the user without a clear way to end the conversation.
 
 SAFETY PROTOCOL: If the user mentions self-harm, suicidal thoughts, abuse, or violence, stop the regular flow. Respond with warmth, do not minimize, and share: 988 Suicide & Crisis Lifeline (call/text 988) or the National Domestic Violence Hotline (1-800-799-7233), whichever fits. Encourage reaching out to a professional. Do not return to task discussion in the same message.`;
 
@@ -560,6 +601,7 @@ SAFETY PROTOCOL: If the user mentions self-harm, suicidal thoughts, abuse, or vi
         const d = new Date(checkins[0].scheduled_at);
         const str = d.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' }) +
           ' at ' + d.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
+        nextCheckinStr = str;
         document.getElementById('checkinValuePreview').textContent = d.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' });
         document.getElementById('checkinDateFull').textContent = str;
       }
@@ -590,6 +632,9 @@ SAFETY PROTOCOL: If the user mentions self-harm, suicidal thoughts, abuse, or vi
     }
     addMessage('ai', opening, false);
     saveMessage('assistant', opening);
+
+    // Always offer a clear exit (C-3)
+    document.getElementById('wrapUpBar').style.display = 'block';
 
     // First-run profile sheet (items 11, 23, 26)
     maybeShowIntro();
@@ -676,10 +721,50 @@ SAFETY PROTOCOL: If the user mentions self-harm, suicidal thoughts, abuse, or vi
     if (phase) {
       document.getElementById('focusCollapsible').style.display = 'block';
       document.getElementById('focusValuePreview').textContent = phase.focus;
-      document.getElementById('focusFullText').textContent =
-        (phase.theory_explanation ? phase.theory + ': ' + phase.theory_explanation : phase.focus);
+      const ft = document.getElementById('focusFullText');
+      if (phase.theory) {
+        const info = detectTheory(phase.theory);
+        const infoBtn = info
+          ? ` <button class="theory-info" onclick="openTheoryInfo('${info.key}')" aria-label="About ${escAttr(info.name)}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="12" cy="12" r="9"/><line x1="12" y1="11" x2="12" y2="16"/><circle cx="12" cy="8" r="0.6" fill="currentColor" stroke="none"/></svg></button>`
+          : '';
+        ft.innerHTML = `<span class="focus-theory-name">${escHtml(phase.theory)}</span>${infoBtn}`
+          + (phase.theory_explanation ? `<div class="focus-theory-text">${escHtml(phase.theory_explanation)}</div>` : '');
+      } else {
+        ft.textContent = phase.focus;
+      }
     }
   }
+
+  // Static, human-written explanations of each clinical method (C-2)
+  const THEORY_INFO = {
+    eft: { name: 'Emotionally Focused Therapy (EFT)', text: 'EFT looks at the emotions underneath your conflicts — the fear, hurt, or longing driving the cycle — so you can respond to what\'s really going on instead of the surface argument. It fits when the core pain is feeling unwanted, unseen, or disconnected.' },
+    gottman: { name: 'The Gottman Method', text: 'Built on decades of research into what keeps couples close, the Gottman Method focuses on everyday habits — how you handle conflict, repair after a fight, and stay connected. It fits when the same arguments keep cycling.' },
+    mi: { name: 'Motivational Interviewing (MI)', text: 'MI is a gentle way of working through mixed feelings about change, helping you find your own reasons and readiness rather than being pushed. It fits when part of you wants things to change and part of you feels stuck or unsure.' },
+    cbt: { name: 'Cognitive Behavioral Therapy (CBT)', text: 'CBT notices the automatic thoughts that shape how you feel and react, and gently tests whether they\'re actually true. It fits when harsh or absolute thoughts ("they\'ll always say no") are getting in the way.' },
+    ibct: { name: 'Integrative Behavioral Couple Therapy (IBCT)', text: 'IBCT blends making real changes with accepting the differences that won\'t fully change — easing the resentment that builds over years. It fits when there\'s a long history of the same hurts.' },
+    sensate: { name: 'Sensate Focus', text: 'Sensate Focus is a slow, pressure-free way to rebuild physical closeness through gentle, structured touch — never rushing intimacy. It\'s introduced only later, once there\'s enough groundwork and safety.' },
+  };
+  function detectTheory(str) {
+    const s = (str || '').toLowerCase();
+    let key = null;
+    if (s.includes('sensate')) key = 'sensate';
+    else if (s.includes('ibct') || s.includes('integrative behavioral')) key = 'ibct';
+    else if (s.includes('eft') || s.includes('emotionally focused')) key = 'eft';
+    else if (s.includes('gottman')) key = 'gottman';
+    else if (s.includes('motivational') || /\bmi\b/.test(s)) key = 'mi';
+    else if (s.includes('cbt') || s.includes('cognitive behavioral')) key = 'cbt';
+    if (!key) return null;
+    return { key, name: THEORY_INFO[key].name };
+  }
+  function openTheoryInfo(key) {
+    const info = THEORY_INFO[key];
+    if (!info) return;
+    document.getElementById('theoryInfoTitle').textContent = info.name;
+    document.getElementById('theoryInfoText').textContent = info.text;
+    document.getElementById('theoryInfoModal').classList.add('open');
+  }
+  function escHtml(s) { return (s || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+  function escAttr(s) { return (s || '').replace(/"/g,'&quot;').replace(/'/g,'&#39;'); }
 
   async function createCheckinSession() {
     try {
@@ -872,6 +957,13 @@ SAFETY PROTOCOL: If the user mentions self-harm, suicidal thoughts, abuse, or vi
     document.getElementById('chatSendBtn').disabled = true;
     document.getElementById('wrapUpBar').style.display = 'none';
 
+    // Warm closing message with a clear exit (C-3)
+    const closing = "Thank you for sharing this today — this is enough for now. "
+      + (nextCheckinStr ? `Your next check-in is ${nextCheckinStr}. ` : "I'll be here next week. ")
+      + "You can close the app whenever you're ready; we'll pick this up next time.";
+    addMessage('ai', closing, false);
+    saveMessage('assistant', closing);
+
     try {
       const transcript = chatHistory
         .map(m => `${m.role === 'assistant' ? 'Anew' : 'User'}: ${m.content}`)
@@ -898,23 +990,66 @@ SAFETY PROTOCOL: If the user mentions self-harm, suicidal thoughts, abuse, or vi
     chevron.classList.toggle('open');
   }
 
-  // ── Check-in scheduling ──
+  // ── Check-in scheduling (native picker + presets, items 17/C-5/C-6) ──
+  function toLocalInput(d) {
+    // Format a Date as a datetime-local value (YYYY-MM-DDTHH:MM) in local time
+    const pad = (n) => String(n).padStart(2, '0');
+    return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
+  }
+  function defaultCheckinDate() {
+    // Default to +7 days from now (C-5 fix), at a sensible 7pm
+    const d = new Date();
+    d.setDate(d.getDate() + 7);
+    d.setHours(19, 0, 0, 0);
+    return d;
+  }
   function scheduleCheckin() {
-    const dt = prompt('Enter date and time for your next check-in (YYYY-MM-DD HH:MM)');
-    if (!dt) return;
-    const d = new Date(dt);
-    if (isNaN(d)) { alert('Invalid date format. Please use YYYY-MM-DD HH:MM'); return; }
-    if (!currentProject) return;
-    sbClient.from('checkins').insert({
-      project_id: currentProject.id,
-      scheduled_at: d.toISOString()
-    }).then(() => {
+    document.getElementById('checkinInput').value = toLocalInput(defaultCheckinDate());
+    document.getElementById('checkinSheetError').classList.remove('show');
+    document.getElementById('checkinSheet').classList.add('open');
+  }
+  function closeCheckinSheet() {
+    document.getElementById('checkinSheet').classList.remove('open');
+  }
+  function presetNextWeek() {
+    document.getElementById('checkinInput').value = toLocalInput(defaultCheckinDate());
+  }
+  function presetSundayEvening() {
+    const d = new Date();
+    // Next Sunday (not today) at 7pm
+    const daysUntilSunday = (7 - d.getDay()) % 7 || 7;
+    d.setDate(d.getDate() + daysUntilSunday);
+    d.setHours(19, 0, 0, 0);
+    document.getElementById('checkinInput').value = toLocalInput(d);
+  }
+  async function saveCheckin() {
+    const err = document.getElementById('checkinSheetError');
+    const val = document.getElementById('checkinInput').value;
+    if (!val) { err.textContent = 'Please choose a date and time.'; err.classList.add('show'); return; }
+    const d = new Date(val);
+    if (isNaN(d.getTime())) { err.textContent = 'That date doesn\'t look right.'; err.classList.add('show'); return; }
+    if (d.getTime() <= Date.now()) { err.textContent = 'Please choose a time in the future.'; err.classList.add('show'); return; }
+    if (!currentProject) { closeCheckinSheet(); return; }
+
+    const btn = document.getElementById('checkinSaveBtn');
+    btn.disabled = true; btn.textContent = 'Saving…';
+    try {
+      await sbClient.from('checkins').insert({ project_id: currentProject.id, scheduled_at: d.toISOString() });
       const str = d.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' }) +
         ' at ' + d.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
+      nextCheckinStr = str;
       document.getElementById('checkinValuePreview').textContent = d.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' });
       document.getElementById('checkinDateFull').textContent = str;
-    });
+      closeCheckinSheet();
+    } catch (e) {
+      err.textContent = 'Couldn\'t save just now. Please try again.'; err.classList.add('show');
+    } finally {
+      btn.disabled = false; btn.textContent = 'Save check-in';
+    }
   }
+  document.getElementById('checkinSheet').addEventListener('click', (e) => {
+    if (e.target === document.getElementById('checkinSheet')) closeCheckinSheet();
+  });
 
   // ── Hamburger menu ──
   function openMenu() {
@@ -939,6 +1074,9 @@ SAFETY PROTOCOL: If the user mentions self-harm, suicidal thoughts, abuse, or vi
   }
   document.getElementById('accountModal').addEventListener('click', (e) => {
     if (e.target === document.getElementById('accountModal')) closeAccountModal();
+  });
+  document.getElementById('theoryInfoModal').addEventListener('click', (e) => {
+    if (e.target === document.getElementById('theoryInfoModal')) e.currentTarget.classList.remove('open');
   });
 
   function openCancelConfirm() {

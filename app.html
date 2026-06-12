@@ -210,7 +210,7 @@
 
   /* Email confirmation state */
   .confirm-state { text-align: center; padding: 8px 0; }
-  .confirm-icon { font-size: 40px; margin-bottom: 16px; }
+  .confirm-icon { display: flex; justify-content: center; margin-bottom: 16px; }
 
   .confirm-title {
     font-family: 'Cormorant Garamond', serif;
@@ -312,7 +312,12 @@
 
       <!-- Email sent confirmation (hidden initially) -->
       <div id="confirmState" style="display:none;" class="confirm-state">
-        <div class="confirm-icon">✉️</div>
+        <div class="confirm-icon">
+          <svg width="40" height="40" viewBox="0 0 40 40" fill="none">
+            <rect x="5" y="9" width="30" height="22" rx="3" stroke="#B8704E" stroke-width="1.6"/>
+            <path d="M6 11l14 11 14-11" stroke="#B8704E" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </div>
         <div class="confirm-title">Check your inbox</div>
         <p class="confirm-text">Click the link in the email we sent you to activate your account.</p>
       </div>

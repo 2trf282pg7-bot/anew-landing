@@ -21,11 +21,11 @@
   /* Loading screen */
   .loading-screen { position: fixed; inset: 0; background: var(--warm-white); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 20px; z-index: 200; }
   .loading-logo { font-family: 'Cormorant Garamond', serif; font-size: 28px; color: var(--charcoal); letter-spacing: 0.1em; }
-  .loading-sub { font-size: 14px; color: var(--stone); }
-  .loading-dots { display: flex; gap: 6px; }
-  .loading-dots span { width: 7px; height: 7px; border-radius: 50%; background: var(--clay); animation: dotPulse 1.2s ease-in-out infinite; }
-  .loading-dots span:nth-child(2) { animation-delay: 0.2s; }
-  .loading-dots span:nth-child(3) { animation-delay: 0.4s; }
+  .loading-stage { font-size: 15px; color: var(--charcoal-soft); transition: opacity 0.4s ease; min-height: 22px; text-align: center; padding: 0 24px; }
+  .loading-track { width: 200px; height: 4px; background: var(--blush); border-radius: 2px; overflow: hidden; }
+  .loading-indeterminate { width: 40%; height: 100%; background: var(--clay); border-radius: 2px; animation: indeterminate 1.9s ease-in-out infinite; }
+  @keyframes indeterminate { 0% { margin-left: -40%; } 100% { margin-left: 100%; } }
+  .loading-note { font-size: 12px; color: var(--stone); }
   @keyframes dotPulse { 0%,80%,100%{opacity:0.25;transform:scale(0.85)} 40%{opacity:1;transform:scale(1)} }
 
   /* Nav */
@@ -40,6 +40,18 @@
   .page-title { font-family: 'Cormorant Garamond', serif; font-size: 30px; font-weight: 300; color: var(--charcoal); line-height: 1.25; margin-bottom: 12px; }
   .page-summary { font-size: 15px; color: var(--charcoal-soft); line-height: 1.65; margin-bottom: 36px; }
 
+  /* What I heard (item 8) */
+  .heard { background: white; border-radius: 16px; padding: 24px 26px; box-shadow: 0 2px 12px rgba(28,22,20,0.06); margin-bottom: 28px; }
+  .heard-label { font-size: 10px; font-weight: 500; text-transform: uppercase; letter-spacing: 0.14em; color: var(--clay); margin-bottom: 12px; }
+  .heard-pattern { font-family: 'Cormorant Garamond', serif; font-size: 21px; font-weight: 300; color: var(--charcoal); line-height: 1.45; margin-bottom: 14px; }
+  .heard-factors { display: flex; flex-direction: column; gap: 8px; }
+  .heard-factor { font-size: 14px; color: var(--charcoal-soft); line-height: 1.55; padding-left: 16px; position: relative; }
+  .heard-factor::before { content: '·'; position: absolute; left: 4px; color: var(--stone); }
+  .heard-strengths { margin-top: 18px; border-left: 3px solid var(--sage); padding-left: 16px; }
+  .heard-strengths-label { font-size: 10px; font-weight: 500; text-transform: uppercase; letter-spacing: 0.12em; color: var(--sage); margin-bottom: 8px; }
+  .heard-strengths-list { display: flex; flex-direction: column; gap: 6px; }
+  .heard-strength { font-size: 14px; color: var(--charcoal-soft); line-height: 1.55; }
+
   /* Roadmap */
   .roadmap { display: flex; flex-direction: column; gap: 12px; margin-bottom: 32px; }
   .phase-card { background: white; border-radius: 14px; overflow: hidden; box-shadow: 0 2px 12px rgba(28,22,20,0.06); }
@@ -48,8 +60,10 @@
   .phase-left { flex: 1; }
   .phase-range { font-size: 10px; font-weight: 500; text-transform: uppercase; letter-spacing: 0.12em; color: var(--clay); margin-bottom: 3px; }
   .phase-focus { font-family: 'Cormorant Garamond', serif; font-size: 18px; color: var(--charcoal); line-height: 1.3; }
-  .phase-info-btn { width: 24px; height: 24px; border-radius: 50%; border: 1.5px solid var(--blush-deep); background: none; cursor: pointer; display: flex; align-items: center; justify-content: center; color: var(--stone); font-size: 12px; font-weight: 500; flex-shrink: 0; margin-left: 12px; transition: border-color 0.2s ease, color 0.2s ease; }
-  .phase-info-btn:hover { border-color: var(--clay); color: var(--clay); }
+  /* 44px tap target with a 24px visual icon (item 19) */
+  .phase-info-btn { width: 44px; height: 44px; border: none; background: none; cursor: pointer; display: flex; align-items: center; justify-content: center; color: var(--stone); flex-shrink: 0; margin-left: 4px; transition: color 0.2s ease; }
+  .phase-info-btn:hover { color: var(--clay); }
+  .phase-info-btn svg { width: 24px; height: 24px; }
   .phase-body { max-height: 0; overflow: hidden; transition: max-height 0.25s ease; }
   .phase-body.open { max-height: 600px; }
   .phase-inner { padding: 0 20px 16px; border-top: 1px solid var(--section-alt); }
@@ -84,7 +98,7 @@
   .adj-msg-ai { font-family: 'Cormorant Garamond', serif; font-size: 17px; color: var(--charcoal); line-height: 1.6; }
   .adj-msg-user { background: var(--blush-deep); border-radius: 10px; padding: 10px 14px; font-size: 14px; color: var(--charcoal); align-self: flex-end; max-width: 85%; }
   .adjust-input-row { display: flex; gap: 8px; align-items: flex-end; }
-  .adjust-textarea { flex: 1; border: 1.5px solid var(--blush-deep); border-radius: 8px; padding: 10px 12px; font-family: 'DM Sans', sans-serif; font-size: 14px; color: var(--charcoal); resize: none; min-height: 44px; max-height: 100px; outline: none; transition: border-color 0.2s ease; }
+  .adjust-textarea { flex: 1; border: 1.5px solid var(--blush-deep); border-radius: 8px; padding: 10px 12px; font-family: 'DM Sans', sans-serif; font-size: 16px; color: var(--charcoal); resize: none; min-height: 44px; max-height: 100px; outline: none; transition: border-color 0.2s ease; }
   .adjust-textarea:focus { border-color: var(--clay); }
   .adjust-send { width: 40px; height: 40px; background: var(--clay); border: none; border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center; flex-shrink: 0; transition: background 0.2s ease; }
   .adjust-send:hover { background: var(--clay-dark); }
@@ -116,8 +130,9 @@
 
 <div class="loading-screen" id="loadingScreen">
   <div class="loading-logo">Anew</div>
-  <div class="loading-sub">Building your recovery project…</div>
-  <div class="loading-dots"><span></span><span></span><span></span></div>
+  <div class="loading-stage" id="loadingStage">Reading your conversation…</div>
+  <div class="loading-track"><div class="loading-indeterminate"></div></div>
+  <div class="loading-note">This usually takes about a minute.</div>
 </div>
 
 <nav class="nav">
@@ -127,6 +142,17 @@
 <main class="main" id="mainContent" style="display:none">
 
   <div id="projectView">
+    <!-- What I heard (item 8) -->
+    <div class="heard" id="heardSection" style="display:none">
+      <div class="heard-label">What I heard</div>
+      <div class="heard-pattern" id="heardPattern"></div>
+      <div class="heard-factors" id="heardFactors"></div>
+      <div class="heard-strengths" id="heardStrengths" style="display:none">
+        <div class="heard-strengths-label">What's still alive in this relationship</div>
+        <div class="heard-strengths-list" id="heardStrengthsList"></div>
+      </div>
+    </div>
+
     <div class="page-eyebrow">Your 90-day recovery project</div>
     <div class="page-title" id="projTitle"></div>
     <div class="page-summary" id="projSummary"></div>
@@ -222,10 +248,29 @@
     }
   }
 
+  // Staged loading messages (C-1): no fake percentages, just honest stages.
+  let loadingTimers = [];
+  function startLoadingStages() {
+    stopLoadingStages();
+    const stageEl = document.getElementById('loadingStage');
+    const setStage = (text) => {
+      stageEl.style.opacity = '0';
+      setTimeout(() => { stageEl.textContent = text; stageEl.style.opacity = '1'; }, 300);
+    };
+    setStage('Reading your conversation…');
+    loadingTimers.push(setTimeout(() => setStage('Identifying the patterns underneath…'), 8000));
+    loadingTimers.push(setTimeout(() => setStage('Designing your 90-day project…'), 20000));
+  }
+  function stopLoadingStages() {
+    loadingTimers.forEach(clearTimeout);
+    loadingTimers = [];
+  }
+
   async function generateProject(adjustmentNote) {
     document.getElementById('loadingScreen').style.display = 'flex';
     document.getElementById('mainContent').style.display = 'none';
     document.getElementById('errorView').style.display = 'none';
+    startLoadingStages();
 
     let sessionId = localStorage.getItem('anew_onboarding_session_id') || localStorage.getItem('anew_session_id');
     // Fallback for cross-device / cleared localStorage: postRegisterFlow links the
@@ -293,6 +338,7 @@
       el.textContent = q;
       box.appendChild(el);
     });
+    stopLoadingStages();
     document.getElementById('loadingScreen').style.display = 'none';
     document.getElementById('mainContent').style.display = 'block';
     document.getElementById('projectView').style.display = 'none';
@@ -311,6 +357,7 @@
       el.innerHTML = `<div class="refer-resource-name">${esc(r.name)}</div><div class="refer-resource-contact">${esc(r.contact)}</div>`;
       box.appendChild(el);
     });
+    stopLoadingStages();
     document.getElementById('loadingScreen').style.display = 'none';
     document.getElementById('mainContent').style.display = 'block';
     document.getElementById('projectView').style.display = 'none';
@@ -320,6 +367,22 @@
   }
 
   function renderProject(project) {
+    // What I heard (item 8)
+    const pa = project.pattern_analysis;
+    if (pa && (pa.primary_pattern || (pa.contributing_factors || []).length)) {
+      document.getElementById('heardSection').style.display = 'block';
+      document.getElementById('heardPattern').textContent = pa.primary_pattern || '';
+      const factorsEl = document.getElementById('heardFactors');
+      factorsEl.innerHTML = (pa.contributing_factors || [])
+        .map(f => `<div class="heard-factor">${esc(f)}</div>`).join('');
+      const strengths = pa.strengths || [];
+      if (strengths.length) {
+        document.getElementById('heardStrengths').style.display = 'block';
+        document.getElementById('heardStrengthsList').innerHTML =
+          strengths.map(s => `<div class="heard-strength">${esc(s)}</div>`).join('');
+      }
+    }
+
     document.getElementById('projTitle').textContent = project.project_title || 'Your Recovery Project';
     document.getElementById('projSummary').textContent = project.project_summary || '';
 
@@ -350,7 +413,7 @@
             <div class="phase-range">${esc(phase.week_range)}</div>
             <div class="phase-focus">${esc(phase.focus)}</div>
           </div>
-          <button class="phase-info-btn" onclick="event.stopPropagation(); togglePhase(${i})" aria-label="More info">ⓘ</button>
+          <button class="phase-info-btn" onclick="event.stopPropagation(); togglePhase(${i})" aria-label="More info"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="12" cy="12" r="9"/><line x1="12" y1="11" x2="12" y2="16"/><circle cx="12" cy="8" r="0.6" fill="currentColor" stroke="none"/></svg></button>
         </div>
         <div class="phase-body" id="phase-${i}">
           <div class="phase-inner">
@@ -363,6 +426,7 @@
       roadmapEl.appendChild(card);
     });
 
+    stopLoadingStages();
     document.getElementById('loadingScreen').style.display = 'none';
     document.getElementById('mainContent').style.display = 'block';
     document.getElementById('errorView').style.display = 'none';
@@ -451,6 +515,7 @@
   }
 
   function showError(msg) {
+    stopLoadingStages();
     document.getElementById('loadingScreen').style.display = 'none';
     document.getElementById('mainContent').style.display = 'block';
     document.getElementById('projectView').style.display = 'none';

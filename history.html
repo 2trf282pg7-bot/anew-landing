@@ -27,7 +27,7 @@
   /* MENU */
   .menu-overlay { display: none; position: fixed; inset: 0; background: rgba(28,22,20,0.3); z-index: 999; }
   .menu-overlay.open { display: block; }
-  .menu-drawer { position: fixed; right: 0; top: 0; width: 240px; height: 100vh; background: white; z-index: 1000; box-shadow: -4px 0 20px rgba(28,22,20,0.1); transform: translateX(100%); transition: transform 0.25s ease; display: flex; flex-direction: column; }
+  .menu-drawer { position: fixed; right: 0; top: 0; width: 240px; height: 100dvh; background: white; z-index: 1000; box-shadow: -4px 0 20px rgba(28,22,20,0.1); transform: translateX(100%); transition: transform 0.25s ease; display: flex; flex-direction: column; }
   .menu-drawer.open { transform: translateX(0); }
   .menu-item { display: block; padding: 16px 24px; font-family: 'DM Sans', sans-serif; font-size: 15px; color: var(--charcoal); border-bottom: 1px solid var(--blush-deep); text-decoration: none; background: none; border-left: none; border-right: none; border-top: none; cursor: pointer; text-align: left; width: 100%; transition: background 0.15s ease; }
   .menu-item:hover { background: var(--section-alt); }
@@ -72,9 +72,10 @@
 
 <div class="menu-overlay" id="menuOverlay" onclick="closeMenu()"></div>
 <div class="menu-drawer" id="menuDrawer">
+  <a href="/dashboard.html" class="menu-item">Check-in</a>
   <a href="/project.html" class="menu-item">My Project</a>
   <a href="/history.html" class="menu-item active">Conversation History</a>
-  <a href="#" class="menu-item" onclick="closeMenu()">Account</a>
+  <a href="/account.html" class="menu-item">Account</a>
   <div class="menu-divider"></div>
   <button class="menu-item menu-item-logout" onclick="handleLogout()">Log out</button>
 </div>
