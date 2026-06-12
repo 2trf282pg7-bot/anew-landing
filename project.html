@@ -52,6 +52,17 @@
   .task-info:hover { color: var(--clay); }
   .task-info svg { width: 18px; height: 18px; }
   .empty-state { font-size: 14px; color: var(--stone); font-style: italic; padding: 8px 0; }
+  /* Weekly counter + inline reaction (D-3) */
+  .week-counter { font-size: 13px; color: var(--charcoal-soft); line-height: 1.5; margin-bottom: 14px; }
+  .week-counter strong { color: var(--clay-dark); font-weight: 500; }
+  .reaction-inline { margin-top: 16px; padding-top: 16px; border-top: 1px solid var(--section-alt); }
+  .reaction-q { font-family: 'Cormorant Garamond', serif; font-size: 18px; color: var(--charcoal); line-height: 1.4; margin-bottom: 12px; }
+  .reaction-opts { display: flex; flex-direction: column; gap: 8px; }
+  .reaction-btn { width: 100%; text-align: left; background: var(--section-alt); border: 1.5px solid transparent; color: var(--charcoal); font-family: 'DM Sans', sans-serif; font-size: 15px; padding: 13px 15px; min-height: 44px; border-radius: 10px; cursor: pointer; transition: border-color 0.2s ease, background 0.2s ease; }
+  .reaction-btn:hover { border-color: var(--blush-deep); background: white; }
+  .reaction-skip { align-self: flex-start; background: none; border: none; color: var(--stone); font-size: 13px; padding: 12px 4px; min-height: 44px; cursor: pointer; text-decoration: underline; text-underline-offset: 3px; }
+  .reaction-skip:hover { color: var(--charcoal-soft); }
+  .reaction-saved { margin-top: 14px; font-size: 13px; color: var(--charcoal-soft); }
 
   /* Roadmap */
   .roadmap-phases { display: flex; flex-direction: column; gap: 10px; margin-top: 8px; }
@@ -64,7 +75,11 @@
   .phase-badge { font-size: 10px; padding: 3px 8px; border-radius: 100px; background: var(--clay); color: white; white-space: nowrap; }
   .phase-body { padding: 0 16px; max-height: 0; overflow: hidden; transition: max-height 0.3s ease, padding 0.3s ease; }
   .phase-body.open { max-height: 600px; padding: 0 16px 16px; }
-  .phase-theory { font-size: 13px; color: var(--charcoal-soft); line-height: 1.5; margin-bottom: 10px; font-style: italic; }
+  .phase-theory { font-size: 13px; color: var(--charcoal-soft); line-height: 1.6; margin-bottom: 10px; }
+  /* Visible theory chip on the roadmap (D-8) */
+  .theory-chip { display: inline-flex; align-items: center; gap: 6px; min-height: 32px; padding: 5px 11px; border-radius: 100px; border: 1.5px solid var(--clay); background: rgba(184,112,78,0.08); color: var(--clay-dark); font-family: 'DM Sans', sans-serif; font-size: 12px; font-weight: 500; cursor: pointer; vertical-align: middle; transition: background 0.2s ease; }
+  .theory-chip:hover { background: rgba(184,112,78,0.16); }
+  .theory-chip svg { width: 15px; height: 15px; }
   .phase-tasks-list { display: flex; flex-direction: column; gap: 6px; }
   .phase-task { font-size: 13px; color: var(--charcoal); padding: 8px 0; border-bottom: 1px solid var(--section-alt); display: flex; gap: 8px; align-items: flex-start; }
   .phase-task:last-child { border-bottom: none; }
@@ -144,7 +159,7 @@
 <div class="menu-drawer" id="menuDrawer">
   <a href="/dashboard.html" class="menu-item">Check-in</a>
   <a href="/project.html" class="menu-item active">My Project</a>
-  <a href="/history.html" class="menu-item">Conversation History</a>
+  <a href="/history.html" class="menu-item">History</a>
   <a href="/account.html" class="menu-item">Account</a>
   <div class="menu-divider"></div>
   <button class="menu-item menu-item-logout" onclick="handleLogout()">Log out</button>
@@ -178,7 +193,21 @@
   <!-- This week's tasks -->
   <div class="card" id="weekTasksCard" style="display:none">
     <div class="card-label">This week's tasks</div>
+    <div class="week-counter" id="weekCounter"></div>
     <div class="task-list" id="taskList"></div>
+
+    <!-- Inline partner reaction, shown when a task is checked (D-3) -->
+    <div class="reaction-inline" id="reactionInline" style="display:none">
+      <div class="reaction-q">How did it go with your partner this week?</div>
+      <div class="reaction-opts">
+        <button class="reaction-btn" onclick="recordProjectReaction('It went better than I expected')">It went better than I expected</button>
+        <button class="reaction-btn" onclick="recordProjectReaction(&quot;They didn't really respond&quot;)">They didn't really respond</button>
+        <button class="reaction-btn" onclick="recordProjectReaction(&quot;It didn't go well&quot;)">It didn't go well</button>
+        <button class="reaction-btn" onclick="recordProjectReaction(&quot;I'm not sure yet&quot;)">I'm not sure yet</button>
+        <button class="reaction-skip" onclick="hideReactionInline()">Skip</button>
+      </div>
+    </div>
+    <div class="reaction-saved" id="reactionSaved" style="display:none"></div>
   </div>
 
   <!-- Schedule -->
@@ -208,7 +237,7 @@
       <button class="preset-btn" type="button" onclick="presetSundayEvening()">Sunday evening</button>
     </div>
     <label class="sheet-label" for="checkinInput">Date &amp; time</label>
-    <input class="sheet-input" id="checkinInput" type="datetime-local" />
+    <input class="sheet-input" id="checkinInput" type="datetime-local" step="1800" />
     <div class="sheet-error" id="checkinSheetError"></div>
     <button class="sheet-save" id="checkinSaveBtn" onclick="saveCheckin()">Save check-in</button>
     <button class="sheet-skip" onclick="closeCheckinSheet()">Cancel</button>
@@ -229,6 +258,7 @@
   const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imh6a2tmdHNpaGl0a3ZkaW55ZGp1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzUyNzUyODksImV4cCI6MjA5MDg1MTI4OX0.D7QBobLt7JhMGJcNNhvlLvKjq2ysozYa2k9Z0Fj8ZGI';
   let sbClient = null, currentUser = null, currentProject = null;
   let changeRequestCount = 0;
+  let weekTasksTotal = 0, reactionRecorded = false;
 
   async function init() {
     try {
@@ -338,7 +368,8 @@
         `;
         list.appendChild(item);
       });
-      restoreTaskStates(weekIndex); // item 20
+      weekTasksTotal = phase.tasks.length;
+      restoreTaskStates(weekIndex); // item 20 + D-3 counter/reaction restore
     }
 
     if (roadmap.length) {
@@ -347,6 +378,10 @@
       phases.innerHTML = '';
       roadmap.forEach((p, i) => {
         const isCurrent = i === Math.min(weekIndex, roadmap.length - 1);
+        const info = detectTheory(p.theory);
+        const theoryLine = info
+          ? `<p class="phase-theory"><button class="theory-chip" onclick="openTheoryInfo('${info.key}')"><span>${THEORY_INFO[info.key].short}</span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="9"/><line x1="12" y1="11" x2="12" y2="16"/><circle cx="12" cy="8" r="0.7" fill="currentColor" stroke="none"/></svg></button> ${p.theory_explanation || ''}</p>`
+          : `<p class="phase-theory">${p.theory ? p.theory + ': ' : ''}${p.theory_explanation || ''}</p>`;
         const el = document.createElement('div');
         el.className = 'phase-item';
         el.innerHTML = `
@@ -358,7 +393,7 @@
             ${isCurrent ? '<span class="phase-badge">Now</span>' : ''}
           </div>
           <div class="phase-body ${isCurrent ? 'open' : ''}">
-            <p class="phase-theory">${p.theory}: ${p.theory_explanation}</p>
+            ${theoryLine}
             <div class="phase-tasks-list">
               ${(p.tasks || []).map(t => `<div class="phase-task">· ${t.title}</div>`).join('')}
             </div>
@@ -404,26 +439,47 @@
     return Math.max(0, Math.floor((Date.now() - start) / (1000 * 60 * 60 * 24) / 7));
   }
 
-  // Restore checkbox state from saved actions for this week (item 20)
+  function countTried() {
+    return document.querySelectorAll('.task-check:checked').length;
+  }
+  // Non-judgmental framing: trying even one is enough (D-3)
+  function updateWeekCounter() {
+    const el = document.getElementById('weekCounter');
+    if (!el) return;
+    const n = countTried();
+    el.innerHTML = `This week: <strong>${n} of ${weekTasksTotal} tried</strong>. `
+      + (n === 0 ? 'No pressure — start whenever you\'re ready.' : 'Trying even one is enough.');
+  }
+
+  // Restore checkbox state + week counter + saved reaction (items 20, D-3)
   async function restoreTaskStates(weekIndex) {
     if (!currentProject) return;
     const { data } = await sbClient
       .from('actions')
-      .select('description, status, created_at')
+      .select('description, status, type, created_at')
       .eq('project_id', currentProject.id)
-      .eq('type', 'task')
       .eq('week_index', weekIndex)
       .order('created_at', { ascending: true });
-    if (!data) return;
-    const latest = {}; // description -> latest status
-    data.forEach(a => { latest[a.description] = a.status; });
-    document.querySelectorAll('.task-check').forEach(cb => {
-      const t = cb.getAttribute('data-title');
-      if (t && latest[t] !== undefined) cb.checked = latest[t] === 'done';
-    });
+    if (data) {
+      const latest = {}; // task description -> latest status
+      let reaction = null;
+      data.forEach(a => {
+        if (a.type === 'task') latest[a.description] = a.status;
+        if (a.type === 'partner_reaction') reaction = a.description;
+      });
+      document.querySelectorAll('.task-check').forEach(cb => {
+        const t = cb.getAttribute('data-title');
+        if (t && latest[t] !== undefined) cb.checked = latest[t] === 'done';
+      });
+      if (reaction) {
+        reactionRecorded = true;
+        showReactionSaved(reaction);
+      }
+    }
+    updateWeekCounter();
   }
 
-  // Update the existing row for this task+week, or insert once (no infinite inserts, item 20)
+  // Update the existing row for this task+week, or insert once (item 20)
   async function toggleTask(checkbox, title) {
     if (!currentProject) return;
     const wk = currentWeekIndex();
@@ -445,10 +501,57 @@
         });
       }
     } catch (e) { console.error('[Anew] toggleTask error:', e.message); }
+
+    updateWeekCounter();
+    if (checkbox.checked) {
+      // Checking a task invites the partner-reaction once per week (D-3)
+      if (!reactionRecorded) {
+        document.getElementById('reactionInline').style.display = 'block';
+      }
+    } else if (countTried() === 0) {
+      // Unchecking everything removes the week's recorded reaction (D-3)
+      await removeWeekReaction();
+      document.getElementById('reactionInline').style.display = 'none';
+    }
+  }
+
+  function hideReactionInline() {
+    document.getElementById('reactionInline').style.display = 'none';
+  }
+  function showReactionSaved(choice) {
+    const el = document.getElementById('reactionSaved');
+    el.textContent = `You noted: "${choice}".`;
+    el.style.display = 'block';
+  }
+  async function recordProjectReaction(choice) {
+    hideReactionInline();
+    if (!currentProject) return;
+    reactionRecorded = true;
+    showReactionSaved(choice);
+    try {
+      await sbClient.from('actions').insert({
+        project_id: currentProject.id, type: 'partner_reaction', description: choice, week_index: currentWeekIndex(),
+      });
+    } catch (e) { console.error('[Anew] reaction save error:', e.message); }
+  }
+  async function removeWeekReaction() {
+    reactionRecorded = false;
+    document.getElementById('reactionSaved').style.display = 'none';
+    if (!currentProject) return;
+    try {
+      await sbClient.from('actions')
+        .delete()
+        .eq('project_id', currentProject.id)
+        .eq('type', 'partner_reaction')
+        .eq('week_index', currentWeekIndex());
+    } catch (e) { console.error('[Anew] reaction remove error:', e.message); }
   }
 
   function addCheckin() {
-    document.getElementById('checkinInput').value = toLocalInput(defaultCheckinDate());
+    const inp = document.getElementById('checkinInput');
+    const minD = new Date(); minD.setHours(0, 0, 0, 0);
+    inp.min = toLocalInput(minD); // D-5
+    inp.value = toLocalInput(defaultCheckinDate());
     document.getElementById('checkinSheetError').classList.remove('show');
     document.getElementById('checkinSheet').classList.add('open');
   }
@@ -473,6 +576,8 @@
     if (!val) { err.textContent = 'Please choose a date and time.'; err.classList.add('show'); return; }
     const d = new Date(val);
     if (isNaN(d.getTime())) { err.textContent = 'That date doesn\'t look right.'; err.classList.add('show'); return; }
+    const yr = d.getFullYear(); const nowYr = new Date().getFullYear();
+    if (yr < nowYr || yr > nowYr + 5) { err.textContent = 'Please choose a valid date.'; err.classList.add('show'); return; }
     if (d.getTime() <= Date.now()) { err.textContent = 'Please choose a time in the future.'; err.classList.add('show'); return; }
     if (!currentProject) { closeCheckinSheet(); return; }
     const btn = document.getElementById('checkinSaveBtn');
@@ -491,6 +596,32 @@
   async function deleteCheckin(id) {
     await sbClient.from('checkins').delete().eq('id', id);
     loadSchedule();
+  }
+
+  // Static, human-written method explanations (C-2/D-8), reusing the theory modal
+  const THEORY_INFO = {
+    eft: { name: 'Emotionally Focused Therapy (EFT)', short: 'EFT', text: 'EFT looks at the emotions underneath your conflicts — the fear, hurt, or longing driving the cycle — so you can respond to what\'s really going on instead of the surface argument.' },
+    gottman: { name: 'The Gottman Method', short: 'Gottman', text: 'Built on decades of research into what keeps couples close, the Gottman Method focuses on everyday habits — how you handle conflict, repair after a fight, and stay connected.' },
+    mi: { name: 'Motivational Interviewing (MI)', short: 'MI', text: 'MI is a gentle way of working through mixed feelings about change, helping you find your own reasons and readiness rather than being pushed.' },
+    cbt: { name: 'Cognitive Behavioral Therapy (CBT)', short: 'CBT', text: 'CBT notices the automatic thoughts that shape how you feel and react, and gently tests whether they\'re actually true.' },
+    ibct: { name: 'Integrative Behavioral Couple Therapy (IBCT)', short: 'IBCT', text: 'IBCT blends making real changes with accepting the differences that won\'t fully change — easing the resentment that builds over years.' },
+    sensate: { name: 'Sensate Focus', short: 'Sensate Focus', text: 'Sensate Focus is a slow, pressure-free way to rebuild physical closeness through gentle, structured touch — introduced only later, once there\'s enough groundwork and safety.' },
+  };
+  function detectTheory(str) {
+    const s = (str || '').toLowerCase();
+    let key = null;
+    if (s.includes('sensate')) key = 'sensate';
+    else if (s.includes('ibct') || s.includes('integrative behavioral')) key = 'ibct';
+    else if (s.includes('eft') || s.includes('emotionally focused')) key = 'eft';
+    else if (s.includes('gottman')) key = 'gottman';
+    else if (s.includes('motivational') || /\bmi\b/.test(s)) key = 'mi';
+    else if (s.includes('cbt') || s.includes('cognitive behavioral')) key = 'cbt';
+    return key ? { key } : null;
+  }
+  function openTheoryInfo(key) {
+    const info = THEORY_INFO[key];
+    if (!info) return;
+    openTheory(info.name, info.text);
   }
 
   function openTheory(title, text) {

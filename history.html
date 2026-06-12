@@ -43,7 +43,7 @@
   .session-card { background: white; border-radius: 16px; padding: 24px 28px; box-shadow: 0 2px 16px rgba(28,22,20,0.06); cursor: pointer; transition: box-shadow 0.2s ease; }
   .session-card:hover { box-shadow: 0 4px 24px rgba(28,22,20,0.10); }
   .session-date { font-family: 'Cormorant Garamond', serif; font-size: 18px; color: var(--charcoal); margin-bottom: 4px; }
-  .session-overview { font-size: 14px; color: var(--stone); }
+  .session-overview { font-size: 14px; color: var(--charcoal-soft); line-height: 1.6; }
   .session-body { display: none; margin-top: 16px; border-top: 1px solid var(--section-alt); padding-top: 16px; }
   .session-body.open { display: block; }
   .session-msg { margin-bottom: 12px; }
@@ -74,7 +74,7 @@
 <div class="menu-drawer" id="menuDrawer">
   <a href="/dashboard.html" class="menu-item">Check-in</a>
   <a href="/project.html" class="menu-item">My Project</a>
-  <a href="/history.html" class="menu-item active">Conversation History</a>
+  <a href="/history.html" class="menu-item active">History</a>
   <a href="/account.html" class="menu-item">Account</a>
   <div class="menu-divider"></div>
   <button class="menu-item menu-item-logout" onclick="handleLogout()">Log out</button>
@@ -106,7 +106,7 @@
   async function loadHistory() {
     const { data: sessions } = await sbClient
       .from('sessions')
-      .select('id, created_at, type')
+      .select('id, created_at, type, summary')
       .eq('user_id', currentUser.id)
       .order('created_at', { ascending: false });
 
@@ -126,13 +126,17 @@
     sessions.forEach(session => {
       const d = new Date(session.created_at);
       const dateStr = d.toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
-      const typeLabel = session.type === 'checkin' ? 'Weekly Check-in' : 'Onboarding';
+      const typeLabel = session.type === 'checkin' ? 'Weekly check-in'
+        : session.type === 'review' ? 'Project review' : 'Onboarding';
+      const overview = session.summary
+        ? escHtml(session.summary)
+        : 'Conversation with Anew — tap to read';
       const card = document.createElement('div');
       card.className = 'session-card';
       card.innerHTML = `
         <div class="session-type-label">${typeLabel}</div>
         <div class="session-date">${dateStr}</div>
-        <div class="session-overview">Conversation with Anew</div>
+        <div class="session-overview">${overview}</div>
         <div class="session-body" id="body-${session.id}"></div>
       `;
       card.addEventListener('click', () => toggleSession(session.id));

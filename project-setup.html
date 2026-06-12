@@ -291,6 +291,13 @@
       return;
     }
 
+    // D-10: onboarding sessions were left with user_id = null (register-time linking
+    // didn't persist), so they never showed in History. Claim the session here, where
+    // the user is reliably authenticated and the id is known.
+    try {
+      await sbClient.from('sessions').update({ user_id: currentUser.id }).eq('id', sessionId).is('user_id', null);
+    } catch (_) {}
+
     const { data: { session } } = await sbClient.auth.getSession();
     if (!session) { window.location.href = '/app.html'; return; }
 
