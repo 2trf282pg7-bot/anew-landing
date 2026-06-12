@@ -65,7 +65,7 @@ The roadmap must have exactly these 4 phases.`;
 module.exports = async (req, res) => {
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
 
-  const { session_id, user_id, adjustment_note } = req.body;
+  const { session_id, user_id, adjustment_note, force } = req.body;
   if (!session_id) return res.status(400).json({ error: 'session_id required' });
 
   const supabase = createClient(
@@ -99,6 +99,12 @@ module.exports = async (req, res) => {
       ? `\n\nThe user has reviewed a previous version of the project and requested the following changes:\n"${adjustment_note}"\nIncorporate these changes into the new project. The safety and sufficiency gates still apply.`
       : '';
 
+    // After two needs_more rounds the client forces generation (E-1): skip STEP 1
+    // entirely and build from whatever is available. STEP 0 (safety) still applies.
+    const forceSection = force
+      ? '\n\nIMPORTANT: The user has already been asked for more detail twice. Do NOT return needs_more. Skip STEP 1 (the sufficiency gate) entirely and generate the best possible 90-day project from the conversation available. STEP 0 (safety) still applies.'
+      : '';
+
     const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
     const response = await client.messages.create({
       model: 'claude-sonnet-4-6',
@@ -106,7 +112,7 @@ module.exports = async (req, res) => {
       system: SYSTEM_PROMPT,
       messages: [{
         role: 'user',
-        content: `Conversation:\n${conversation}${adjustmentSection}`,
+        content: `Conversation:\n${conversation}${adjustmentSection}${forceSection}`,
       }],
     });
 

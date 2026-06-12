@@ -197,9 +197,18 @@
     <div class="guide-card">
       <div class="guide-eyebrow">Before I build your project</div>
       <div class="guide-title">I want to understand a little more first</div>
-      <div class="guide-text">There are a couple of things I'd love to hear more about, so the project I build truly fits your situation — not a generic one.</div>
-      <div class="guide-questions" id="needsMoreQuestions"></div>
-      <a href="/dashboard.html" class="btn-guide">Continue the conversation</a>
+      <div class="guide-text">A few more details will help me build something that truly fits your situation — not a generic plan.</div>
+      <div class="adjust-chat" id="nmChat" style="margin-top:6px"></div>
+      <div class="adjust-input-row" id="nmInputRow" style="display:none; margin-top:6px">
+        <textarea class="adjust-textarea" id="nmInput" placeholder="Take your time…" rows="1"></textarea>
+        <button class="adjust-send" id="nmSendBtn" onclick="sendNeedsMore()" aria-label="Send">
+          <svg width="16" height="16" viewBox="0 0 18 18" fill="none">
+            <path d="M3 9H15M15 9L10 4M15 9L10 14" stroke="white" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </button>
+      </div>
+      <button class="btn-guide" id="nmContinueBtn" onclick="openNeedsMoreChat()">Continue the conversation</button>
+      <button class="btn-guide" id="nmBuildBtn" style="display:none; margin-top:12px" onclick="buildFromNeedsMore()">Build my project</button>
     </div>
   </div>
 
@@ -221,6 +230,9 @@
   let sbClient = null, currentUser = null, currentProject = null;
   let adjustCount = 0;
   const MAX_ADJUSTMENTS = 2;
+  // needs_more inline chat state (E-1)
+  let onboardingSessionId = null;
+  let needsMoreRound = 0, nmChatOpen = false, nmHasReply = false, pendingNmQuestions = [];
 
   async function init() {
     try {
@@ -297,6 +309,7 @@
     try {
       await sbClient.from('sessions').update({ user_id: currentUser.id }).eq('id', sessionId).is('user_id', null);
     } catch (_) {}
+    onboardingSessionId = sessionId; // E-1: needs_more chat persists to this session
 
     const { data: { session } } = await sbClient.auth.getSession();
     if (!session) { window.location.href = '/app.html'; return; }
@@ -304,6 +317,8 @@
     try {
       const body = { session_id: sessionId, user_id: currentUser.id };
       if (adjustmentNote) body.adjustment_note = adjustmentNote;
+      // E-1: cap needs_more at 2 rounds — on the next attempt, force generation
+      if (needsMoreRound >= 2) body.force = true;
 
       const res = await fetch('/api/generate-project', {
         method: 'POST',
@@ -336,15 +351,10 @@
     }
   }
 
+  // E-1: needs_more is handled inline (no navigation). The conversation persists to
+  // the linked onboarding session so the next generate-project sees the full context.
   function showNeedsMore(questions) {
-    const box = document.getElementById('needsMoreQuestions');
-    box.innerHTML = '';
-    questions.forEach(q => {
-      const el = document.createElement('div');
-      el.className = 'guide-question';
-      el.textContent = q;
-      box.appendChild(el);
-    });
+    needsMoreRound++;
     stopLoadingStages();
     document.getElementById('loadingScreen').style.display = 'none';
     document.getElementById('mainContent').style.display = 'block';
@@ -352,6 +362,77 @@
     document.getElementById('errorView').style.display = 'none';
     document.getElementById('referView').style.display = 'none';
     document.getElementById('needsMoreView').style.display = 'block';
+
+    if (!nmChatOpen) {
+      // First round: offer the "Continue the conversation" entry point
+      pendingNmQuestions = questions || [];
+      document.getElementById('nmContinueBtn').style.display = 'block';
+      document.getElementById('nmInputRow').style.display = 'none';
+      document.getElementById('nmBuildBtn').style.display = 'none';
+    } else {
+      // Already chatting (round 2): append the new question into the same thread
+      appendNmAssistant(weaveQuestions(questions));
+      document.getElementById('nmInputRow').style.display = 'flex';
+      document.getElementById('nmBuildBtn').style.display = 'none';
+      nmHasReply = false;
+      document.getElementById('nmInput').focus();
+    }
+  }
+
+  function weaveQuestions(questions) {
+    const qs = (questions || []).filter(Boolean).join(' ');
+    return 'Thank you for staying with me. ' + (qs || 'Could you tell me a little more about what\'s been happening?');
+  }
+
+  function openNeedsMoreChat() {
+    nmChatOpen = true;
+    document.getElementById('nmContinueBtn').style.display = 'none';
+    document.getElementById('nmInputRow').style.display = 'flex';
+    appendNmAssistant(weaveQuestions(pendingNmQuestions));
+    document.getElementById('nmInput').focus();
+  }
+
+  function appendNmAssistant(text) {
+    const chat = document.getElementById('nmChat');
+    const el = document.createElement('div');
+    el.className = 'adj-msg-ai';
+    el.textContent = text;
+    chat.appendChild(el);
+    chat.scrollTop = chat.scrollHeight;
+    saveNmMessage('assistant', text);
+  }
+
+  async function saveNmMessage(role, content) {
+    if (!sbClient || !onboardingSessionId) return;
+    try { await sbClient.from('messages').insert({ session_id: onboardingSessionId, role, content }); } catch (_) {}
+  }
+
+  function sendNeedsMore() {
+    const ta = document.getElementById('nmInput');
+    const text = ta.value.trim();
+    if (!text) return;
+    ta.value = ''; ta.style.height = 'auto';
+    const chat = document.getElementById('nmChat');
+    const el = document.createElement('div');
+    el.className = 'adj-msg-user';
+    el.textContent = text;
+    chat.appendChild(el);
+    chat.scrollTop = chat.scrollHeight;
+    saveNmMessage('user', text);
+    nmHasReply = true;
+    document.getElementById('nmBuildBtn').style.display = 'block'; // at least one reply (E-1 step 3)
+  }
+
+  async function buildFromNeedsMore() {
+    if (!nmHasReply) return;
+    document.getElementById('nmBuildBtn').disabled = true;
+    document.getElementById('nmSendBtn').disabled = true;
+    try {
+      await generateProject();
+    } finally {
+      document.getElementById('nmBuildBtn').disabled = false;
+      document.getElementById('nmSendBtn').disabled = false;
+    }
   }
 
   function showRefer(result) {
@@ -539,6 +620,14 @@
       if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendAdjust(); }
     });
     document.getElementById('adjustInput').addEventListener('input', function() {
+      this.style.height = 'auto';
+      this.style.height = Math.min(this.scrollHeight, 100) + 'px';
+    });
+    // needs_more inline chat input (E-1)
+    document.getElementById('nmInput').addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendNeedsMore(); }
+    });
+    document.getElementById('nmInput').addEventListener('input', function() {
       this.style.height = 'auto';
       this.style.height = Math.min(this.scrollHeight, 100) + 'px';
     });

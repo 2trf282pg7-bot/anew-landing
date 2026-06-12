@@ -236,8 +236,10 @@
       <button class="preset-btn" type="button" onclick="presetNextWeek()">Same time next week</button>
       <button class="preset-btn" type="button" onclick="presetSundayEvening()">Sunday evening</button>
     </div>
-    <label class="sheet-label" for="checkinInput">Date &amp; time</label>
-    <input class="sheet-input" id="checkinInput" type="datetime-local" step="1800" />
+    <label class="sheet-label" for="checkinDate">Date</label>
+    <input class="sheet-input" id="checkinDate" type="date" />
+    <label class="sheet-label" for="checkinTime">Time</label>
+    <select class="sheet-input" id="checkinTime"></select>
     <div class="sheet-error" id="checkinSheetError"></div>
     <button class="sheet-save" id="checkinSaveBtn" onclick="saveCheckin()">Save check-in</button>
     <button class="sheet-skip" onclick="closeCheckinSheet()">Cancel</button>
@@ -547,37 +549,62 @@
     } catch (e) { console.error('[Anew] reaction remove error:', e.message); }
   }
 
-  function addCheckin() {
-    const inp = document.getElementById('checkinInput');
-    const minD = new Date(); minD.setHours(0, 0, 0, 0);
-    inp.min = toLocalInput(minD); // D-5
-    inp.value = toLocalInput(defaultCheckinDate());
-    document.getElementById('checkinSheetError').classList.remove('show');
-    document.getElementById('checkinSheet').classList.add('open');
+  // E-2: split date + 30-min time select
+  function pad2(n) { return String(n).padStart(2, '0'); }
+  function localDateStr(d) { return `${d.getFullYear()}-${pad2(d.getMonth() + 1)}-${pad2(d.getDate())}`; }
+  function fmtTimeDisplay(h, m) {
+    const ampm = h < 12 ? 'AM' : 'PM'; let hh = h % 12; if (hh === 0) hh = 12;
+    return `${hh}:${pad2(m)} ${ampm}`;
   }
-  function closeCheckinSheet() { document.getElementById('checkinSheet').classList.remove('open'); }
-  function toLocalInput(d) {
-    const pad = (n) => String(n).padStart(2, '0');
-    return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
+  function populateTimeOptions() {
+    const sel = document.getElementById('checkinTime');
+    if (sel.options.length) return;
+    for (let h = 0; h < 24; h++) {
+      for (const m of [0, 30]) {
+        const o = document.createElement('option');
+        o.value = `${pad2(h)}:${pad2(m)}`;
+        o.textContent = fmtTimeDisplay(h, m);
+        sel.appendChild(o);
+      }
+    }
   }
   function defaultCheckinDate() {
     const d = new Date(); d.setDate(d.getDate() + 7); d.setHours(19, 0, 0, 0); return d;
   }
-  function presetNextWeek() { document.getElementById('checkinInput').value = toLocalInput(defaultCheckinDate()); }
+  function setSheetDateTime(d) {
+    document.getElementById('checkinDate').value = localDateStr(d);
+    const m = d.getMinutes() < 30 ? 0 : 30;
+    document.getElementById('checkinTime').value = `${pad2(d.getHours())}:${pad2(m)}`;
+  }
+  function addCheckin() {
+    populateTimeOptions();
+    const today = new Date(); today.setHours(0, 0, 0, 0);
+    document.getElementById('checkinDate').min = localDateStr(today);
+    setSheetDateTime(defaultCheckinDate());
+    document.getElementById('checkinSheetError').classList.remove('show');
+    document.getElementById('checkinSheet').classList.add('open');
+  }
+  function closeCheckinSheet() { document.getElementById('checkinSheet').classList.remove('open'); }
+  function presetNextWeek() { setSheetDateTime(defaultCheckinDate()); }
   function presetSundayEvening() {
     const d = new Date();
     const days = (7 - d.getDay()) % 7 || 7;
     d.setDate(d.getDate() + days); d.setHours(19, 0, 0, 0);
-    document.getElementById('checkinInput').value = toLocalInput(d);
+    setSheetDateTime(d);
   }
   async function saveCheckin() {
     const err = document.getElementById('checkinSheetError');
-    const val = document.getElementById('checkinInput').value;
-    if (!val) { err.textContent = 'Please choose a date and time.'; err.classList.add('show'); return; }
-    const d = new Date(val);
+    const dateV = document.getElementById('checkinDate').value;
+    const timeV = document.getElementById('checkinTime').value;
+    if (!dateV || !timeV) { err.textContent = 'Please choose a date and time.'; err.classList.add('show'); return; }
+    const [hh, mm] = timeV.split(':').map(Number);
+    if (!(mm === 0 || mm === 30)) { err.textContent = 'Please pick a time on the hour or half-hour.'; err.classList.add('show'); return; }
+    const d = new Date(`${dateV}T${timeV}`);
     if (isNaN(d.getTime())) { err.textContent = 'That date doesn\'t look right.'; err.classList.add('show'); return; }
     const yr = d.getFullYear(); const nowYr = new Date().getFullYear();
     if (yr < nowYr || yr > nowYr + 5) { err.textContent = 'Please choose a valid date.'; err.classList.add('show'); return; }
+    const todayStart = new Date(); todayStart.setHours(0, 0, 0, 0);
+    if (d < todayStart) { err.textContent = 'Please choose today or a future date.'; err.classList.add('show'); return; }
     if (d.getTime() <= Date.now()) { err.textContent = 'Please choose a time in the future.'; err.classList.add('show'); return; }
     if (!currentProject) { closeCheckinSheet(); return; }
     const btn = document.getElementById('checkinSaveBtn');
