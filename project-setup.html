@@ -334,10 +334,10 @@ When you sense you have enough, warmly let them know they can tap "Build my proj
       return;
     }
 
-    // D-10: claim the onboarding session so it's linked to this user.
-    try {
-      await sbClient.from('sessions').update({ user_id: currentUser.id }).eq('id', sessionId).is('user_id', null);
-    } catch (_) {}
+    // Linking the onboarding session to the user happens server-side in
+    // /api/generate-project (service role). A client-side claim can't work: an
+    // authenticated user has no SELECT policy for an unlinked session, so the
+    // update matches 0 rows. We only need the id here for the inline chat.
     onboardingSessionId = sessionId; // F-1: the needs_more chat persists to this session
 
     const { data: { session } } = await sbClient.auth.getSession();

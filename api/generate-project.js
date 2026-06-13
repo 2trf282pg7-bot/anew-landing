@@ -81,6 +81,15 @@ module.exports = async (req, res) => {
   if (authErr || !user) return res.status(401).json({ error: 'Invalid token' });
   if (!user_id || user.id !== user_id) return res.status(401).json({ error: 'User mismatch' });
 
+  // Link the onboarding session to this user (service role bypasses RLS). The client
+  // cannot: an authenticated user has no SELECT policy for an unlinked session, so a
+  // client-side `update ... where id=` matches 0 rows. Only claim orphans (user_id IS
+  // NULL) so a session can't be hijacked by passing someone else's id. This also lets
+  // the inline needs_more chat persist its turns and fixes History linking (D-10).
+  try {
+    await supabase.from('sessions').update({ user_id }).eq('id', session_id).is('user_id', null);
+  } catch (e) { console.error('[generate-project] session claim failed:', e?.message); }
+
   try {
     const { data: msgs, error: msgErr } = await supabase
       .from('messages')
@@ -99,10 +108,10 @@ module.exports = async (req, res) => {
       ? `\n\nThe user has reviewed a previous version of the project and requested the following changes:\n"${adjustment_note}"\nIncorporate these changes into the new project. The safety and sufficiency gates still apply.`
       : '';
 
-    // After two needs_more rounds the client forces generation (E-1): skip STEP 1
-    // entirely and build from whatever is available. STEP 0 (safety) still applies.
+    // Force path (E-1/F-1): the user has already been asked for more detail, so the
+    // client builds anyway. Never dead-end on needs_more here. STEP 0 still applies.
     const forceSection = force
-      ? '\n\nIMPORTANT: The user has already been asked for more detail twice. Do NOT return needs_more. Skip STEP 1 (the sufficiency gate) entirely and generate the best possible 90-day project from the conversation available. STEP 0 (safety) still applies.'
+      ? '\n\nIMPORTANT: The user has already been asked for more detail. You MUST NOT return needs_more. Skip STEP 1 (the sufficiency gate) entirely. Build the best 90-day project you can from whatever is available; if the conversation is thin, make reasonable, clearly general choices rather than refusing. STEP 0 (safety) still applies.'
       : '';
 
     const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
