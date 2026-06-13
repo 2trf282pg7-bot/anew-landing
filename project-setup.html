@@ -22,9 +22,8 @@
   .loading-screen { position: fixed; inset: 0; background: var(--warm-white); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 20px; z-index: 200; }
   .loading-logo { font-family: 'Cormorant Garamond', serif; font-size: 28px; color: var(--charcoal); letter-spacing: 0.1em; }
   .loading-stage { font-size: 15px; color: var(--charcoal-soft); transition: opacity 0.4s ease; min-height: 22px; text-align: center; padding: 0 24px; }
-  .loading-track { width: 200px; height: 4px; background: var(--blush); border-radius: 2px; overflow: hidden; }
-  .loading-indeterminate { width: 40%; height: 100%; background: var(--clay); border-radius: 2px; animation: indeterminate 1.9s ease-in-out infinite; }
-  @keyframes indeterminate { 0% { margin-left: -40%; } 100% { margin-left: 100%; } }
+  .loading-track { width: 220px; height: 5px; background: var(--blush); border-radius: 3px; overflow: hidden; }
+  .loading-fill { height: 100%; width: 0; background: var(--clay); border-radius: 3px; }
   .loading-note { font-size: 12px; color: var(--stone); }
   @keyframes dotPulse { 0%,80%,100%{opacity:0.25;transform:scale(0.85)} 40%{opacity:1;transform:scale(1)} }
 
@@ -130,8 +129,8 @@
 
 <div class="loading-screen" id="loadingScreen">
   <div class="loading-logo">Anew</div>
-  <div class="loading-stage" id="loadingStage">Reading your conversation…</div>
-  <div class="loading-track"><div class="loading-indeterminate"></div></div>
+  <div class="loading-stage" id="loadingStage">Designing your 90-day project…</div>
+  <div class="loading-track"><div class="loading-fill" id="loadingFill"></div></div>
   <div class="loading-note">This usually takes about a minute.</div>
 </div>
 
@@ -207,7 +206,6 @@
           </svg>
         </button>
       </div>
-      <button class="btn-guide" id="nmContinueBtn" onclick="openNeedsMoreChat()">Continue the conversation</button>
       <button class="btn-guide" id="nmBuildBtn" style="display:none; margin-top:12px" onclick="buildFromNeedsMore()">Build my project</button>
     </div>
   </div>
@@ -230,9 +228,18 @@
   let sbClient = null, currentUser = null, currentProject = null;
   let adjustCount = 0;
   const MAX_ADJUSTMENTS = 2;
-  // needs_more inline chat state (E-1)
+  // needs_more inline chat state (E-1/F-1)
   let onboardingSessionId = null;
-  let needsMoreRound = 0, nmChatOpen = false, nmHasReply = false, pendingNmQuestions = [];
+  let nmActive = false, nmHasReply = false, nmBusy = false;
+  let nmHistory = []; // {role, content} for /api/chat
+
+  const SEED_MESSAGE = "Before I build this, it would help to understand a little more — what everyday life together has felt like lately, what you've already tried, and what you're most worried about. There's no rush; share whatever feels true, and tap the Build my project button below whenever you're ready.";
+
+  const INTAKE_SYSTEM = `You are Anew, a warm relationship support guide. The user has just paid and started building their 90-day project, but a little more context will make it fit their situation.
+Ask gentle follow-up questions, one at a time, to understand: what daily life together looks like, what they have already tried, and what they are most worried about.
+Keep replies to 1-2 warm, plain sentences. One question at a time. No lists. Never use emojis or decorative symbols.
+Only discuss their relationship. If asked to do anything unrelated, gently decline in one sentence and steer back.
+When you sense you have enough, warmly let them know they can tap "Build my project" whenever they're ready. Do not claim to have built anything.`;
 
   async function init() {
     try {
@@ -260,29 +267,53 @@
     }
   }
 
-  // Staged loading messages (C-1): no fake percentages, just honest stages.
-  let loadingTimers = [];
-  function startLoadingStages() {
-    stopLoadingStages();
-    const stageEl = document.getElementById('loadingStage');
-    const setStage = (text) => {
-      stageEl.style.opacity = '0';
-      setTimeout(() => { stageEl.textContent = text; stageEl.style.opacity = '1'; }, 300);
-    };
-    setStage('Reading your conversation…');
-    loadingTimers.push(setTimeout(() => setStage('Identifying the patterns underneath…'), 8000));
-    loadingTimers.push(setTimeout(() => setStage('Designing your 90-day project…'), 20000));
+  // F-2: honest, time-based determinate gauge. Eases toward ~95% over ~50s and
+  // keeps creeping (never frozen, never reaches 100% on its own); jumps to 100%
+  // only when the real response returns.
+  let progressRAF = null, progressStart = 0, progressDone = false, subSwapped = false;
+  function startProgress() {
+    const fill = document.getElementById('loadingFill');
+    const stage = document.getElementById('loadingStage');
+    stage.textContent = 'Designing your 90-day project…';
+    fill.style.transition = 'width 0.3s linear';
+    fill.style.width = '0%';
+    progressStart = performance.now();
+    progressDone = false;
+    subSwapped = false;
+    function tick(now) {
+      if (progressDone) return;
+      const elapsed = now - progressStart;
+      // ease-out: fast early, asymptotically approaching (never reaching) 95%
+      const pct = 95 * (1 - Math.exp(-elapsed / 18000));
+      fill.style.width = pct.toFixed(2) + '%';
+      // ~30s: swap to a second honest line describing the real work (F-2 step 4)
+      if (!subSwapped && elapsed > 30000) {
+        stage.style.opacity = '0';
+        setTimeout(() => { stage.textContent = 'Working through everything you shared…'; stage.style.opacity = '1'; }, 300);
+        subSwapped = true;
+      }
+      progressRAF = requestAnimationFrame(tick);
+    }
+    progressRAF = requestAnimationFrame(tick);
   }
-  function stopLoadingStages() {
-    loadingTimers.forEach(clearTimeout);
-    loadingTimers = [];
+  function finishProgress(cb) {
+    progressDone = true;
+    if (progressRAF) cancelAnimationFrame(progressRAF);
+    const fill = document.getElementById('loadingFill');
+    fill.style.transition = 'width 0.4s ease-out';
+    fill.style.width = '100%';
+    setTimeout(() => { if (cb) cb(); }, 450);
+  }
+  function stopProgress() {
+    progressDone = true;
+    if (progressRAF) cancelAnimationFrame(progressRAF);
   }
 
-  async function generateProject(adjustmentNote) {
+  async function generateProject(adjustmentNote, opts = {}) {
     document.getElementById('loadingScreen').style.display = 'flex';
     document.getElementById('mainContent').style.display = 'none';
     document.getElementById('errorView').style.display = 'none';
-    startLoadingStages();
+    startProgress();
 
     let sessionId = localStorage.getItem('anew_onboarding_session_id') || localStorage.getItem('anew_session_id');
     // Fallback for cross-device / cleared localStorage: postRegisterFlow links the
@@ -303,92 +334,79 @@
       return;
     }
 
-    // D-10: onboarding sessions were left with user_id = null (register-time linking
-    // didn't persist), so they never showed in History. Claim the session here, where
-    // the user is reliably authenticated and the id is known.
+    // D-10: claim the onboarding session so it's linked to this user.
     try {
       await sbClient.from('sessions').update({ user_id: currentUser.id }).eq('id', sessionId).is('user_id', null);
     } catch (_) {}
-    onboardingSessionId = sessionId; // E-1: needs_more chat persists to this session
+    onboardingSessionId = sessionId; // F-1: the needs_more chat persists to this session
 
     const { data: { session } } = await sbClient.auth.getSession();
     if (!session) { window.location.href = '/app.html'; return; }
 
-    try {
+    async function post(force) {
       const body = { session_id: sessionId, user_id: currentUser.id };
       if (adjustmentNote) body.adjustment_note = adjustmentNote;
-      // E-1: cap needs_more at 2 rounds — on the next attempt, force generation
-      if (needsMoreRound >= 2) body.force = true;
-
+      if (force) body.force = true;
       const res = await fetch('/api/generate-project', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${session.access_token}`
-        },
+        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${session.access_token}` },
         body: JSON.stringify(body)
       });
-
       if (!res.ok) {
-        // Surface the server's actual error text so testers can see the cause.
         let serverMsg = '';
         try { serverMsg = (await res.json()).error || ''; }
         catch (_) { try { serverMsg = await res.text(); } catch (_) {} }
         throw new Error(serverMsg || `Error ${res.status}`);
       }
+      return res.json();
+    }
 
-      const result = await res.json();
+    try {
+      let result = await post(false);
 
-      // Gate branches (item 4) — shown as warm cards, never as errors
-      if (result.status === 'needs_more') { showNeedsMore(result.questions || []); return; }
-      if (result.status === 'refer') { showRefer(result); return; }
+      if (result.status === 'needs_more') {
+        if (opts.fromBuild) {
+          // F-1 step 4: don't route back into chat — force one generation (same loading)
+          result = await post(true);
+          if (result.status === 'needs_more') {
+            stopProgress();
+            showError('We couldn\'t finish building your project. Please try again.');
+            return;
+          }
+        } else {
+          // Initial pass: gather more context through the inline chat (no re-generation)
+          stopProgress();
+          enterNeedsMoreChat();
+          return;
+        }
+      }
+
+      if (result.status === 'refer') { stopProgress(); showRefer(result); return; }
 
       currentProject = result;
-      renderProject(currentProject);
+      finishProgress(() => renderProject(currentProject));
     } catch (e) {
+      stopProgress();
       console.error('[Anew] generate-project error:', e);
       showError(e.message);
     }
   }
 
-  // E-1: needs_more is handled inline (no navigation). The conversation persists to
-  // the linked onboarding session so the next generate-project sees the full context.
-  function showNeedsMore(questions) {
-    needsMoreRound++;
-    stopLoadingStages();
+  // F-1: gather the missing context in ONE inline conversation via /api/chat
+  // (no per-turn re-generation). generate-project runs only on "Build my project".
+  function enterNeedsMoreChat() {
     document.getElementById('loadingScreen').style.display = 'none';
     document.getElementById('mainContent').style.display = 'block';
     document.getElementById('projectView').style.display = 'none';
     document.getElementById('errorView').style.display = 'none';
     document.getElementById('referView').style.display = 'none';
     document.getElementById('needsMoreView').style.display = 'block';
-
-    if (!nmChatOpen) {
-      // First round: offer the "Continue the conversation" entry point
-      pendingNmQuestions = questions || [];
-      document.getElementById('nmContinueBtn').style.display = 'block';
-      document.getElementById('nmInputRow').style.display = 'none';
-      document.getElementById('nmBuildBtn').style.display = 'none';
-    } else {
-      // Already chatting (round 2): append the new question into the same thread
-      appendNmAssistant(weaveQuestions(questions));
-      document.getElementById('nmInputRow').style.display = 'flex';
-      document.getElementById('nmBuildBtn').style.display = 'none';
-      nmHasReply = false;
-      document.getElementById('nmInput').focus();
-    }
-  }
-
-  function weaveQuestions(questions) {
-    const qs = (questions || []).filter(Boolean).join(' ');
-    return 'Thank you for staying with me. ' + (qs || 'Could you tell me a little more about what\'s been happening?');
-  }
-
-  function openNeedsMoreChat() {
-    nmChatOpen = true;
-    document.getElementById('nmContinueBtn').style.display = 'none';
     document.getElementById('nmInputRow').style.display = 'flex';
-    appendNmAssistant(weaveQuestions(pendingNmQuestions));
+
+    if (!nmActive) {
+      nmActive = true;
+      appendNmAssistant(SEED_MESSAGE); // one warm, pre-framing message (no bullets)
+    }
     document.getElementById('nmInput').focus();
   }
 
@@ -399,6 +417,7 @@
     el.textContent = text;
     chat.appendChild(el);
     chat.scrollTop = chat.scrollHeight;
+    nmHistory.push({ role: 'assistant', content: text });
     saveNmMessage('assistant', text);
   }
 
@@ -407,20 +426,67 @@
     try { await sbClient.from('messages').insert({ session_id: onboardingSessionId, role, content }); } catch (_) {}
   }
 
-  function sendNeedsMore() {
+  // Ensure the array sent to /api/chat starts with a user turn and alternates
+  function sanitizeForApi(history) {
+    const out = [];
+    for (const m of history) {
+      const content = (m.content || '').trim();
+      if (!content) continue;
+      const role = m.role === 'assistant' ? 'assistant' : 'user';
+      if (out.length === 0 && role !== 'user') continue;
+      const last = out[out.length - 1];
+      if (last && last.role === role) last.content += '\n\n' + content;
+      else out.push({ role, content });
+    }
+    return out;
+  }
+
+  function showNmTyping() {
+    const chat = document.getElementById('nmChat');
+    const el = document.createElement('div');
+    el.className = 'adj-msg-ai'; el.id = 'nmTyping'; el.textContent = '…';
+    chat.appendChild(el); chat.scrollTop = chat.scrollHeight;
+  }
+  function hideNmTyping() { document.getElementById('nmTyping')?.remove(); }
+
+  async function sendNeedsMore() {
     const ta = document.getElementById('nmInput');
     const text = ta.value.trim();
-    if (!text) return;
+    if (!text || nmBusy) return;
     ta.value = ''; ta.style.height = 'auto';
+
     const chat = document.getElementById('nmChat');
     const el = document.createElement('div');
     el.className = 'adj-msg-user';
     el.textContent = text;
-    chat.appendChild(el);
-    chat.scrollTop = chat.scrollHeight;
+    chat.appendChild(el); chat.scrollTop = chat.scrollHeight;
+    nmHistory.push({ role: 'user', content: text });
     saveNmMessage('user', text);
+
     nmHasReply = true;
-    document.getElementById('nmBuildBtn').style.display = 'block'; // at least one reply (E-1 step 3)
+    document.getElementById('nmBuildBtn').style.display = 'block'; // >=1 reply (E-1 step 3)
+
+    nmBusy = true;
+    document.getElementById('nmSendBtn').disabled = true;
+    showNmTyping();
+    try {
+      const res = await fetch('/api/chat', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ model: 'claude-sonnet-4-6', max_tokens: 300, system: INTAKE_SYSTEM, messages: sanitizeForApi(nmHistory) })
+      });
+      hideNmTyping();
+      if (res.ok) {
+        const data = await res.json();
+        const reply = data.content?.[0]?.text?.trim();
+        if (reply) appendNmAssistant(reply);
+      }
+    } catch (_) {
+      hideNmTyping();
+    } finally {
+      nmBusy = false;
+      document.getElementById('nmSendBtn').disabled = false;
+    }
   }
 
   async function buildFromNeedsMore() {
@@ -428,7 +494,7 @@
     document.getElementById('nmBuildBtn').disabled = true;
     document.getElementById('nmSendBtn').disabled = true;
     try {
-      await generateProject();
+      await generateProject(undefined, { fromBuild: true }); // single generation
     } finally {
       document.getElementById('nmBuildBtn').disabled = false;
       document.getElementById('nmSendBtn').disabled = false;
@@ -445,7 +511,7 @@
       el.innerHTML = `<div class="refer-resource-name">${esc(r.name)}</div><div class="refer-resource-contact">${esc(r.contact)}</div>`;
       box.appendChild(el);
     });
-    stopLoadingStages();
+    stopProgress();
     document.getElementById('loadingScreen').style.display = 'none';
     document.getElementById('mainContent').style.display = 'block';
     document.getElementById('projectView').style.display = 'none';
@@ -514,7 +580,7 @@
       roadmapEl.appendChild(card);
     });
 
-    stopLoadingStages();
+    stopProgress();
     document.getElementById('loadingScreen').style.display = 'none';
     document.getElementById('mainContent').style.display = 'block';
     document.getElementById('errorView').style.display = 'none';
@@ -603,7 +669,7 @@
   }
 
   function showError(msg) {
-    stopLoadingStages();
+    stopProgress();
     document.getElementById('loadingScreen').style.display = 'none';
     document.getElementById('mainContent').style.display = 'block';
     document.getElementById('projectView').style.display = 'none';
