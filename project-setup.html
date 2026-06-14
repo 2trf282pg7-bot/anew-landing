@@ -1,0 +1,717 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Anew — Your Recovery Project</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;1,400&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --warm-white: #FAF6F1; --clay: #B8704E; --clay-dark: #8C4E32;
+    --charcoal: #1C1614; --charcoal-soft: #5C4D45;
+    --stone: #8A7870; --blush: #EDD4C6; --blush-deep: #DBBAA6;
+    --section-alt: #F5EFE8;
+  }
+  html, body { min-height: 100dvh; font-family: 'DM Sans', sans-serif; background: var(--warm-white); color: var(--charcoal); }
+
+  /* Loading screen */
+  .loading-screen { position: fixed; inset: 0; background: var(--warm-white); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 20px; z-index: 200; }
+  .loading-logo { font-family: 'Cormorant Garamond', serif; font-size: 28px; color: var(--charcoal); letter-spacing: 0.1em; }
+  .loading-stage { font-size: 15px; color: var(--charcoal-soft); transition: opacity 0.4s ease; min-height: 22px; text-align: center; padding: 0 24px; }
+  .loading-track { width: 220px; height: 5px; background: var(--blush); border-radius: 3px; overflow: hidden; }
+  .loading-fill { height: 100%; width: 0; background: var(--clay); border-radius: 3px; }
+  .loading-note { font-size: 12px; color: var(--stone); }
+  @keyframes dotPulse { 0%,80%,100%{opacity:0.25;transform:scale(0.85)} 40%{opacity:1;transform:scale(1)} }
+
+  /* Nav */
+  .nav { position: fixed; top: 0; left: 0; right: 0; height: 56px; background: rgba(250,246,241,0.96); border-bottom: 1px solid var(--blush-deep); display: flex; align-items: center; justify-content: center; padding: 0 24px; z-index: 100; }
+  .nav-logo { font-family: 'Cormorant Garamond', serif; font-size: 22px; font-weight: 400; color: var(--charcoal); letter-spacing: 0.08em; text-decoration: none; }
+
+  /* Main */
+  .main { max-width: 640px; margin: 0 auto; padding: 72px 20px 80px; }
+
+  /* Header */
+  .page-eyebrow { font-size: 10px; font-weight: 500; text-transform: uppercase; letter-spacing: 0.14em; color: var(--clay); margin-bottom: 8px; }
+  .page-title { font-family: 'Cormorant Garamond', serif; font-size: 30px; font-weight: 300; color: var(--charcoal); line-height: 1.25; margin-bottom: 12px; }
+  .page-summary { font-size: 15px; color: var(--charcoal-soft); line-height: 1.65; margin-bottom: 36px; }
+
+  /* What I heard (item 8) */
+  .heard { background: white; border-radius: 16px; padding: 24px 26px; box-shadow: 0 2px 12px rgba(28,22,20,0.06); margin-bottom: 28px; }
+  .heard-label { font-size: 10px; font-weight: 500; text-transform: uppercase; letter-spacing: 0.14em; color: var(--clay); margin-bottom: 12px; }
+  .heard-pattern { font-family: 'Cormorant Garamond', serif; font-size: 21px; font-weight: 300; color: var(--charcoal); line-height: 1.45; margin-bottom: 14px; }
+  .heard-factors { display: flex; flex-direction: column; gap: 8px; }
+  .heard-factor { font-size: 14px; color: var(--charcoal-soft); line-height: 1.55; padding-left: 16px; position: relative; }
+  .heard-factor::before { content: '·'; position: absolute; left: 4px; color: var(--stone); }
+  .heard-strengths { margin-top: 18px; border-left: 3px solid var(--sage); padding-left: 16px; }
+  .heard-strengths-label { font-size: 10px; font-weight: 500; text-transform: uppercase; letter-spacing: 0.12em; color: var(--sage); margin-bottom: 8px; }
+  .heard-strengths-list { display: flex; flex-direction: column; gap: 6px; }
+  .heard-strength { font-size: 14px; color: var(--charcoal-soft); line-height: 1.55; }
+
+  /* Roadmap */
+  .roadmap { display: flex; flex-direction: column; gap: 12px; margin-bottom: 32px; }
+  .phase-card { background: white; border-radius: 14px; overflow: hidden; box-shadow: 0 2px 12px rgba(28,22,20,0.06); }
+  .phase-header { display: flex; align-items: center; justify-content: space-between; padding: 16px 20px; cursor: pointer; transition: background 0.15s ease; }
+  .phase-header:hover { background: var(--section-alt); }
+  .phase-left { flex: 1; }
+  .phase-range { font-size: 10px; font-weight: 500; text-transform: uppercase; letter-spacing: 0.12em; color: var(--clay); margin-bottom: 3px; }
+  .phase-focus { font-family: 'Cormorant Garamond', serif; font-size: 18px; color: var(--charcoal); line-height: 1.3; }
+  /* 44px tap target with a 24px visual icon (item 19) */
+  .phase-info-btn { width: 44px; height: 44px; border: none; background: none; cursor: pointer; display: flex; align-items: center; justify-content: center; color: var(--stone); flex-shrink: 0; margin-left: 4px; transition: color 0.2s ease; }
+  .phase-info-btn:hover { color: var(--clay); }
+  .phase-info-btn svg { width: 24px; height: 24px; }
+  .phase-body { max-height: 0; overflow: hidden; transition: max-height 0.25s ease; }
+  .phase-body.open { max-height: 600px; }
+  .phase-inner { padding: 0 20px 16px; border-top: 1px solid var(--section-alt); }
+  .phase-theory { font-size: 12px; font-weight: 500; text-transform: uppercase; letter-spacing: 0.1em; color: var(--clay); margin: 12px 0 6px; }
+  .phase-theory-text { font-size: 14px; color: var(--charcoal-soft); line-height: 1.6; margin-bottom: 14px; }
+  .phase-tasks { display: flex; flex-direction: column; gap: 10px; }
+  .task-item { background: var(--section-alt); border-radius: 8px; padding: 12px 14px; }
+  .task-title { font-size: 14px; font-weight: 500; color: var(--charcoal); margin-bottom: 4px; }
+  .task-desc { font-size: 13px; color: var(--charcoal-soft); line-height: 1.5; }
+  .task-freq { font-size: 11px; color: var(--stone); margin-top: 4px; text-transform: capitalize; }
+
+  /* First week callout */
+  .first-week { background: linear-gradient(135deg, var(--blush) 0%, var(--blush-deep) 100%); border-radius: 14px; padding: 20px 24px; margin-bottom: 32px; }
+  .first-week-label { font-size: 10px; font-weight: 500; text-transform: uppercase; letter-spacing: 0.14em; color: var(--clay-dark); margin-bottom: 6px; }
+  .first-week-title { font-family: 'Cormorant Garamond', serif; font-size: 20px; color: var(--charcoal); margin-bottom: 6px; }
+  .first-week-desc { font-size: 14px; color: var(--charcoal-soft); line-height: 1.6; }
+
+  /* Action buttons */
+  .action-area { display: flex; flex-direction: column; gap: 12px; }
+  .btn-start { background: var(--clay); color: white; font-family: 'DM Sans', sans-serif; font-size: 12px; font-weight: 500; text-transform: uppercase; letter-spacing: 0.12em; padding: 18px; border-radius: 8px; border: none; cursor: pointer; transition: background 0.2s ease; width: 100%; }
+  .btn-start:hover { background: var(--clay-dark); }
+  .btn-start:disabled { background: var(--blush-deep); cursor: not-allowed; }
+  .btn-adjust { background: none; border: 1.5px solid var(--blush-deep); color: var(--charcoal-soft); font-family: 'DM Sans', sans-serif; font-size: 13px; padding: 14px; border-radius: 8px; cursor: pointer; transition: border-color 0.2s ease, color 0.2s ease; width: 100%; }
+  .btn-adjust:hover { border-color: var(--stone); color: var(--charcoal); }
+  .btn-adjust:disabled { opacity: 0.4; cursor: not-allowed; }
+
+  /* Adjust chat */
+  .adjust-area { margin-top: 20px; background: white; border-radius: 14px; padding: 20px; box-shadow: 0 2px 12px rgba(28,22,20,0.06); display: none; }
+  .adjust-area.open { display: block; }
+  .adjust-label { font-size: 12px; font-weight: 500; color: var(--stone); text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 10px; }
+  .adjust-chat { display: flex; flex-direction: column; gap: 10px; margin-bottom: 12px; min-height: 0; }
+  .adj-msg-ai { font-family: 'Cormorant Garamond', serif; font-size: 17px; color: var(--charcoal); line-height: 1.6; }
+  .adj-msg-user { background: var(--blush-deep); border-radius: 10px; padding: 10px 14px; font-size: 14px; color: var(--charcoal); align-self: flex-end; max-width: 85%; }
+  .adjust-input-row { display: flex; gap: 8px; align-items: flex-end; }
+  .adjust-textarea { flex: 1; border: 1.5px solid var(--blush-deep); border-radius: 8px; padding: 10px 12px; font-family: 'DM Sans', sans-serif; font-size: 16px; color: var(--charcoal); resize: none; min-height: 44px; max-height: 100px; outline: none; transition: border-color 0.2s ease; }
+  .adjust-textarea:focus { border-color: var(--clay); }
+  .adjust-send { width: 40px; height: 40px; background: var(--clay); border: none; border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center; flex-shrink: 0; transition: background 0.2s ease; }
+  .adjust-send:hover { background: var(--clay-dark); }
+  .adjust-send:disabled { background: var(--blush-deep); cursor: not-allowed; }
+  .adjust-note { font-size: 12px; color: var(--stone); margin-top: 8px; }
+
+  /* Error */
+  .error-card { background: rgba(184,112,78,0.08); border-radius: 12px; padding: 20px 24px; text-align: center; }
+  .error-title { font-family: 'Cormorant Garamond', serif; font-size: 22px; color: var(--charcoal); margin-bottom: 8px; }
+  .error-text { font-size: 14px; color: var(--charcoal-soft); margin-bottom: 16px; }
+  .btn-retry { background: var(--clay); color: white; border: none; border-radius: 6px; padding: 12px 24px; font-size: 13px; cursor: pointer; }
+
+  /* Gentle guidance cards (needs_more / refer) */
+  .guide-card { background: white; border-radius: 16px; padding: 32px 28px; box-shadow: 0 2px 16px rgba(28,22,20,0.06); }
+  .guide-eyebrow { font-size: 10px; font-weight: 500; text-transform: uppercase; letter-spacing: 0.14em; color: var(--clay); margin-bottom: 12px; }
+  .guide-title { font-family: 'Cormorant Garamond', serif; font-size: 26px; font-weight: 300; color: var(--charcoal); line-height: 1.3; margin-bottom: 14px; }
+  .guide-text { font-size: 15px; color: var(--charcoal-soft); line-height: 1.7; margin-bottom: 20px; }
+  .guide-questions { display: flex; flex-direction: column; gap: 12px; margin-bottom: 26px; }
+  .guide-question { background: var(--section-alt); border-left: 3px solid var(--blush-deep); border-radius: 8px; padding: 14px 16px; font-family: 'Cormorant Garamond', serif; font-size: 17px; color: var(--charcoal); line-height: 1.5; }
+  .btn-guide { display: block; width: 100%; background: var(--clay); color: white; font-family: 'DM Sans', sans-serif; font-size: 12px; font-weight: 500; text-transform: uppercase; letter-spacing: 0.12em; padding: 18px; border-radius: 8px; border: none; cursor: pointer; text-align: center; text-decoration: none; min-height: 44px; transition: background 0.2s ease; }
+  .btn-guide:hover { background: var(--clay-dark); }
+  .refer-resources { display: flex; flex-direction: column; gap: 10px; margin-top: 4px; }
+  .refer-resource { background: var(--section-alt); border-radius: 8px; padding: 14px 16px; }
+  .refer-resource-name { font-size: 13px; font-weight: 500; color: var(--charcoal); margin-bottom: 2px; }
+  .refer-resource-contact { font-size: 15px; color: var(--clay-dark); letter-spacing: 0.02em; }
+</style>
+</head>
+<body>
+
+<div class="loading-screen" id="loadingScreen">
+  <div class="loading-logo">Anew</div>
+  <div class="loading-stage" id="loadingStage">Designing your 90-day project…</div>
+  <div class="loading-track"><div class="loading-fill" id="loadingFill"></div></div>
+  <div class="loading-note">This usually takes about a minute.</div>
+</div>
+
+<nav class="nav">
+  <a href="/dashboard.html" class="nav-logo">Anew</a>
+</nav>
+
+<main class="main" id="mainContent" style="display:none">
+
+  <div id="projectView">
+    <!-- What I heard (item 8) -->
+    <div class="heard" id="heardSection" style="display:none">
+      <div class="heard-label">What I heard</div>
+      <div class="heard-pattern" id="heardPattern"></div>
+      <div class="heard-factors" id="heardFactors"></div>
+      <div class="heard-strengths" id="heardStrengths" style="display:none">
+        <div class="heard-strengths-label">What's still alive in this relationship</div>
+        <div class="heard-strengths-list" id="heardStrengthsList"></div>
+      </div>
+    </div>
+
+    <div class="page-eyebrow">Your 90-day recovery project</div>
+    <div class="page-title" id="projTitle"></div>
+    <div class="page-summary" id="projSummary"></div>
+
+    <div class="first-week" id="firstWeekCard" style="display:none">
+      <div class="first-week-label">Start here — this week</div>
+      <div class="first-week-title" id="firstWeekTitle"></div>
+      <div class="first-week-desc" id="firstWeekDesc"></div>
+    </div>
+
+    <div class="roadmap" id="roadmapEl"></div>
+
+    <div class="action-area">
+      <button class="btn-start" id="btnStart" onclick="startProject()">Start this project</button>
+      <button class="btn-adjust" id="btnAdjust" onclick="openAdjust()">I'd like to change something</button>
+    </div>
+
+    <div class="adjust-area" id="adjustArea">
+      <div class="adjust-label">What would you like to change?</div>
+      <div class="adjust-chat" id="adjustChat"></div>
+      <div class="adjust-input-row">
+        <textarea class="adjust-textarea" id="adjustInput" placeholder="e.g. The first phase feels too intense for where we are right now." rows="1"></textarea>
+        <button class="adjust-send" id="adjustSendBtn" onclick="sendAdjust()">
+          <svg width="16" height="16" viewBox="0 0 18 18" fill="none">
+            <path d="M3 9H15M15 9L10 4M15 9L10 14" stroke="white" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </button>
+      </div>
+      <div class="adjust-note" id="adjustNote"></div>
+    </div>
+  </div>
+
+  <div id="errorView" style="display:none">
+    <div class="error-card">
+      <div class="error-title">Something went wrong</div>
+      <div class="error-text" id="errorText">We couldn't generate your project. Please try again.</div>
+      <button class="btn-retry" onclick="generateProject()">Try again</button>
+    </div>
+  </div>
+
+  <div id="needsMoreView" style="display:none">
+    <div class="guide-card">
+      <div class="guide-eyebrow">Before I build your project</div>
+      <div class="guide-title">I want to understand a little more first</div>
+      <div class="guide-text">A few more details will help me build something that truly fits your situation — not a generic plan.</div>
+      <div class="adjust-chat" id="nmChat" style="margin-top:6px"></div>
+      <div class="adjust-input-row" id="nmInputRow" style="display:none; margin-top:6px">
+        <textarea class="adjust-textarea" id="nmInput" placeholder="Take your time…" rows="1"></textarea>
+        <button class="adjust-send" id="nmSendBtn" onclick="sendNeedsMore()" aria-label="Send">
+          <svg width="16" height="16" viewBox="0 0 18 18" fill="none">
+            <path d="M3 9H15M15 9L10 4M15 9L10 14" stroke="white" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </button>
+      </div>
+      <button class="btn-guide" id="nmBuildBtn" style="display:none; margin-top:12px" onclick="buildFromNeedsMore()">Build my project</button>
+    </div>
+  </div>
+
+  <div id="referView" style="display:none">
+    <div class="guide-card">
+      <div class="guide-eyebrow">A note from Anew</div>
+      <div class="guide-title">Thank you for trusting me with this</div>
+      <div class="guide-text" id="referMessage"></div>
+      <div class="refer-resources" id="referResources"></div>
+    </div>
+  </div>
+
+</main>
+
+<script>
+  const SUPABASE_URL = 'https://hzkkftsihitkvdinydju.supabase.co';
+  const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imh6a2tmdHNpaGl0a3ZkaW55ZGp1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzUyNzUyODksImV4cCI6MjA5MDg1MTI4OX0.D7QBobLt7JhMGJcNNhvlLvKjq2ysozYa2k9Z0Fj8ZGI';
+
+  let sbClient = null, currentUser = null, currentProject = null;
+  let adjustCount = 0;
+  const MAX_ADJUSTMENTS = 2;
+  // needs_more inline chat state (E-1/F-1)
+  let onboardingSessionId = null;
+  let nmActive = false, nmHasReply = false, nmBusy = false;
+  let nmHistory = []; // {role, content} for /api/chat
+
+  const SEED_MESSAGE = "Before I build this, it would help to understand a little more — what everyday life together has felt like lately, what you've already tried, and what you're most worried about. There's no rush; share whatever feels true, and tap the Build my project button below whenever you're ready.";
+
+  const INTAKE_SYSTEM = `You are Anew, a warm relationship support guide. The user has just paid and started building their 90-day project, but a little more context will make it fit their situation.
+Ask gentle follow-up questions, one at a time, to understand: what daily life together looks like, what they have already tried, and what they are most worried about.
+Keep replies to 1-2 warm, plain sentences. One question at a time. No lists. Never use emojis or decorative symbols.
+Only discuss their relationship. If asked to do anything unrelated, gently decline in one sentence and steer back.
+When you sense you have enough, warmly let them know they can tap "Build my project" whenever they're ready. Do not claim to have built anything.`;
+
+  async function init() {
+    try {
+      sbClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+      const { data: { session } } = await sbClient.auth.getSession();
+      if (!session) { window.location.href = '/app.html'; return; }
+      currentUser = session.user;
+
+      // If user already has an active project, skip to dashboard
+      const { data: existing } = await sbClient
+        .from('projects')
+        .select('id')
+        .eq('user_id', currentUser.id)
+        .eq('status', 'active')
+        .limit(1);
+      if (existing && existing.length > 0) {
+        window.location.href = '/dashboard.html';
+        return;
+      }
+
+      await generateProject();
+    } catch (e) {
+      console.error(e);
+      showError(e.message);
+    }
+  }
+
+  // F-2: honest, time-based determinate gauge. Eases toward ~95% over ~50s and
+  // keeps creeping (never frozen, never reaches 100% on its own); jumps to 100%
+  // only when the real response returns.
+  let progressRAF = null, progressStart = 0, progressDone = false, subSwapped = false;
+  function startProgress() {
+    const fill = document.getElementById('loadingFill');
+    const stage = document.getElementById('loadingStage');
+    stage.textContent = 'Designing your 90-day project…';
+    fill.style.transition = 'width 0.3s linear';
+    fill.style.width = '0%';
+    progressStart = performance.now();
+    progressDone = false;
+    subSwapped = false;
+    function tick(now) {
+      if (progressDone) return;
+      const elapsed = now - progressStart;
+      // ease-out: fast early, asymptotically approaching (never reaching) 95%
+      const pct = 95 * (1 - Math.exp(-elapsed / 18000));
+      fill.style.width = pct.toFixed(2) + '%';
+      // ~30s: swap to a second honest line describing the real work (F-2 step 4)
+      if (!subSwapped && elapsed > 30000) {
+        stage.style.opacity = '0';
+        setTimeout(() => { stage.textContent = 'Working through everything you shared…'; stage.style.opacity = '1'; }, 300);
+        subSwapped = true;
+      }
+      progressRAF = requestAnimationFrame(tick);
+    }
+    progressRAF = requestAnimationFrame(tick);
+  }
+  function finishProgress(cb) {
+    progressDone = true;
+    if (progressRAF) cancelAnimationFrame(progressRAF);
+    const fill = document.getElementById('loadingFill');
+    fill.style.transition = 'width 0.4s ease-out';
+    fill.style.width = '100%';
+    setTimeout(() => { if (cb) cb(); }, 450);
+  }
+  function stopProgress() {
+    progressDone = true;
+    if (progressRAF) cancelAnimationFrame(progressRAF);
+  }
+
+  async function generateProject(adjustmentNote, opts = {}) {
+    document.getElementById('loadingScreen').style.display = 'flex';
+    document.getElementById('mainContent').style.display = 'none';
+    document.getElementById('errorView').style.display = 'none';
+    startProgress();
+
+    let sessionId = localStorage.getItem('anew_onboarding_session_id') || localStorage.getItem('anew_session_id');
+    // Fallback for cross-device / cleared localStorage: postRegisterFlow links the
+    // onboarding session to the user, so look up their latest session by user_id.
+    if (!sessionId) {
+      try {
+        const { data } = await sbClient
+          .from('sessions')
+          .select('id')
+          .eq('user_id', currentUser.id)
+          .order('created_at', { ascending: false })
+          .limit(1);
+        if (data && data.length) sessionId = data[0].id;
+      } catch (_) {}
+    }
+    if (!sessionId) {
+      showError('No onboarding session found. Please complete the onboarding first.');
+      return;
+    }
+
+    // Linking the onboarding session to the user happens server-side in
+    // /api/generate-project (service role). A client-side claim can't work: an
+    // authenticated user has no SELECT policy for an unlinked session, so the
+    // update matches 0 rows. We only need the id here for the inline chat.
+    onboardingSessionId = sessionId; // F-1: the needs_more chat persists to this session
+
+    const { data: { session } } = await sbClient.auth.getSession();
+    if (!session) { window.location.href = '/app.html'; return; }
+
+    async function post(force) {
+      const body = { session_id: sessionId, user_id: currentUser.id };
+      if (adjustmentNote) body.adjustment_note = adjustmentNote;
+      if (force) body.force = true;
+      const res = await fetch('/api/generate-project', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${session.access_token}` },
+        body: JSON.stringify(body)
+      });
+      if (!res.ok) {
+        let serverMsg = '';
+        try { serverMsg = (await res.json()).error || ''; }
+        catch (_) { try { serverMsg = await res.text(); } catch (_) {} }
+        throw new Error(serverMsg || `Error ${res.status}`);
+      }
+      return res.json();
+    }
+
+    try {
+      let result = await post(false);
+
+      if (result.status === 'needs_more') {
+        if (opts.fromBuild) {
+          // F-1 step 4: don't route back into chat — force one generation (same loading)
+          result = await post(true);
+          if (result.status === 'needs_more') {
+            stopProgress();
+            showError('We couldn\'t finish building your project. Please try again.');
+            return;
+          }
+        } else {
+          // Initial pass: gather more context through the inline chat (no re-generation)
+          stopProgress();
+          enterNeedsMoreChat();
+          return;
+        }
+      }
+
+      if (result.status === 'refer') { stopProgress(); showRefer(result); return; }
+
+      currentProject = result;
+      finishProgress(() => renderProject(currentProject));
+    } catch (e) {
+      stopProgress();
+      console.error('[Anew] generate-project error:', e);
+      showError(e.message);
+    }
+  }
+
+  // F-1: gather the missing context in ONE inline conversation via /api/chat
+  // (no per-turn re-generation). generate-project runs only on "Build my project".
+  function enterNeedsMoreChat() {
+    document.getElementById('loadingScreen').style.display = 'none';
+    document.getElementById('mainContent').style.display = 'block';
+    document.getElementById('projectView').style.display = 'none';
+    document.getElementById('errorView').style.display = 'none';
+    document.getElementById('referView').style.display = 'none';
+    document.getElementById('needsMoreView').style.display = 'block';
+    document.getElementById('nmInputRow').style.display = 'flex';
+
+    if (!nmActive) {
+      nmActive = true;
+      appendNmAssistant(SEED_MESSAGE); // one warm, pre-framing message (no bullets)
+    }
+    document.getElementById('nmInput').focus();
+  }
+
+  function appendNmAssistant(text) {
+    const chat = document.getElementById('nmChat');
+    const el = document.createElement('div');
+    el.className = 'adj-msg-ai';
+    el.textContent = text;
+    chat.appendChild(el);
+    chat.scrollTop = chat.scrollHeight;
+    nmHistory.push({ role: 'assistant', content: text });
+    saveNmMessage('assistant', text);
+  }
+
+  async function saveNmMessage(role, content) {
+    if (!sbClient || !onboardingSessionId) return;
+    try { await sbClient.from('messages').insert({ session_id: onboardingSessionId, role, content }); } catch (_) {}
+  }
+
+  // Ensure the array sent to /api/chat starts with a user turn and alternates
+  function sanitizeForApi(history) {
+    const out = [];
+    for (const m of history) {
+      const content = (m.content || '').trim();
+      if (!content) continue;
+      const role = m.role === 'assistant' ? 'assistant' : 'user';
+      if (out.length === 0 && role !== 'user') continue;
+      const last = out[out.length - 1];
+      if (last && last.role === role) last.content += '\n\n' + content;
+      else out.push({ role, content });
+    }
+    return out;
+  }
+
+  function showNmTyping() {
+    const chat = document.getElementById('nmChat');
+    const el = document.createElement('div');
+    el.className = 'adj-msg-ai'; el.id = 'nmTyping'; el.textContent = '…';
+    chat.appendChild(el); chat.scrollTop = chat.scrollHeight;
+  }
+  function hideNmTyping() { document.getElementById('nmTyping')?.remove(); }
+
+  async function sendNeedsMore() {
+    const ta = document.getElementById('nmInput');
+    const text = ta.value.trim();
+    if (!text || nmBusy) return;
+    ta.value = ''; ta.style.height = 'auto';
+
+    const chat = document.getElementById('nmChat');
+    const el = document.createElement('div');
+    el.className = 'adj-msg-user';
+    el.textContent = text;
+    chat.appendChild(el); chat.scrollTop = chat.scrollHeight;
+    nmHistory.push({ role: 'user', content: text });
+    saveNmMessage('user', text);
+
+    nmHasReply = true;
+    document.getElementById('nmBuildBtn').style.display = 'block'; // >=1 reply (E-1 step 3)
+
+    nmBusy = true;
+    document.getElementById('nmSendBtn').disabled = true;
+    showNmTyping();
+    try {
+      const res = await fetch('/api/chat', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ model: 'claude-sonnet-4-6', max_tokens: 300, system: INTAKE_SYSTEM, messages: sanitizeForApi(nmHistory) })
+      });
+      hideNmTyping();
+      if (res.ok) {
+        const data = await res.json();
+        const reply = data.content?.[0]?.text?.trim();
+        if (reply) appendNmAssistant(reply);
+      }
+    } catch (_) {
+      hideNmTyping();
+    } finally {
+      nmBusy = false;
+      document.getElementById('nmSendBtn').disabled = false;
+    }
+  }
+
+  async function buildFromNeedsMore() {
+    if (!nmHasReply) return;
+    document.getElementById('nmBuildBtn').disabled = true;
+    document.getElementById('nmSendBtn').disabled = true;
+    try {
+      await generateProject(undefined, { fromBuild: true }); // single generation
+    } finally {
+      document.getElementById('nmBuildBtn').disabled = false;
+      document.getElementById('nmSendBtn').disabled = false;
+    }
+  }
+
+  function showRefer(result) {
+    document.getElementById('referMessage').textContent = result.message || '';
+    const box = document.getElementById('referResources');
+    box.innerHTML = '';
+    (result.resources || []).forEach(r => {
+      const el = document.createElement('div');
+      el.className = 'refer-resource';
+      el.innerHTML = `<div class="refer-resource-name">${esc(r.name)}</div><div class="refer-resource-contact">${esc(r.contact)}</div>`;
+      box.appendChild(el);
+    });
+    stopProgress();
+    document.getElementById('loadingScreen').style.display = 'none';
+    document.getElementById('mainContent').style.display = 'block';
+    document.getElementById('projectView').style.display = 'none';
+    document.getElementById('errorView').style.display = 'none';
+    document.getElementById('needsMoreView').style.display = 'none';
+    document.getElementById('referView').style.display = 'block';
+  }
+
+  function renderProject(project) {
+    // What I heard (item 8)
+    const pa = project.pattern_analysis;
+    if (pa && (pa.primary_pattern || (pa.contributing_factors || []).length)) {
+      document.getElementById('heardSection').style.display = 'block';
+      document.getElementById('heardPattern').textContent = pa.primary_pattern || '';
+      const factorsEl = document.getElementById('heardFactors');
+      factorsEl.innerHTML = (pa.contributing_factors || [])
+        .map(f => `<div class="heard-factor">${esc(f)}</div>`).join('');
+      const strengths = pa.strengths || [];
+      if (strengths.length) {
+        document.getElementById('heardStrengths').style.display = 'block';
+        document.getElementById('heardStrengthsList').innerHTML =
+          strengths.map(s => `<div class="heard-strength">${esc(s)}</div>`).join('');
+      }
+    }
+
+    document.getElementById('projTitle').textContent = project.project_title || 'Your Recovery Project';
+    document.getElementById('projSummary').textContent = project.project_summary || '';
+
+    // First week task
+    const fwt = project.first_week_task;
+    if (fwt) {
+      document.getElementById('firstWeekCard').style.display = 'block';
+      document.getElementById('firstWeekTitle').textContent = fwt.title || '';
+      document.getElementById('firstWeekDesc').textContent = fwt.description || '';
+    }
+
+    // Roadmap phases
+    const roadmapEl = document.getElementById('roadmapEl');
+    roadmapEl.innerHTML = '';
+    (project.roadmap || []).forEach((phase, i) => {
+      const card = document.createElement('div');
+      card.className = 'phase-card';
+      const tasks = (phase.tasks || []).map(t => `
+        <div class="task-item">
+          <div class="task-title">${esc(t.title)}</div>
+          <div class="task-desc">${esc(t.description)}</div>
+          <div class="task-freq">${esc(t.frequency || '')}</div>
+        </div>
+      `).join('');
+      card.innerHTML = `
+        <div class="phase-header" onclick="togglePhase(${i})">
+          <div class="phase-left">
+            <div class="phase-range">${esc(phase.week_range)}</div>
+            <div class="phase-focus">${esc(phase.focus)}</div>
+          </div>
+          <button class="phase-info-btn" onclick="event.stopPropagation(); togglePhase(${i})" aria-label="More info"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="12" cy="12" r="9"/><line x1="12" y1="11" x2="12" y2="16"/><circle cx="12" cy="8" r="0.6" fill="currentColor" stroke="none"/></svg></button>
+        </div>
+        <div class="phase-body" id="phase-${i}">
+          <div class="phase-inner">
+            <div class="phase-theory">${esc(phase.theory || '')}</div>
+            <div class="phase-theory-text">${esc(phase.theory_explanation || '')}</div>
+            <div class="phase-tasks">${tasks}</div>
+          </div>
+        </div>
+      `;
+      roadmapEl.appendChild(card);
+    });
+
+    stopProgress();
+    document.getElementById('loadingScreen').style.display = 'none';
+    document.getElementById('mainContent').style.display = 'block';
+    document.getElementById('errorView').style.display = 'none';
+    document.getElementById('needsMoreView').style.display = 'none';
+    document.getElementById('referView').style.display = 'none';
+    document.getElementById('projectView').style.display = 'block';
+  }
+
+  function togglePhase(i) {
+    const body = document.getElementById('phase-' + i);
+    if (body) body.classList.toggle('open');
+  }
+
+  async function startProject() {
+    if (!currentProject?.project_id) {
+      window.location.href = '/dashboard.html';
+      return;
+    }
+    const btn = document.getElementById('btnStart');
+    btn.disabled = true;
+    btn.textContent = 'Starting…';
+    try {
+      await sbClient
+        .from('projects')
+        .update({ status: 'active', started_at: new Date().toISOString() })
+        .eq('id', currentProject.project_id);
+      localStorage.removeItem('anew_onboarding_session_id');
+      localStorage.removeItem('anew_session_id');
+    } catch (e) {
+      console.error('[Anew] activate project error:', e);
+    }
+    window.location.href = '/dashboard.html';
+  }
+
+  function openAdjust() {
+    document.getElementById('adjustArea').classList.add('open');
+    document.getElementById('adjustInput').focus();
+    updateAdjustNote();
+  }
+
+  function updateAdjustNote() {
+    const remaining = MAX_ADJUSTMENTS - adjustCount;
+    const note = document.getElementById('adjustNote');
+    if (remaining <= 0) {
+      note.textContent = 'You\'ve used all your revisions. Please start with the current project.';
+      document.getElementById('adjustInput').disabled = true;
+      document.getElementById('adjustSendBtn').disabled = true;
+      document.getElementById('btnAdjust').disabled = true;
+    } else {
+      note.textContent = `${remaining} revision${remaining === 1 ? '' : 's'} remaining.`;
+    }
+  }
+
+  async function sendAdjust() {
+    if (adjustCount >= MAX_ADJUSTMENTS) return;
+    const textarea = document.getElementById('adjustInput');
+    const text = textarea.value.trim();
+    if (!text) return;
+    textarea.value = '';
+    textarea.style.height = 'auto';
+
+    const chat = document.getElementById('adjustChat');
+    const userEl = document.createElement('div');
+    userEl.className = 'adj-msg-user';
+    userEl.textContent = text;
+    chat.appendChild(userEl);
+
+    document.getElementById('adjustSendBtn').disabled = true;
+    document.getElementById('btnStart').disabled = true;
+
+    adjustCount++;
+    updateAdjustNote();
+
+    // Regenerate project with adjustment note
+    await generateProject(text);
+
+    const aiEl = document.createElement('div');
+    aiEl.className = 'adj-msg-ai';
+    aiEl.textContent = adjustCount >= MAX_ADJUSTMENTS
+      ? 'Here\'s your revised project. This is your final version — please start with this plan.'
+      : 'I\'ve updated your project based on your feedback. Take a look and let me know if you\'d like any other changes.';
+    document.getElementById('adjustChat').appendChild(aiEl);
+
+    document.getElementById('btnStart').disabled = false;
+    updateAdjustNote();
+  }
+
+  function showError(msg) {
+    stopProgress();
+    document.getElementById('loadingScreen').style.display = 'none';
+    document.getElementById('mainContent').style.display = 'block';
+    document.getElementById('projectView').style.display = 'none';
+    document.getElementById('errorView').style.display = 'block';
+    document.getElementById('errorText').textContent = msg || 'We couldn\'t generate your project. Please try again.';
+  }
+
+  function esc(str) {
+    return (str || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  }
+
+  document.addEventListener('DOMContentLoaded', () => {
+    document.getElementById('adjustInput').addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendAdjust(); }
+    });
+    document.getElementById('adjustInput').addEventListener('input', function() {
+      this.style.height = 'auto';
+      this.style.height = Math.min(this.scrollHeight, 100) + 'px';
+    });
+    // needs_more inline chat input (E-1)
+    document.getElementById('nmInput').addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendNeedsMore(); }
+    });
+    document.getElementById('nmInput').addEventListener('input', function() {
+      this.style.height = 'auto';
+      this.style.height = Math.min(this.scrollHeight, 100) + 'px';
+    });
+  });
+
+  init();
+
+  /*
+    ── Manual test (item 4) ──
+    1. Sparse onboarding session -> generate-project returns status:"needs_more".
+       Expect the warm "I want to understand a little more first" card with the
+       returned questions and a "Continue the conversation" button to /dashboard.html.
+       It must NOT look like an error and must NOT show a retry button.
+    2. Onboarding mentioning self-harm/violence -> status:"refer".
+       Expect the calm "Thank you for trusting me with this" card with the message
+       and resource list (name + contact). No retry button.
+    3. Sufficient session -> status:"ok" renders the project as before.
+  */
+</script>
+</body>
+</html>

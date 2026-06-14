@@ -355,7 +355,7 @@ footer { background: var(--charcoal); padding: 44px 48px; display: flex; justify
 
 <nav>
   <a href="#" class="nav-logo">Anew</a>
-  <a href="#" class="nav-cta">Start privately</a>
+  <a href="/onboarding.html" class="nav-cta">Start privately</a>
 </nav>
 
 <!-- 1. HERO -->
@@ -368,12 +368,7 @@ footer { background: var(--charcoal); padding: 44px 48px; display: flex; justify
     <span class="hero-situation">You've been carrying this alone.</span>
   </div>
   <p class="hero-sub">Anew was built for exactly this.<br>No partner needed. No therapy required.</p>
-  <form id="email-form" class="email-form" action="https://formspree.io/f/mzdyqvbe" method="POST">
-    <input class="email-input" type="email" name="email" placeholder="your@email.com" required>
-    <button type="submit" class="primary-btn" style="margin:0;flex-shrink:0;">
-      <span>Get early access — free</span>
-    </button>
-  </form>
+  <a href="/onboarding.html" class="primary-btn"><span>Start privately — free</span></a>
   <p class="form-microcopy">No partner needed &nbsp;&middot;&nbsp; No commitment &nbsp;&middot;&nbsp; Leave anytime</p>
 </section>
 
@@ -397,7 +392,7 @@ footer { background: var(--charcoal); padding: 44px 48px; display: flex; justify
     <div class="case-personalise reveal">
       <p class="case-personalise-hl">Your situation is unique.</p>
       <p class="case-personalise-sub">Anew analyzes your specific patterns<br>and builds a recovery plan around them.</p>
-      <button class="case-personalise-btn" onclick="document.querySelector('.email-form').scrollIntoView({behavior:'smooth'})">Start privately &mdash; free</button>
+      <button class="case-personalise-btn" onclick="window.location.href='/onboarding.html'">Start privately &mdash; free</button>
     </div>
   </div>
 </section>
@@ -502,7 +497,7 @@ footer { background: var(--charcoal); padding: 44px 48px; display: flex; justify
     <p class="cta-sub reveal">Early access is free. Founding members keep their rate after launch.</p>
     <p class="cta-decision reveal">You don't need to fix everything today. Just start.</p>
     <div class="reveal">
-      <a href="#" class="primary-btn">
+      <a href="/onboarding.html" class="primary-btn">
         <span>Start privately</span>
       </a>
       <p class="cta-microcopy">No partner needed &nbsp;&middot;&nbsp; No commitment &nbsp;&middot;&nbsp; Leave anytime</p>
@@ -513,8 +508,8 @@ footer { background: var(--charcoal); padding: 44px 48px; display: flex; justify
 <footer>
   <span class="footer-logo">Anew</span>
   <div class="footer-links">
-    <a href="#" class="footer-link">Privacy</a>
-    <a href="#" class="footer-link">Terms</a>
+    <a href="/privacy.html" class="footer-link">Privacy</a>
+    <a href="/terms.html" class="footer-link">Terms</a>
     <a href="#" class="footer-link">Contact</a>
   </div>
   <span class="footer-note">&copy; 2026 Anew &middot; anewapp.net</span>
