@@ -171,8 +171,8 @@ nav {
 .stat-item:nth-child(2) { transition-delay: 0.15s; }
 .stat-item:nth-child(3) { transition-delay: 0.3s; }
 .stat-number { font-family: 'Cormorant Garamond', serif; font-size: 46px; font-weight: 300; color: var(--clay-light); line-height: 1; margin-bottom: 6px; }
-.stat-label { font-size: 13px; color: #7A6E68; line-height: 1.55; }
-.stat-source { font-size: 10px; color: rgba(122,110,104,0.55); margin-top: 4px; letter-spacing: 0.04em; }
+.stat-label { font-size: 13px; color: #D8D1CA; line-height: 1.55; }
+.stat-source { font-size: 10px; color: #A79E96; margin-top: 4px; letter-spacing: 0.04em; }
 
 /* HOW */
 .section-how { background: var(--warm-white); padding: 96px 48px; }
@@ -193,7 +193,8 @@ nav {
 .diff-h-generic { color: var(--stone); }
 .diff-h-anew { color: var(--clay); }
 .diff-rows { display: flex; flex-direction: column; gap: 14px; }
-.diff-row { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
+.diff-row { display: grid; grid-template-columns: 1fr 1fr; column-gap: 18px; row-gap: 10px; }
+.diff-axis { grid-column: 1 / -1; font-size: 10px; font-weight: 600; letter-spacing: 0.16em; text-transform: uppercase; color: var(--clay); padding-left: 4px; }
 .diff-cell { padding: 22px 24px; border-radius: 14px; }
 .diff-generic { background: rgba(138,120,112,0.07); }
 .diff-anew { background: white; box-shadow: 0 2px 16px rgba(28,22,20,0.05); }
@@ -207,15 +208,17 @@ nav {
   .section-difference { padding: 72px 24px; }
   .diff-headers { display: none; }
   .diff-rows { gap: 22px; }
-  /* Each generic/Anew pair becomes ONE bounded card: generic on top, Anew below */
+  /* Each axis + generic/Anew pair becomes ONE bounded card: axis on top */
   .diff-row {
     grid-template-columns: 1fr;
     gap: 0;
+    background: white;
     border: 1px solid var(--blush-deep);
     border-radius: 16px;
     overflow: hidden;
     box-shadow: 0 2px 16px rgba(28,22,20,0.05);
   }
+  .diff-axis { padding: 16px 24px 12px; }
   .diff-cell { border-radius: 0; box-shadow: none; }
   .diff-generic { background: rgba(138,120,112,0.06); border-bottom: 1px solid var(--blush-deep); }
   .diff-anew { background: white; }
@@ -503,18 +506,22 @@ footer { background: var(--charcoal); padding: 44px 48px; display: flex; justify
     </div>
     <div class="diff-rows">
       <div class="diff-row reveal">
+        <div class="diff-axis">The advice</div>
         <div class="diff-cell diff-generic"><span class="diff-tag">A generic AI</span><p>Sympathizes and says what sounds comforting.</p></div>
         <div class="diff-cell diff-anew"><span class="diff-tag">Anew</span><p>Grounded in the Gottman Method &mdash; responses trace back to clinical research, not guesswork.</p></div>
       </div>
       <div class="diff-row reveal">
+        <div class="diff-axis">Your history</div>
         <div class="diff-cell diff-generic"><span class="diff-tag">A generic AI</span><p>Forgets you the moment you close it.</p></div>
         <div class="diff-cell diff-anew"><span class="diff-tag">Anew</span><p>Remembers your story &mdash; your patterns, what you've tried, what happened last week.</p></div>
       </div>
       <div class="diff-row reveal">
+        <div class="diff-axis">The focus</div>
         <div class="diff-cell diff-generic"><span class="diff-tag">A generic AI</span><p>Drifts into anything you ask.</p></div>
         <div class="diff-cell diff-anew"><span class="diff-tag">Anew</span><p>Stays on one thing: moving your relationship forward.</p></div>
       </div>
       <div class="diff-row reveal">
+        <div class="diff-axis">The result</div>
         <div class="diff-cell diff-generic"><span class="diff-tag">A generic AI</span><p>Leaves you feeling heard, but still stuck.</p></div>
         <div class="diff-cell diff-anew"><span class="diff-tag">Anew</span><p>Helps you take the actual next step.</p></div>
       </div>
