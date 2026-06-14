@@ -188,43 +188,24 @@ nav {
 /* THE DIFFERENCE */
 .section-difference { background: var(--section-alt); padding: 96px 48px; }
 .difference-inner { max-width: 920px; margin: 0 auto; }
-.diff-headers { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; margin-bottom: 14px; }
-.diff-h { font-size: 11px; font-weight: 500; letter-spacing: 0.16em; text-transform: uppercase; padding: 0 4px 12px; border-bottom: 1px solid var(--blush-deep); }
-.diff-h-generic { color: var(--stone); }
-.diff-h-anew { color: var(--clay); }
-.diff-rows { display: flex; flex-direction: column; gap: 14px; }
-.diff-row { display: grid; grid-template-columns: 1fr 1fr; column-gap: 18px; row-gap: 10px; }
-.diff-axis { grid-column: 1 / -1; font-size: 10px; font-weight: 600; letter-spacing: 0.16em; text-transform: uppercase; color: var(--clay); padding-left: 4px; }
-.diff-cell { padding: 22px 24px; border-radius: 14px; }
-.diff-generic { background: rgba(138,120,112,0.07); }
-.diff-anew { background: white; box-shadow: 0 2px 16px rgba(28,22,20,0.05); }
-.diff-cell p { font-size: 14.5px; line-height: 1.6; margin: 0; }
-.diff-generic p { color: var(--charcoal-soft); }
-.diff-anew p { color: var(--charcoal); }
-.diff-tag { display: none; font-size: 10px; font-weight: 500; letter-spacing: 0.14em; text-transform: uppercase; margin-bottom: 8px; }
+.diff-table { display: grid; grid-template-columns: minmax(76px, 0.7fr) 1fr 1fr; border: 1px solid var(--blush-deep); border-radius: 14px; overflow: hidden; background: white; }
+.diff-table > div { padding: 16px; display: flex; align-items: center; }
+.dt-head { font-size: 11px; font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase; }
+.dt-head-axis { background: var(--section-alt); }
+.dt-head-generic { color: var(--stone); background: var(--section-alt); }
+.dt-head-anew { color: var(--clay-dark); background: rgba(184,112,78,0.12); }
+.dt-axis { font-size: 11px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: var(--clay); background: var(--section-alt); border-top: 1px solid var(--blush-deep); }
+.dt-generic { font-size: 14px; line-height: 1.4; color: var(--charcoal-soft); border-top: 1px solid var(--blush-deep); }
+.dt-anew { font-size: 14px; line-height: 1.4; color: var(--charcoal); font-weight: 500; background: rgba(184,112,78,0.06); border-top: 1px solid var(--blush-deep); }
 .difference-close { font-family: 'Cormorant Garamond', serif; font-size: clamp(22px, 2.6vw, 30px); font-weight: 300; font-style: italic; color: var(--clay-dark); text-align: center; line-height: 1.35; margin-top: 56px; }
 
 @media (max-width: 768px) {
   .section-difference { padding: 72px 24px; }
-  .diff-headers { display: none; }
-  .diff-rows { gap: 22px; }
-  /* Each axis + generic/Anew pair becomes ONE bounded card: axis on top */
-  .diff-row {
-    grid-template-columns: 1fr;
-    gap: 0;
-    background: white;
-    border: 1px solid var(--blush-deep);
-    border-radius: 16px;
-    overflow: hidden;
-    box-shadow: 0 2px 16px rgba(28,22,20,0.05);
-  }
-  .diff-axis { padding: 16px 24px 12px; }
-  .diff-cell { border-radius: 0; box-shadow: none; }
-  .diff-generic { background: rgba(138,120,112,0.06); border-bottom: 1px solid var(--blush-deep); }
-  .diff-anew { background: white; }
-  .diff-tag { display: block; }
-  .diff-generic .diff-tag { color: var(--stone); }
-  .diff-anew .diff-tag { color: var(--clay); }
+  .diff-table { grid-template-columns: minmax(58px, 0.55fr) 1fr 1fr; }
+  .diff-table > div { padding: 12px 11px; }
+  .dt-head { font-size: 9px; letter-spacing: 0.06em; }
+  .dt-axis { font-size: 9px; letter-spacing: 0.03em; }
+  .dt-generic, .dt-anew { font-size: 12.5px; line-height: 1.32; }
   .difference-close { margin-top: 44px; }
 }
 
@@ -500,31 +481,26 @@ footer { background: var(--charcoal); padding: 44px 48px; display: flex; justify
   <div class="difference-inner">
     <p class="section-label reveal">The difference</p>
     <h2 class="section-headline reveal">Why not just ask a chatbot?</h2>
-    <div class="diff-headers reveal">
-      <div class="diff-h diff-h-generic">A generic AI</div>
-      <div class="diff-h diff-h-anew">Anew</div>
-    </div>
-    <div class="diff-rows">
-      <div class="diff-row reveal">
-        <div class="diff-axis">The advice</div>
-        <div class="diff-cell diff-generic"><span class="diff-tag">A generic AI</span><p>Sympathizes and says what sounds comforting.</p></div>
-        <div class="diff-cell diff-anew"><span class="diff-tag">Anew</span><p>Grounded in the Gottman Method &mdash; responses trace back to clinical research, not guesswork.</p></div>
-      </div>
-      <div class="diff-row reveal">
-        <div class="diff-axis">Your history</div>
-        <div class="diff-cell diff-generic"><span class="diff-tag">A generic AI</span><p>Forgets you the moment you close it.</p></div>
-        <div class="diff-cell diff-anew"><span class="diff-tag">Anew</span><p>Remembers your story &mdash; your patterns, what you've tried, what happened last week.</p></div>
-      </div>
-      <div class="diff-row reveal">
-        <div class="diff-axis">The focus</div>
-        <div class="diff-cell diff-generic"><span class="diff-tag">A generic AI</span><p>Drifts into anything you ask.</p></div>
-        <div class="diff-cell diff-anew"><span class="diff-tag">Anew</span><p>Stays on one thing: moving your relationship forward.</p></div>
-      </div>
-      <div class="diff-row reveal">
-        <div class="diff-axis">The result</div>
-        <div class="diff-cell diff-generic"><span class="diff-tag">A generic AI</span><p>Leaves you feeling heard, but still stuck.</p></div>
-        <div class="diff-cell diff-anew"><span class="diff-tag">Anew</span><p>Helps you take the actual next step.</p></div>
-      </div>
+    <div class="diff-table reveal">
+      <div class="dt-head dt-head-axis"></div>
+      <div class="dt-head dt-head-generic">A generic AI</div>
+      <div class="dt-head dt-head-anew">Anew</div>
+
+      <div class="dt-axis">The advice</div>
+      <div class="dt-generic">Comforting words</div>
+      <div class="dt-anew">Built on proven clinical methods</div>
+
+      <div class="dt-axis">Your history</div>
+      <div class="dt-generic">Forgets you each time</div>
+      <div class="dt-anew">Remembers your whole story</div>
+
+      <div class="dt-axis">The focus</div>
+      <div class="dt-generic">Drifts anywhere</div>
+      <div class="dt-anew">Stays on your relationship</div>
+
+      <div class="dt-axis">The result</div>
+      <div class="dt-generic">You feel heard, still stuck</div>
+      <div class="dt-anew">You see the way forward</div>
     </div>
     <p class="difference-close reveal">A knowledgeable partner who walks through it with you.</p>
   </div>
