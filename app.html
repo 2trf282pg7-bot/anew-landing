@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Anew — Private Relationship Support</title>
+<title>Anew — Sign In</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;1,400&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
@@ -26,57 +26,125 @@
   }
 
   html, body {
-    height: 100%;
-    height: 100dvh;
+    min-height: 100dvh;
     font-family: 'DM Sans', sans-serif;
     background: var(--warm-white);
     color: var(--charcoal);
-    overflow: hidden;
   }
 
-  /* ─── STATE 1: Welcome ─── */
-  #state1 {
+  .auth-wrap {
+    min-height: 100dvh;
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    height: 100dvh;
-    padding: 24px;
-    text-align: center;
-    background: var(--warm-white);
-    transition: opacity 0.5s ease;
+    padding: 32px 24px 48px;
   }
 
-  #state1.fade-out { opacity: 0; pointer-events: none; }
-
-  .welcome-logo {
+  .auth-logo {
     font-family: 'Cormorant Garamond', serif;
     font-size: 28px;
     font-weight: 400;
     letter-spacing: 0.1em;
     color: var(--charcoal);
-    margin-bottom: 48px;
+    margin-bottom: 40px;
   }
 
-  .welcome-headline {
-    font-family: 'Cormorant Garamond', serif;
-    font-size: clamp(36px, 5vw, 52px);
-    font-weight: 300;
+  .auth-card {
+    background: white;
+    border-radius: 16px;
+    padding: 36px 32px;
+    width: 100%;
+    max-width: 420px;
+    box-shadow: 0 8px 40px rgba(28,22,20,0.08);
+  }
+
+  /* Tabs */
+  .auth-tabs {
+    display: flex;
+    border-bottom: 1px solid var(--blush-deep);
+    margin-bottom: 28px;
+    gap: 0;
+  }
+
+  .auth-tab {
+    flex: 1;
+    background: none;
+    border: none;
+    border-bottom: 2px solid transparent;
+    margin-bottom: -1px;
+    padding: 10px 0 12px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 12px;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    color: var(--stone);
+    cursor: pointer;
+    transition: color 0.2s ease, border-color 0.2s ease;
+  }
+
+  .auth-tab.active {
     color: var(--charcoal);
-    max-width: 480px;
-    line-height: 1.15;
-    margin-bottom: 16px;
+    border-bottom-color: var(--clay);
   }
 
-  .welcome-sub {
+  /* Panels */
+  .auth-panel { display: none; }
+  .auth-panel.active { display: block; }
+
+  /* Form elements */
+  .form-group { margin-bottom: 16px; }
+
+  .form-label {
+    display: block;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 11px;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--stone);
+    margin-bottom: 6px;
+  }
+
+  .form-input {
+    width: 100%;
+    border: 1.5px solid var(--blush-deep);
+    border-radius: 8px;
+    padding: 12px 14px;
     font-family: 'DM Sans', sans-serif;
     font-size: 15px;
-    color: var(--charcoal-soft);
-    margin-bottom: 40px;
-    line-height: 1.6;
+    color: var(--charcoal);
+    background: white;
+    outline: none;
+    transition: border-color 0.2s ease;
+    min-height: 48px;
   }
 
-  .btn-begin {
+  .form-input:focus { border-color: var(--clay); }
+  .form-input::placeholder { color: var(--stone); }
+
+  /* Password toggle wrapper */
+  .pw-wrap { position: relative; }
+  .pw-wrap .form-input { padding-right: 44px; }
+  .pw-toggle {
+    position: absolute;
+    right: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: var(--stone);
+    padding: 0 4px;
+    display: flex;
+    align-items: center;
+    transition: color 0.2s ease;
+  }
+  .pw-toggle:hover { color: var(--charcoal-soft); }
+
+  .btn-auth {
+    width: 100%;
     background: var(--clay);
     color: white;
     font-family: 'DM Sans', sans-serif;
@@ -84,1291 +152,404 @@
     font-weight: 500;
     text-transform: uppercase;
     letter-spacing: 0.12em;
-    padding: 16px 36px;
-    border-radius: 4px;
-    border: none;
-    cursor: pointer;
-    transition: background 0.2s ease;
-    min-height: 44px;
-  }
-
-  .btn-begin:hover { background: var(--clay-dark); }
-
-  .safety-note {
-    margin-top: 24px;
-    font-family: 'DM Sans', sans-serif;
-    font-size: 11px;
-    color: var(--stone);
-    max-width: 320px;
-    line-height: 1.6;
-  }
-
-  /* ─── STATE 2: Conversation ─── */
-  #state2 {
-    display: none;
-    flex-direction: column;
-    height: 100dvh;
-    background: var(--warm-white);
-    opacity: 0;
-    transition: opacity 0.5s ease;
-  }
-
-  #state2.visible { opacity: 1; }
-
-  .top-bar {
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    height: 56px;
-    background: rgba(250,246,241,0.96);
-    border-bottom: 1px solid var(--blush-deep);
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 0 24px;
-    z-index: 100;
-    backdrop-filter: blur(4px);
-  }
-
-  .top-bar-logo {
-    font-family: 'Cormorant Garamond', serif;
-    font-size: 22px;
-    font-weight: 400;
-    color: var(--charcoal);
-    letter-spacing: 0.08em;
-  }
-
-  .top-bar-label {
-    font-family: 'DM Sans', sans-serif;
-    font-size: 10px;
-    text-transform: uppercase;
-    letter-spacing: 0.1em;
-    color: var(--stone);
-  }
-
-  .chat-area {
-    flex: 1;
-    overflow-y: auto;
-    padding: 80px 24px 160px;
-    display: flex;
-    flex-direction: column;
-    gap: 20px;
-  }
-
-  .chat-inner {
-    max-width: 640px;
-    margin: 0 auto;
-    width: 100%;
-    display: flex;
-    flex-direction: column;
-    gap: 20px;
-  }
-
-  .msg-ai {
-    font-family: 'Cormorant Garamond', serif;
-    font-size: 20px;
-    font-weight: 400;
-    color: var(--charcoal);
-    line-height: 1.65;
-    max-width: 520px;
-  }
-
-  .msg-user {
-    background: var(--blush-deep);
-    border-radius: 18px 18px 4px 18px;
-    padding: 12px 18px;
-    font-family: 'DM Sans', sans-serif;
-    font-size: 15px;
-    color: var(--charcoal);
-    align-self: flex-end;
-    max-width: 400px;
-    line-height: 1.5;
-  }
-
-  .word { opacity: 0; transition: opacity 0.15s ease; display: inline; }
-  .word.visible { opacity: 1; }
-
-  /* Typing indicator */
-  .typing-indicator {
-    display: flex;
-    gap: 5px;
-    align-items: center;
-    padding: 8px 0;
-  }
-
-  .typing-indicator span {
-    width: 7px;
-    height: 7px;
-    border-radius: 50%;
-    background: var(--stone);
-    animation: pulse 1.2s ease-in-out infinite;
-  }
-
-  .typing-indicator span:nth-child(2) { animation-delay: 0.2s; }
-  .typing-indicator span:nth-child(3) { animation-delay: 0.4s; }
-
-  @keyframes pulse {
-    0%, 80%, 100% { opacity: 0.3; transform: scale(0.85); }
-    40% { opacity: 1; transform: scale(1); }
-  }
-
-  /* Input bar */
-  .input-bar {
-    position: fixed;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    background: white;
-    border-top: 1px solid var(--blush-deep);
-    padding: 12px 16px;
-    z-index: 100;
-    transition: bottom 0.1s ease;
-  }
-
-  .input-bar-inner {
-    max-width: 640px;
-    margin: 0 auto;
-    display: flex;
-    align-items: flex-end;
-    gap: 10px;
-  }
-
-  #userInput {
-    flex: 1;
-    border: 1.5px solid var(--blush-deep);
-    border-radius: 12px;
-    padding: 12px 16px;
-    font-family: 'DM Sans', sans-serif;
-    font-size: 15px;
-    color: var(--charcoal);
-    background: white;
-    resize: none;
-    min-height: 48px;
-    max-height: 120px;
-    line-height: 1.5;
-    outline: none;
-    transition: border-color 0.2s ease;
-    overflow-y: auto;
-  }
-
-  #userInput:focus { border-color: var(--clay); }
-  #userInput::placeholder { color: var(--stone); }
-
-  #sendBtn {
-    width: 44px;
-    height: 44px;
-    min-width: 44px;
-    border-radius: 50%;
-    background: var(--clay);
-    border: none;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    transition: background 0.2s ease;
-    flex-shrink: 0;
-  }
-
-  #sendBtn:hover { background: var(--clay-dark); }
-  #sendBtn:disabled { background: var(--blush-deep); cursor: not-allowed; }
-
-  .error-msg {
-    font-family: 'DM Sans', sans-serif;
-    font-size: 13px;
-    color: var(--stone);
-    font-style: italic;
-    padding: 4px 0;
-  }
-
-  /* ─── STATE 3: Reflection trigger buttons ─── */
-  .reflection-buttons {
-    display: flex;
-    gap: 12px;
-    flex-wrap: wrap;
-    margin-top: 8px;
-  }
-
-  .btn-yes {
-    background: var(--clay);
-    color: white;
-    font-family: 'DM Sans', sans-serif;
-    font-size: 12px;
-    font-weight: 500;
-    text-transform: uppercase;
-    letter-spacing: 0.1em;
-    padding: 14px 28px;
-    border-radius: 4px;
-    border: none;
-    cursor: pointer;
-    min-height: 44px;
-    transition: background 0.2s ease;
-  }
-
-  .btn-yes:hover { background: var(--clay-dark); }
-
-  .btn-not-yet {
-    background: none;
-    color: var(--clay);
-    font-family: 'DM Sans', sans-serif;
-    font-size: 12px;
-    font-weight: 500;
-    text-transform: uppercase;
-    letter-spacing: 0.1em;
-    padding: 14px 28px;
-    border-radius: 4px;
-    border: 1.5px solid var(--clay);
-    cursor: pointer;
-    min-height: 44px;
-    transition: opacity 0.2s ease;
-  }
-
-  .btn-not-yet:hover { opacity: 0.75; }
-
-  /* ─── STATE 4: Paywall ─── */
-  .paywall-card {
-    background: white;
-    border-radius: 16px;
-    padding: 32px 28px;
-    box-shadow: 0 8px 40px rgba(28,22,20,0.10);
-    max-width: 480px;
-    margin: 24px auto 48px;
-    opacity: 0;
-    transition: opacity 0.3s ease;
-  }
-
-  .paywall-card.visible { opacity: 1; }
-
-  .paywall-headline {
-    font-family: 'Cormorant Garamond', serif;
-    font-size: 28px;
-    font-weight: 300;
-    color: var(--charcoal);
-    margin-bottom: 8px;
-  }
-
-  .paywall-sub {
-    font-family: 'DM Sans', sans-serif;
-    font-size: 14px;
-    color: var(--charcoal-soft);
-    margin-bottom: 24px;
-    line-height: 1.5;
-  }
-
-  .paywall-features {
-    list-style: none;
-    margin-bottom: 24px;
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
-  }
-
-  .paywall-features li {
-    font-family: 'DM Sans', sans-serif;
-    font-size: 14px;
-    color: var(--charcoal);
-    display: flex;
-    align-items: flex-start;
-    gap: 10px;
-    line-height: 1.4;
-  }
-
-  .paywall-features li::before {
-    content: '✓';
-    color: var(--clay);
-    font-weight: 500;
-    flex-shrink: 0;
-    margin-top: 1px;
-  }
-
-  .paywall-divider {
-    border: none;
-    border-top: 1px solid var(--blush-deep);
-    margin-bottom: 20px;
-  }
-
-  .paywall-price-main {
-    font-family: 'Cormorant Garamond', serif;
-    font-size: 22px;
-    font-style: italic;
-    color: var(--charcoal);
-    display: block;
-    margin-bottom: 4px;
-  }
-
-  .paywall-price-sub {
-    font-family: 'DM Sans', sans-serif;
-    font-size: 13px;
-    color: var(--stone);
-    display: block;
-    margin-bottom: 4px;
-  }
-
-  .paywall-price-note {
-    font-family: 'DM Sans', sans-serif;
-    font-size: 11px;
-    color: var(--clay);
-    display: block;
-    margin-bottom: 20px;
-  }
-
-  .btn-cta {
-    display: block;
-    width: 100%;
-    background: var(--clay);
-    color: white;
-    font-family: 'Cormorant Garamond', serif;
-    font-size: 20px;
-    font-style: italic;
-    padding: 18px;
+    padding: 16px;
     border-radius: 6px;
     border: none;
     cursor: pointer;
-    text-align: center;
     transition: background 0.2s ease;
-    text-decoration: none;
-    line-height: 1;
+    min-height: 52px;
+    margin-top: 8px;
   }
 
-  .btn-cta:hover { background: var(--clay-dark); }
+  .btn-auth:hover { background: var(--clay-dark); }
+  .btn-auth:disabled { background: var(--blush-deep); cursor: not-allowed; }
 
-  .paywall-no-cc {
-    font-family: 'DM Sans', sans-serif;
-    font-size: 11px;
-    color: var(--stone);
-    text-align: center;
-    margin-top: 12px;
+  .form-link {
     display: block;
-  }
-
-  .paywall-skip {
+    text-align: right;
     font-family: 'DM Sans', sans-serif;
     font-size: 12px;
     color: var(--stone);
-    text-align: center;
-    margin-top: 16px;
-    display: block;
-    cursor: pointer;
     text-decoration: underline;
     text-underline-offset: 3px;
     background: none;
     border: none;
+    cursor: pointer;
     padding: 0;
+    margin-top: 4px;
   }
 
-  .paywall-skip:hover { color: var(--charcoal-soft); }
+  .form-link:hover { color: var(--charcoal-soft); }
 
-  /* Fade-in utility */
-  .fade-in {
-    opacity: 0;
-    animation: fadeIn 0.4s ease forwards;
-  }
-
-  @keyframes fadeIn {
-    to { opacity: 1; }
-  }
-
-  /* Scrollbar */
-  .chat-area::-webkit-scrollbar { width: 4px; }
-  .chat-area::-webkit-scrollbar-track { background: transparent; }
-  .chat-area::-webkit-scrollbar-thumb { background: var(--blush-deep); border-radius: 2px; }
-
-  /* ─── Feedback button ─── */
-  #feedbackBtn {
-    position: fixed;
-    bottom: 90px;
-    right: 24px;
-    background: white;
-    border: 1px solid var(--blush-deep);
-    border-radius: 100px;
-    padding: 10px 18px;
-    font-family: 'DM Sans', sans-serif;
-    font-size: 12px;
-    color: var(--charcoal-soft);
-    box-shadow: 0 4px 16px rgba(28,22,20,0.08);
-    cursor: pointer;
-    z-index: 90;
-    transition: border-color 0.2s ease, color 0.2s ease;
-  }
-
-  #feedbackBtn:hover {
-    border-color: var(--clay);
-    color: var(--clay);
-  }
-
-  /* ─── Feedback modal ─── */
-  #feedbackOverlay {
-    display: none;
-    position: fixed;
-    inset: 0;
-    background: rgba(28,22,20,0.4);
-    z-index: 1000;
-    align-items: center;
-    justify-content: center;
-  }
-
-  #feedbackOverlay.open { display: flex; }
-
-  #feedbackModal {
-    background: white;
-    border-radius: 16px;
-    padding: 32px 28px;
-    max-width: 420px;
-    width: calc(100% - 48px);
-    position: relative;
-  }
-
-  #feedbackClose {
-    position: absolute;
-    top: 16px;
-    right: 20px;
-    background: none;
-    border: none;
-    font-size: 20px;
-    color: var(--stone);
-    cursor: pointer;
-    line-height: 1;
-    padding: 4px;
-  }
-
-  #feedbackClose:hover { color: var(--charcoal); }
-
-  #feedbackModal h2 {
-    font-family: 'Cormorant Garamond', serif;
-    font-size: 24px;
-    font-weight: 400;
-    color: var(--charcoal);
-    margin-bottom: 20px;
-  }
-
-  #feedbackCategory, #feedbackText {
-    width: 100%;
-    border: 1.5px solid var(--blush-deep);
-    border-radius: 8px;
-    font-family: 'DM Sans', sans-serif;
-    font-size: 14px;
-    color: var(--charcoal);
-    background: white;
-    outline: none;
-    transition: border-color 0.2s ease;
-    appearance: none;
-  }
-
-  #feedbackCategory:focus, #feedbackText:focus { border-color: var(--clay); }
-
-  #feedbackCategory {
-    padding: 10px 12px;
-    margin-bottom: 16px;
-    cursor: pointer;
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%238A7870' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
-    background-repeat: no-repeat;
-    background-position: right 12px center;
-    padding-right: 32px;
-  }
-
-  #feedbackText {
-    padding: 12px;
-    min-height: 100px;
-    resize: vertical;
-    margin-bottom: 20px;
-    display: block;
-  }
-
-  #feedbackText::placeholder { color: var(--stone); }
-
-  #feedbackSubmit {
-    background: var(--clay);
-    color: white;
-    font-family: 'DM Sans', sans-serif;
-    font-size: 12px;
-    font-weight: 500;
-    text-transform: uppercase;
-    letter-spacing: 0.12em;
-    padding: 14px;
-    border-radius: 4px;
-    border: none;
-    width: 100%;
-    cursor: pointer;
-    transition: background 0.2s ease;
-  }
-
-  #feedbackSubmit:hover { background: var(--clay-dark); }
-  #feedbackSubmit:disabled { background: var(--blush-deep); cursor: not-allowed; }
-
-  #feedbackError {
+  .form-error {
     font-family: 'DM Sans', sans-serif;
     font-size: 13px;
     color: var(--clay);
     margin-top: 12px;
+    padding: 10px 12px;
+    background: rgba(184,112,78,0.08);
+    border-radius: 6px;
     display: none;
   }
 
-  /* ─── Feedback toast ─── */
-  #feedbackToast {
-    position: fixed;
-    bottom: 72px;
-    right: 24px;
-    background: var(--charcoal);
-    color: white;
+  .form-error.show { display: block; }
+
+  .form-success {
     font-family: 'DM Sans', sans-serif;
-    font-size: 12px;
-    border-radius: 8px;
-    padding: 10px 16px;
-    z-index: 300;
-    opacity: 0;
-    transition: opacity 0.3s ease;
-    pointer-events: none;
-  }
-
-  #feedbackToast.show { opacity: 1; }
-
-  /* ─── Mic button ─── */
-  #micBtn {
-    width: 44px;
-    height: 44px;
-    min-width: 44px;
-    border-radius: 50%;
-    border: 1.5px solid var(--blush-deep);
-    background: white;
-    cursor: pointer;
+    font-size: 14px;
+    color: var(--sage);
+    margin-top: 12px;
+    padding: 12px;
+    background: rgba(94,138,96,0.08);
+    border-radius: 6px;
+    line-height: 1.5;
     display: none;
-    align-items: center;
-    justify-content: center;
-    transition: border-color 0.2s ease, background 0.2s ease;
-    flex-shrink: 0;
   }
 
-  #micBtn:hover { border-color: var(--clay); }
+  .form-success.show { display: block; }
 
-  #micBtn.recording {
-    background: var(--clay);
-    border-color: var(--clay);
-    animation: micPulse 1.2s ease-in-out infinite;
+  /* Email confirmation state */
+  .confirm-state { text-align: center; padding: 8px 0; }
+  .confirm-icon { display: flex; justify-content: center; margin-bottom: 16px; }
+
+  .confirm-title {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 24px;
+    font-weight: 400;
+    color: var(--charcoal);
+    margin-bottom: 12px;
   }
 
-  #micBtn.recording svg rect,
-  #micBtn.recording svg path,
-  #micBtn.recording svg line { stroke: white; }
-
-  @keyframes micPulse {
-    0%, 100% { opacity: 1; }
-    50% { opacity: 0.55; }
+  .confirm-text {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14px;
+    color: var(--charcoal-soft);
+    line-height: 1.6;
   }
+
+  /* Disclaimer */
+  .auth-disclaimer { margin-top: 24px; text-align: center; max-width: 420px; }
+
+  .auth-disclaimer p {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 11px;
+    color: var(--stone);
+    line-height: 1.6;
+    margin-bottom: 8px;
+  }
+
+  .auth-disclaimer-links { display: flex; justify-content: center; gap: 16px; }
+
+  .auth-disclaimer-links a {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 11px;
+    color: var(--stone);
+    text-decoration: underline;
+    text-underline-offset: 2px;
+  }
+
+  .auth-disclaimer-links a:hover { color: var(--charcoal-soft); }
 
   @media (max-width: 480px) {
-    .msg-ai { font-size: 18px; }
-    .paywall-card { margin: 16px 0 48px; border-radius: 12px; }
-    .top-bar-label { display: none; }
-    #feedbackBtn { bottom: 80px; }
-    #feedbackToast { bottom: 128px; }
+    .auth-card { padding: 28px 20px; }
   }
 </style>
 </head>
 <body>
 
-<!-- STATE 1: Welcome -->
-<div id="state1">
-  <div class="welcome-logo">Anew</div>
-  <h1 class="welcome-headline">Tell me what's been going on.</h1>
-  <p class="welcome-sub">This is private. Take your time.<br>There are no right answers.</p>
-  <button class="btn-begin" id="beginBtn">Begin privately</button>
-  <p class="safety-note">If your situation involves abuse or crisis, please reach out to a qualified professional.</p>
-</div>
+<div class="auth-wrap">
+  <div class="auth-logo">Anew</div>
 
-<!-- STATE 2/3/4: Conversation -->
-<div id="state2">
-  <div class="top-bar">
-    <span class="top-bar-logo">Anew</span>
-    <span class="top-bar-label">Understanding your situation</span>
+  <div class="auth-card" id="authCard">
+    <!-- Tabs -->
+    <div class="auth-tabs">
+      <button class="auth-tab active" id="tabLogin" onclick="switchTab('login')">Log in</button>
+      <button class="auth-tab" id="tabRegister" onclick="switchTab('register')">Sign up</button>
+    </div>
+
+    <!-- Login panel -->
+    <div class="auth-panel active" id="panelLogin">
+      <div class="form-group">
+        <label class="form-label" for="loginEmail">Email address</label>
+        <input class="form-input" type="email" id="loginEmail" placeholder="you@example.com" autocomplete="email">
+      </div>
+      <div class="form-group">
+        <label class="form-label" for="loginPassword">Password</label>
+        <div class="pw-wrap">
+          <input class="form-input" type="password" id="loginPassword" placeholder="••••••••" autocomplete="current-password">
+          <button type="button" class="pw-toggle" onclick="togglePassword('loginPassword')" tabindex="-1"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg></button>
+        </div>
+        <button class="form-link" onclick="switchTab('reset')">Forgot your password?</button>
+      </div>
+      <button class="btn-auth" id="loginBtn" onclick="handleLogin()" disabled>Loading...</button>
+      <div class="form-error" id="loginError"></div>
+    </div>
+
+    <!-- Register panel -->
+    <div class="auth-panel" id="panelRegister">
+      <div id="regFormFields">
+        <div class="form-group">
+          <label class="form-label" for="regEmail">Email address</label>
+          <input class="form-input" type="email" id="regEmail" placeholder="you@example.com" autocomplete="email">
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="regPassword">Password (8+ characters)</label>
+          <div class="pw-wrap">
+            <input class="form-input" type="password" id="regPassword" placeholder="••••••••" autocomplete="new-password">
+            <button type="button" class="pw-toggle" onclick="togglePassword('regPassword')" tabindex="-1"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg></button>
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="regConfirm">Confirm password</label>
+          <div class="pw-wrap">
+            <input class="form-input" type="password" id="regConfirm" placeholder="••••••••" autocomplete="new-password">
+            <button type="button" class="pw-toggle" onclick="togglePassword('regConfirm')" tabindex="-1"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg></button>
+          </div>
+        </div>
+        <button class="btn-auth" id="registerBtn" onclick="handleRegister()" disabled>Loading...</button>
+        <div class="form-error" id="registerError"></div>
+      </div>
+
+      <!-- Email sent confirmation (hidden initially) -->
+      <div id="confirmState" style="display:none;" class="confirm-state">
+        <div class="confirm-icon">
+          <svg width="40" height="40" viewBox="0 0 40 40" fill="none">
+            <rect x="5" y="9" width="30" height="22" rx="3" stroke="#B8704E" stroke-width="1.6"/>
+            <path d="M6 11l14 11 14-11" stroke="#B8704E" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </div>
+        <div class="confirm-title">Check your inbox</div>
+        <p class="confirm-text">Click the link in the email we sent you to activate your account.</p>
+      </div>
+    </div>
+
+    <!-- Password reset panel -->
+    <div class="auth-panel" id="panelReset">
+      <div class="form-group">
+        <label class="form-label" for="resetEmail">Email address</label>
+        <input class="form-input" type="email" id="resetEmail" placeholder="you@example.com" autocomplete="email">
+      </div>
+      <button class="btn-auth" id="resetBtn" onclick="handleReset()" disabled>Loading...</button>
+      <div class="form-error" id="resetError"></div>
+      <div class="form-success" id="resetSuccess">Check your email — we've sent a password reset link.</div>
+      <button class="form-link" style="text-align:center;margin-top:16px;display:block;" onclick="switchTab('login')">Back to log in</button>
+    </div>
   </div>
 
-  <div class="chat-area" id="chatArea">
-    <div class="chat-inner" id="chatInner"></div>
-  </div>
-
-  <div class="input-bar" id="inputBar">
-    <div class="input-bar-inner">
-      <textarea id="userInput" placeholder="Write here..." rows="1"></textarea>
-      <button id="micBtn" aria-label="Voice input">
-        <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
-          <rect x="6" y="1" width="6" height="10" rx="3" stroke="#B8704E" stroke-width="1.6"/>
-          <path d="M3 9a6 6 0 0012 0" stroke="#B8704E" stroke-width="1.6" stroke-linecap="round"/>
-          <line x1="9" y1="15" x2="9" y2="17" stroke="#B8704E" stroke-width="1.6" stroke-linecap="round"/>
-          <line x1="6" y1="17" x2="12" y2="17" stroke="#B8704E" stroke-width="1.6" stroke-linecap="round"/>
-        </svg>
-      </button>
-      <button id="sendBtn" aria-label="Send">
-        <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
-          <path d="M3 9H15M15 9L10 4M15 9L10 14" stroke="white" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
-        </svg>
-      </button>
+  <div class="auth-disclaimer">
+    <p>Anew is not a substitute for professional therapy or medical advice.</p>
+    <div class="auth-disclaimer-links">
+      <a href="/terms.html">Terms of Service</a>
+      <a href="/privacy.html">Privacy Policy</a>
     </div>
   </div>
 </div>
 
-<!-- Feedback button -->
-<button id="feedbackBtn">Feedback</button>
-
-<!-- Feedback modal -->
-<div id="feedbackOverlay">
-  <div id="feedbackModal">
-    <button id="feedbackClose">×</button>
-    <h2>Share feedback</h2>
-    <select id="feedbackCategory">
-      <option value="Display / Design issue">Display / Design issue</option>
-      <option value="AI conversation issue">AI conversation issue</option>
-      <option value="Something not working">Something not working</option>
-      <option value="Other">Other</option>
-    </select>
-    <textarea id="feedbackText" placeholder="Tell me more..."></textarea>
-    <button id="feedbackSubmit">Send feedback</button>
-    <div id="feedbackError">Something went wrong. Please try again.</div>
-  </div>
-</div>
-
-<!-- Toast -->
-<div id="feedbackToast">Thank you for your feedback</div>
-
 <script>
-  // ─── State ───
-  let messages = [];
-  let turnCount = 0;
-  let readyToReflect = false;
-  let currentState = 1;
-  let isStreaming = false;
-  let sessionId = null;
+  const SUPABASE_URL = 'https://hzkkftsihitkvdinydju.supabase.co';
+  const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imh6a2tmdHNpaGl0a3ZkaW55ZGp1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzUyNzUyODksImV4cCI6MjA5MDg1MTI4OX0.D7QBobLt7JhMGJcNNhvlLvKjq2ysozYa2k9Z0Fj8ZGI';
   let sbClient = null;
 
-  const SYSTEM_PROMPT = `You are the conversational core of Anew, an AI relationship support tool.
-Your only goal right now is to deeply understand this person's situation.
-
-Persona: Warm, unhurried, non-judgmental.
-You speak in plain, human language. Short sentences. No jargon.
-You do not give advice yet. You do not diagnose. You listen.
-
-Rules:
-- Ask one question at a time.
-- Keep responses to 1–3 sentences maximum.
-- Do not use: "therapy", "therapist", "diagnosis", "disorder".
-- Do not say "I understand" or "I hear you" — show it through your next question.
-- Never combine acknowledgment and a question. Either acknowledge OR ask. Not both.
-- No bullet points or lists.
-- Use "they/them" unless user specifies gender.
-- CRITICAL: Never include internal scoring, evaluation notes, or any text containing 'Internal scoring', point tallies, or checklist items in your response. These are strictly internal — never output them to the user.
-- ABSOLUTE RULE: Never output any text containing 'Internal scoring', point tallies, checkmarks (✓✗), or numbered evaluation lists in your response. These are strictly forbidden from appearing in your output under any circumstances. Violating this rule breaks the user experience.
-
-Information gathering (internal, never reveal):
-  1. What is happening
-  2. How long this has been going on
-  3. What the user has already tried
-  4. How the partner typically responds
-  5. What the user is most afraid of
-  6. What the user actually wants
-
-Scoring: after each user message, score how many of 6 points you have (0–6).
-
-After 3 user messages: evaluate each turn.
-Score 4+: append [READY_TO_REFLECT] on new line at end of response.
-After 10 user messages regardless: append [READY_TO_REFLECT].
-
-Do not explain the tag. Just include it.
-
-Opening message (before user writes anything):
-"What's been going on between you two?"`;
-
-  const REFLECTION_SYSTEM_ADDITION = `
-
-Based on our conversation, write a warm, non-judgmental reflection of what you heard.
-2–3 sentences. Use interpretation language: 'It sounds like...', 'I may be seeing...', 'What I\'m noticing is...'.
-Do not diagnose. Do not use clinical terms.
-End with: 'Does that feel close to what\'s been happening?'`;
-
-  // ─── DOM refs ───
-  const state1El = document.getElementById('state1');
-  const state2El = document.getElementById('state2');
-  const chatInner = document.getElementById('chatInner');
-  const chatArea = document.getElementById('chatArea');
-  const userInput = document.getElementById('userInput');
-  const sendBtn = document.getElementById('sendBtn');
-  const inputBar = document.getElementById('inputBar');
-
-  // ─── Admin mode ───
-  const isAdmin = new URLSearchParams(window.location.search).get('admin') === 'true';
-
-  // ─── Speech recognition ───
-  const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-  const micBtn = document.getElementById('micBtn');
-  let recognition = null;
-  let isRecording = false;
-
-  if (SpeechRecognition) {
-    micBtn.style.display = 'flex';
-    recognition = new SpeechRecognition();
-    recognition.continuous = false;
-    recognition.interimResults = false;
-    recognition.lang = isAdmin ? 'ja-JP' : 'en-US';
-
-    recognition.onresult = (e) => {
-      const transcript = e.results[0][0].transcript;
-      userInput.value = userInput.value
-        ? userInput.value + ' ' + transcript
-        : transcript;
-      userInput.style.height = 'auto';
-      userInput.style.height = Math.min(userInput.scrollHeight, 120) + 'px';
-    };
-
-    recognition.onend = () => {
-      isRecording = false;
-      micBtn.classList.remove('recording');
-    };
-
-    recognition.onerror = () => {
-      isRecording = false;
-      micBtn.classList.remove('recording');
-    };
-
-    micBtn.addEventListener('click', () => {
-      if (isRecording) {
-        recognition.stop();
-      } else {
-        recognition.start();
-        isRecording = true;
-        micBtn.classList.add('recording');
-      }
+  function enableAuthButtons() {
+    const labels = { loginBtn: 'Log in', registerBtn: 'Create account', resetBtn: 'Send reset email' };
+    Object.entries(labels).forEach(([id, label]) => {
+      const btn = document.getElementById(id);
+      if (btn) { btn.disabled = false; btn.textContent = label; }
     });
   }
 
-  // ─── Supabase init ───
+  function showInitError() {
+    ['loginError', 'registerError', 'resetError'].forEach(id => {
+      showError(id, 'Connection error. Please refresh the page.');
+    });
+  }
+
   async function initSupabase() {
     try {
-      const res = await fetch('/api/config');
-      if (!res.ok) return;
-      const { supabaseUrl, supabaseAnonKey } = await res.json();
-      if (!supabaseUrl || !supabaseAnonKey) return;
+      console.log('[Anew] initSupabase start');
+      sbClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-      sbClient = supabase.createClient(supabaseUrl, supabaseAnonKey);
-
-      const stored = localStorage.getItem('anew_session_id');
-      if (stored) {
-        sessionId = stored;
-      } else {
-        // Generate the id client-side and insert WITHOUT a RETURNING round-trip.
-        // The anon role has INSERT on sessions but no SELECT policy, so
-        // `.insert().select()` (INSERT ... RETURNING) is rejected with 401.
-        const newId = makeUUID();
-        const { error } = await sbClient.from('sessions').insert({ id: newId });
-        if (!error) {
-          sessionId = newId;
-          localStorage.setItem('anew_session_id', sessionId);
-        }
+      // Check existing session — redirect if already logged in
+      const { data: { session } } = await sbClient.auth.getSession();
+      if (session) {
+        console.log('[Anew] existing session found, redirecting');
+        await redirectByStatus(session);
+        return;
       }
-    } catch (_) {
-      // app works without Supabase
-    }
-  }
 
-  function makeUUID() {
-    if (window.crypto && crypto.randomUUID) return crypto.randomUUID();
-    return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, (c) => {
-      const r = (Math.random() * 16) | 0;
-      const v = c === 'x' ? r : (r & 0x3) | 0x8;
-      return v.toString(16);
-    });
-  }
-
-  async function saveMessage(role, content) {
-    if (!sbClient || !sessionId) return;
-    try {
-      await sbClient.from('messages').insert({ session_id: sessionId, role, content });
-    } catch (_) {}
-  }
-
-  // ─── Transitions ───
-  document.getElementById('beginBtn').addEventListener('click', () => {
-    state1El.classList.add('fade-out');
-    setTimeout(() => {
-      state1El.style.display = 'none';
-      state2El.style.display = 'flex';
-      requestAnimationFrame(() => {
-        requestAnimationFrame(() => {
-          state2El.classList.add('visible');
-        });
-      });
-      currentState = 2;
-      loadOpeningMessage();
-    }, 500);
-  });
-
-  // ─── Auto-resize textarea ───
-  userInput.addEventListener('input', () => {
-    userInput.style.height = 'auto';
-    userInput.style.height = Math.min(userInput.scrollHeight, 120) + 'px';
-  });
-
-  // ─── Send on Enter ───
-  userInput.addEventListener('keydown', (e) => {
-    if (e.key === 'Enter' && !e.shiftKey) {
-      e.preventDefault();
-      if (!isStreaming) handleSend();
-    }
-  });
-
-  sendBtn.addEventListener('click', () => {
-    if (!isStreaming) handleSend();
-  });
-
-  // ─── iOS visual viewport (keyboard detection) ───
-  if (window.visualViewport) {
-    window.visualViewport.addEventListener('resize', () => {
-      const offset = window.innerHeight - window.visualViewport.height;
-      inputBar.style.bottom = offset + 'px';
-      chatArea.style.paddingBottom = (offset + 160) + 'px';
-    });
-  }
-
-  // ─── Append message to chat ───
-  function appendMessage(role, text) {
-    const el = document.createElement('div');
-    if (role === 'ai') {
-      el.className = 'msg-ai';
-    } else {
-      el.className = 'msg-user fade-in';
-      el.textContent = text;
-    }
-    chatInner.appendChild(el);
-    scrollToBottom();
-    return el;
-  }
-
-  // ─── Word-by-word animation ───
-  function animateWords(el, text, onDone) {
-    const words = text.split(' ');
-    el.innerHTML = '';
-    words.forEach((w, i) => {
-      const span = document.createElement('span');
-      span.className = 'word';
-      span.textContent = (i === 0 ? '' : ' ') + w;
-      el.appendChild(span);
-    });
-
-    let i = 0;
-    const spans = el.querySelectorAll('.word');
-    function showNext() {
-      if (i < spans.length) {
-        spans[i].classList.add('visible');
-        i++;
-        setTimeout(showNext, 22);
-      } else {
-        if (onDone) onDone();
-      }
-    }
-    showNext();
-  }
-
-  // ─── Typing indicator ───
-  function showTyping() {
-    const el = document.createElement('div');
-    el.className = 'typing-indicator';
-    el.id = 'typingIndicator';
-    el.innerHTML = '<span></span><span></span><span></span>';
-    chatInner.appendChild(el);
-    scrollToBottom();
-    return el;
-  }
-
-  function hideTyping() {
-    const el = document.getElementById('typingIndicator');
-    if (el) el.remove();
-  }
-
-  function scrollToBottom() {
-    requestAnimationFrame(() => {
-      chatArea.scrollTop = chatArea.scrollHeight;
-    });
-  }
-
-  // ─── Sanitize history for the Anthropic API ───
-  // Guards against 400s: empty-content messages (from over-stripped replies), a
-  // leading assistant message, and consecutive same-role messages. Operates on a
-  // copy; never mutates `messages`.
-  function sanitizeMessages(msgs) {
-    const out = [];
-    for (const m of msgs) {
-      const content = (m.content || '').trim();
-      if (!content) continue;                       // drop empty content
-      const role = m.role === 'assistant' ? 'assistant' : 'user';
-      if (out.length === 0 && role !== 'user') continue; // must start with user
-      const last = out[out.length - 1];
-      if (last && last.role === role) last.content += '\n\n' + content; // merge same-role
-      else out.push({ role, content });
-    }
-    return out;
-  }
-
-  // ─── API call ───
-  async function callAPI(sysPrompt, msgHistory) {
-    const response = await fetch('/api/chat', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        model: 'claude-sonnet-4-20250514',
-        max_tokens: 300,
-        system: sysPrompt,
-        messages: sanitizeMessages(msgHistory)
-      })
-    });
-
-    if (!response.ok) throw new Error(`API error ${response.status}`);
-    const data = await response.json();
-    return data.content[0].text;
-  }
-
-  // ─── Check for READY_TO_REFLECT + strip ALL internal notes ───
-  function processAIText(raw) {
-    const hasReflectTag = raw.includes('[READY_TO_REFLECT]');
-    if (hasReflectTag) readyToReflect = true;
-
-    let clean = raw
-      .replace(/\*\*Internal scoring:.*$/m, '')
-      .replace(/Internal scoring:[\s\S]*?(\n\n|$)/g, '')
-      .replace(/\d+\.\s+.*[✓✗].*$/gm, '')
-      .replace(/\[READY_TO_REFLECT\]/g, '')
-      .trim();
-
-    // Never return empty content — an empty assistant turn poisons the next request.
-    if (!clean) clean = raw.replace(/\[READY_TO_REFLECT\]/g, '').trim();
-    if (!clean) clean = 'Thank you for sharing that. Tell me a little more.';
-
-    return clean;
-  }
-
-  // ─── Show / clear error ───
-  // Errors persist until the next user action (so they can be read), rather than
-  // auto-removing after a timeout.
-  function clearErrors() {
-    chatInner.querySelectorAll('.error-msg').forEach((e) => e.remove());
-  }
-
-  function showError() {
-    clearErrors();
-    const err = document.createElement('div');
-    err.className = 'error-msg fade-in';
-    err.textContent = 'Something went wrong. Please try again.';
-    chatInner.appendChild(err);
-    scrollToBottom();
-  }
-
-  // ─── Opening message ───
-  function loadOpeningMessage() {
-    const el = appendMessage('ai', '');
-    const opening = "What's been going on between you two?";
-    animateWords(el, opening, () => {
-      enableInput();
-    });
-    messages.push({ role: 'assistant', content: opening });
-    saveMessage('assistant', opening);
-  }
-
-  // ─── Enable/disable input ───
-  function enableInput() {
-    isStreaming = false;
-    userInput.disabled = false;
-    sendBtn.disabled = false;
-    userInput.focus();
-  }
-
-  function disableInput() {
-    isStreaming = true;
-    userInput.disabled = true;
-    sendBtn.disabled = true;
-  }
-
-  // ─── Handle send ───
-  async function handleSend() {
-    const text = userInput.value.trim();
-    if (!text) return;
-
-    clearErrors();
-    userInput.value = '';
-    userInput.style.height = 'auto';
-    disableInput();
-
-    appendMessage('user', text);
-    messages.push({ role: 'user', content: text });
-    saveMessage('user', text);
-    turnCount++;
-
-    if (readyToReflect && currentState === 2) {
-      transitionToState3();
-      return;
-    }
-
-    await fetchAndShowAI(SYSTEM_PROMPT);
-  }
-
-  async function fetchAndShowAI(sysPrompt) {
-    showTyping();
-
-    try {
-      const raw = await callAPI(sysPrompt, messages);
-      hideTyping();
-
-      const cleaned = processAIText(raw);
-      const el = appendMessage('ai', '');
-      messages.push({ role: 'assistant', content: cleaned });
-      saveMessage('assistant', cleaned);
-
-      animateWords(el, cleaned, () => {
-        enableInput();
-      });
-    } catch (e) {
-      hideTyping();
-      showError();
-      enableInput();
-    }
-  }
-
-  // ─── STATE 3 ───
-  function transitionToState3() {
-    currentState = 3;
-    inputBar.style.display = 'none';
-
-    const reflectMsg = "I think I'm starting to see some patterns here. Would it be okay if I reflected back what I'm hearing — before we go further?";
-    const el = appendMessage('ai', '');
-
-    animateWords(el, reflectMsg, () => {
-      messages.push({ role: 'assistant', content: reflectMsg });
-      saveMessage('assistant', reflectMsg);
-
-      const btnsEl = document.createElement('div');
-      btnsEl.className = 'reflection-buttons fade-in';
-      btnsEl.id = 'reflectionBtns';
-
-      const btnYes = document.createElement('button');
-      btnYes.className = 'btn-yes';
-      btnYes.textContent = 'Yes, go ahead';
-      btnYes.addEventListener('click', transitionToState4);
-
-      const btnNotYet = document.createElement('button');
-      btnNotYet.className = 'btn-not-yet';
-      btnNotYet.textContent = 'Not yet, I want to say more';
-      btnNotYet.addEventListener('click', () => {
-        btnsEl.remove();
-        readyToReflect = false;
-        currentState = 2;
-        inputBar.style.display = '';
-        enableInput();
-      });
-
-      btnsEl.appendChild(btnYes);
-      btnsEl.appendChild(btnNotYet);
-      chatInner.appendChild(btnsEl);
-      scrollToBottom();
-    });
-  }
-
-  // ─── STATE 4 ───
-  async function transitionToState4() {
-    currentState = 4;
-    document.getElementById('reflectionBtns')?.remove();
-    clearErrors();
-
-    // The "Yes, go ahead" click is a user action — represent it so the request ends
-    // on a user turn (a proper generation request, not a trailing-assistant prefill).
-    // Kept in-memory only; the persisted transcript doesn't need it.
-    messages.push({ role: 'user', content: 'Yes, go ahead.' });
-
-    const reflectionSystem = SYSTEM_PROMPT + REFLECTION_SYSTEM_ADDITION;
-    showTyping();
-
-    try {
-      const raw = await callAPI(reflectionSystem, messages);
-      hideTyping();
-
-      const cleaned = processAIText(raw);
-      const el = appendMessage('ai', '');
-      messages.push({ role: 'assistant', content: cleaned });
-      saveMessage('assistant', cleaned);
-
-      // Step 1→2: word-by-word, then 600ms pause
-      animateWords(el, cleaned, () => {
-        setTimeout(() => {
-
-          // Step 3: bridge message
-          const el2 = appendMessage('ai', '');
-          const bridgeMsg = "I think there's more I can help you see — and a way to start moving through this.";
-          messages.push({ role: 'assistant', content: bridgeMsg });
-          saveMessage('assistant', bridgeMsg);
-
-          animateWords(el2, bridgeMsg, () => {
-            // Step 4→5: 1500ms then paywall inline
-            setTimeout(showPaywall, 1500);
-          });
-
-        }, 600);
-      });
-    } catch (e) {
-      hideTyping();
-      showError();
-    }
-  }
-
-  // ─── Paywall ───
-  function showPaywall() {
-    const ctaHtml = isAdmin
-      ? `<button class="btn-cta" id="adminCtaBtn">See my recovery project</button>`
-      : `<a href="https://buy.stripe.com/test_00w9AV3WB1Qe64a2DDbMQ00" target="_blank" rel="noopener" class="btn-cta">See my recovery project</a>`;
-
-    const card = document.createElement('div');
-    card.className = 'paywall-card';
-    card.innerHTML = `
-      <h2 class="paywall-headline">Your personalized recovery project</h2>
-      <p class="paywall-sub">A 90-day roadmap built around your specific situation.</p>
-      <ul class="paywall-features">
-        <li>Full relationship pattern assessment</li>
-        <li>Week-by-week recovery roadmap</li>
-        <li>Message scripts for difficult conversations</li>
-        <li>Weekly AI coaching check-ins</li>
-      </ul>
-      <hr class="paywall-divider">
-      <span class="paywall-price-main">Start free for 7 days</span>
-      <span class="paywall-price-sub">Then $19/month — cancel anytime</span>
-      <span class="paywall-price-note">Founding member pricing. First 100 members only.</span>
-      ${ctaHtml}
-      <button class="paywall-skip" onclick="window.location.href='https://anewapp.net'">Not ready yet — go back to anewapp.net</button>
-    `;
-
-    chatInner.appendChild(card);
-
-    requestAnimationFrame(() => {
-      requestAnimationFrame(() => {
-        card.classList.add('visible');
-        card.scrollIntoView({ behavior: 'smooth', block: 'start' });
-        if (isAdmin) {
-          document.getElementById('adminCtaBtn').addEventListener('click', showAdminFlow);
+      // Listen for auth changes (e.g. email confirmation callback)
+      sbClient.auth.onAuthStateChange(async (event, session) => {
+        if (event === 'SIGNED_IN' && session) {
+          await redirectByStatus(session);
         }
       });
+
+      console.log('[Anew] init complete, enabling buttons');
+      enableAuthButtons();
+    } catch (e) {
+      console.error('[Anew] initSupabase error:', e);
+      showInitError();
+    }
+  }
+
+  async function redirectByStatus(session) {
+    try {
+      const { data } = await sbClient
+        .from('users')
+        .select('subscription_status')
+        .eq('id', session.user.id)
+        .single();
+
+      const status = data?.subscription_status;
+      if (status === 'trial' || status === 'active') {
+        window.location.href = '/dashboard.html';
+      } else {
+        window.location.href = '/onboarding.html';
+      }
+    } catch (_) {
+      window.location.href = '/onboarding.html';
+    }
+  }
+
+  function switchTab(tab) {
+    ['login', 'register', 'reset'].forEach(t => {
+      document.getElementById('tab' + t.charAt(0).toUpperCase() + t.slice(1))?.classList.remove('active');
+      document.getElementById('panel' + t.charAt(0).toUpperCase() + t.slice(1))?.classList.remove('active');
+    });
+    document.getElementById('tab' + tab.charAt(0).toUpperCase() + tab.slice(1))?.classList.add('active');
+    document.getElementById('panel' + tab.charAt(0).toUpperCase() + tab.slice(1))?.classList.add('active');
+
+    ['loginError','registerError','resetError','resetSuccess'].forEach(id => {
+      const el = document.getElementById(id);
+      if (el) { el.classList.remove('show'); el.textContent = ''; }
     });
   }
 
-  // ─── Admin post-payment flow ───
-  function showAdminFlow() {
-    function addMsg(text, cssText, delay) {
-      return new Promise(resolve => {
-        setTimeout(() => {
-          const el = document.createElement('div');
-          el.className = 'msg-ai fade-in';
-          el.style.cssText = cssText;
-          el.textContent = text;
-          chatInner.appendChild(el);
-          scrollToBottom();
-          resolve();
-        }, delay);
-      });
-    }
-
-    // Msg 1 — immediate
-    const el1 = document.createElement('div');
-    el1.className = 'msg-ai fade-in';
-    el1.style.cssText = 'font-style:italic;font-size:22px;color:var(--charcoal);';
-    el1.textContent = "Welcome. Let's build your recovery project.";
-    chatInner.appendChild(el1);
-    scrollToBottom();
-
-    // Msg 2 — 800ms
-    addMsg(
-      "Based on everything you've shared, I can see a clear path forward.",
-      "font-family:'DM Sans',sans-serif;font-size:15px;color:var(--charcoal-soft);",
-      800
-    );
-
-    // Msg 3 — 1600ms
-    addMsg(
-      'Your 90-day project is being generated. This usually takes about 30 seconds.',
-      "font-family:'DM Sans',sans-serif;font-size:15px;color:var(--charcoal-soft);",
-      1600
-    );
-
-    // Msg 4 — 2400ms: typing indicator
-    setTimeout(() => {
-      const loader = document.createElement('div');
-      loader.className = 'typing-indicator';
-      loader.id = 'adminLoader';
-      loader.innerHTML = '<span></span><span></span><span></span>';
-      chatInner.appendChild(loader);
-      scrollToBottom();
-    }, 2400);
-
-    // Msg 5 — 5000ms: remove loader, show ready message
-    setTimeout(() => {
-      const loader = document.getElementById('adminLoader');
-      if (loader) loader.remove();
-
-      const el5 = document.createElement('div');
-      el5.className = 'msg-ai fade-in';
-      el5.style.cssText = 'font-style:italic;font-size:20px;color:var(--clay-dark);';
-      el5.textContent = "Your project is ready. We'll reach out shortly with next steps.";
-      chatInner.appendChild(el5);
-      scrollToBottom();
-    }, 5000);
+  function showError(id, msg) {
+    const el = document.getElementById(id);
+    if (el) { el.textContent = msg; el.classList.add('show'); }
   }
 
-  // ─── Feedback modal ───
-  const feedbackOverlay = document.getElementById('feedbackOverlay');
-  const feedbackError = document.getElementById('feedbackError');
-  const feedbackSubmit = document.getElementById('feedbackSubmit');
-  const feedbackToast = document.getElementById('feedbackToast');
+  const SVG_EYE = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>`;
+  const SVG_EYE_OFF = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94"/><path d="M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19"/><line x1="1" y1="1" x2="23" y2="23"/></svg>`;
 
-  document.getElementById('feedbackBtn').addEventListener('click', () => {
-    feedbackError.style.display = 'none';
-    document.getElementById('feedbackText').value = '';
-    feedbackOverlay.classList.add('open');
-  });
-
-  document.getElementById('feedbackClose').addEventListener('click', closeFeedback);
-
-  feedbackOverlay.addEventListener('click', (e) => {
-    if (e.target === feedbackOverlay) closeFeedback();
-  });
-
-  function closeFeedback() {
-    feedbackOverlay.classList.remove('open');
+  function togglePassword(id) {
+    const input = document.getElementById(id);
+    const btn = input.parentElement.querySelector('.pw-toggle');
+    input.type = input.type === 'password' ? 'text' : 'password';
+    btn.innerHTML = input.type === 'password' ? SVG_EYE : SVG_EYE_OFF;
   }
 
-  feedbackSubmit.addEventListener('click', async () => {
-    const category = document.getElementById('feedbackCategory').value;
-    const message = document.getElementById('feedbackText').value.trim();
-    if (!message) return;
+  async function handleLogin() {
+    console.log('[Anew] login clicked');
+    const email = document.getElementById('loginEmail').value.trim();
+    const password = document.getElementById('loginPassword').value;
+    console.log('[Anew] email:', email);
+    console.log('[Anew] sbClient:', sbClient ? 'initialized' : 'null');
 
-    feedbackSubmit.disabled = true;
-    feedbackError.style.display = 'none';
+    if (!email) { showError('loginError', 'Please enter your email address.'); return; }
+    if (!password) { showError('loginError', 'Please enter your password.'); return; }
+    if (password.length < 8) { showError('loginError', 'Password must be at least 8 characters.'); return; }
+    if (!sbClient) { showError('loginError', 'Something went wrong. Please try again.'); return; }
+
+    const btn = document.getElementById('loginBtn');
+    btn.disabled = true;
+    btn.textContent = '...';
+    document.getElementById('loginError').classList.remove('show');
 
     try {
-      const res = await fetch('https://formspree.io/f/mzdyqvbe', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
-        body: JSON.stringify({
-          category,
-          message,
-          page_state: currentState,
-          session_id: sessionId || 'unknown',
-          timestamp: new Date().toISOString()
-        })
+      const { data, error } = await sbClient.auth.signInWithPassword({ email, password });
+      console.log('[Anew] login result — data:', data, 'error:', error);
+      if (error) throw error;
+      await redirectByStatus(data.session);
+    } catch (e) {
+      console.error('[Anew] login error:', e);
+      const msg = e.message || '';
+      console.error('[Anew] login error detail:', JSON.stringify(e));
+      let display;
+      if (msg.includes('Invalid login credentials')) {
+        display = 'Incorrect email or password.';
+      } else if (msg.includes('Email not confirmed')) {
+        display = 'Please confirm your email first.';
+      } else {
+        display = msg || 'Something went wrong. Please try again.';
+      }
+      showError('loginError', display);
+      btn.disabled = false;
+      btn.textContent = 'Log in';
+    }
+  }
+
+  async function handleRegister() {
+    const email = document.getElementById('regEmail').value.trim();
+    const password = document.getElementById('regPassword').value;
+    const confirm = document.getElementById('regConfirm').value;
+
+    if (!email) { showError('registerError', 'Please enter your email address.'); return; }
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) { showError('registerError', 'Please enter a valid email address.'); return; }
+    if (!password) { showError('registerError', 'Please enter your password.'); return; }
+    if (password.length < 8) { showError('registerError', 'Password must be at least 8 characters.'); return; }
+    if (password !== confirm) { showError('registerError', 'Passwords do not match.'); return; }
+    if (!sbClient) { showError('registerError', 'Something went wrong. Please try again.'); return; }
+
+    const btn = document.getElementById('registerBtn');
+    btn.disabled = true;
+    btn.textContent = '...';
+    document.getElementById('registerError').classList.remove('show');
+
+    try {
+      const { error } = await sbClient.auth.signUp({
+        email,
+        password,
+        options: { emailRedirectTo: window.location.origin + '/app.html' }
       });
+      if (error) throw error;
 
-      if (!res.ok) throw new Error('failed');
+      document.getElementById('regFormFields').style.display = 'none';
+      document.getElementById('confirmState').style.display = 'block';
+    } catch (e) {
+      showError('registerError', e.message || 'Something went wrong. Please try again.');
+      btn.disabled = false;
+      btn.textContent = 'Create account';
+    }
+  }
 
-      closeFeedback();
-      feedbackToast.classList.add('show');
-      setTimeout(() => feedbackToast.classList.remove('show'), 3000);
-    } catch (_) {
-      feedbackError.style.display = 'block';
+  async function handleReset() {
+    if (!sbClient) { showError('resetError', 'Something went wrong. Please try again.'); return; }
+    const email = document.getElementById('resetEmail').value.trim();
+    if (!email) { showError('resetError', 'Please enter your email address.'); return; }
+
+    const btn = document.getElementById('resetBtn');
+    btn.disabled = true;
+    btn.textContent = '...';
+    document.getElementById('resetError').classList.remove('show');
+    document.getElementById('resetSuccess').classList.remove('show');
+
+    try {
+      const { error } = await sbClient.auth.resetPasswordForEmail(email, {
+        redirectTo: window.location.origin + '/app.html'
+      });
+      if (error) throw error;
+      document.getElementById('resetSuccess').classList.add('show');
+    } catch (e) {
+      showError('resetError', e.message || 'Something went wrong. Please try again.');
     } finally {
-      feedbackSubmit.disabled = false;
+      btn.disabled = false;
+      btn.textContent = 'Send reset email';
     }
+  }
+
+  // Enter key support
+  document.addEventListener('keydown', (e) => {
+    if (e.key !== 'Enter') return;
+    const panel = document.querySelector('.auth-panel.active');
+    if (!panel) return;
+    if (panel.id === 'panelLogin') handleLogin();
+    else if (panel.id === 'panelRegister') handleRegister();
+    else if (panel.id === 'panelReset') handleReset();
   });
 
-  // ─── Init ───
   initSupabase();
 </script>
 </body>

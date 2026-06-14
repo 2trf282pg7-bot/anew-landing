@@ -1,0 +1,487 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, interactive-widget=resizes-content">
+<title>Anew — Review Your Project</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;1,400&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --warm-white: #FAF6F1; --clay: #B8704E; --clay-dark: #8C4E32;
+    --charcoal: #1C1614; --charcoal-soft: #5C4D45;
+    --stone: #8A7870; --blush: #EDD4C6; --blush-deep: #DBBAA6;
+    --section-alt: #F5EFE8;
+  }
+  html, body { min-height: 100dvh; font-family: 'DM Sans', sans-serif; background: var(--warm-white); color: var(--charcoal); }
+
+  /* Loading */
+  .loading-screen { position: fixed; inset: 0; background: var(--warm-white); display: flex; align-items: center; justify-content: center; z-index: 200; }
+  .loading-logo { font-family: 'Cormorant Garamond', serif; font-size: 28px; color: var(--charcoal); letter-spacing: 0.1em; }
+
+  /* Nav */
+  .nav { position: fixed; top: 0; left: 0; right: 0; height: 56px; background: rgba(250,246,241,0.96); border-bottom: 1px solid var(--blush-deep); display: flex; align-items: center; justify-content: space-between; padding: 0 24px; z-index: 100; backdrop-filter: blur(4px); }
+  .nav-logo { font-family: 'Cormorant Garamond', serif; font-size: 22px; font-weight: 400; color: var(--charcoal); letter-spacing: 0.08em; text-decoration: none; }
+  .nav-hamburger { width: 40px; height: 40px; border-radius: 8px; border: none; background: none; cursor: pointer; display: flex; align-items: center; justify-content: center; color: var(--stone); transition: background 0.2s ease, color 0.2s ease; }
+  .nav-hamburger:hover { background: var(--section-alt); color: var(--clay); }
+
+  /* Menu */
+  .menu-overlay { display: none; position: fixed; inset: 0; background: rgba(28,22,20,0.3); z-index: 999; }
+  .menu-overlay.open { display: block; }
+  .menu-drawer { position: fixed; right: 0; top: 0; width: 240px; height: 100dvh; background: white; z-index: 1000; box-shadow: -4px 0 20px rgba(28,22,20,0.1); transform: translateX(100%); transition: transform 0.25s ease; display: flex; flex-direction: column; }
+  .menu-drawer.open { transform: translateX(0); }
+  .menu-item { display: block; padding: 16px 24px; font-family: 'DM Sans', sans-serif; font-size: 15px; color: var(--charcoal); border-bottom: 1px solid var(--blush-deep); text-decoration: none; background: none; border-left: none; border-right: none; border-top: none; cursor: pointer; text-align: left; width: 100%; transition: background 0.15s ease; }
+  .menu-item:hover { background: var(--section-alt); }
+  .menu-item-logout { color: var(--stone); border-bottom: none; margin-top: auto; }
+  .menu-divider { height: 1px; background: var(--blush-deep); }
+
+  /* Main */
+  .main { max-width: 640px; margin: 0 auto; padding: 72px 20px 80px; }
+
+  .page-eyebrow { font-size: 10px; font-weight: 500; text-transform: uppercase; letter-spacing: 0.14em; color: var(--clay); margin-bottom: 8px; }
+  .page-title { font-family: 'Cormorant Garamond', serif; font-size: 30px; font-weight: 300; color: var(--charcoal); margin-bottom: 12px; }
+  .page-sub { font-size: 15px; color: var(--charcoal-soft); line-height: 1.6; margin-bottom: 28px; }
+
+  /* Project summary card */
+  .project-card { background: white; border-radius: 14px; padding: 20px 24px; box-shadow: 0 2px 12px rgba(28,22,20,0.06); margin-bottom: 24px; }
+  .project-card-title { font-family: 'Cormorant Garamond', serif; font-size: 20px; color: var(--charcoal); margin-bottom: 6px; }
+  .project-card-summary { font-size: 14px; color: var(--charcoal-soft); line-height: 1.6; }
+
+  /* Current phase */
+  .current-phase { background: linear-gradient(135deg, var(--blush) 0%, var(--blush-deep) 100%); border-radius: 14px; padding: 20px 24px; margin-bottom: 24px; }
+  .current-phase-label { font-size: 10px; font-weight: 500; text-transform: uppercase; letter-spacing: 0.12em; color: var(--clay-dark); margin-bottom: 4px; }
+  .current-phase-focus { font-family: 'Cormorant Garamond', serif; font-size: 22px; color: var(--charcoal); margin-bottom: 8px; }
+  .current-phase-theory { font-size: 13px; color: var(--charcoal-soft); line-height: 1.6; }
+
+  /* Review chat */
+  .review-card { background: white; border-radius: 16px; box-shadow: 0 2px 20px rgba(28,22,20,0.07); overflow: hidden; margin-bottom: 20px; }
+  .chat-messages { padding: 20px 24px 8px; display: flex; flex-direction: column; gap: 14px; min-height: 120px; }
+  .msg-ai { font-family: 'Cormorant Garamond', serif; font-size: 19px; color: var(--charcoal); line-height: 1.65; }
+  .msg-user { background: var(--blush-deep); border-radius: 12px 12px 3px 12px; padding: 10px 15px; font-size: 14px; color: var(--charcoal); align-self: flex-end; max-width: 80%; line-height: 1.5; }
+  .typing-dots { display: flex; gap: 4px; padding: 4px 0; }
+  .typing-dots span { width: 6px; height: 6px; border-radius: 50%; background: var(--stone); animation: dotPulse 1.2s ease-in-out infinite; }
+  .typing-dots span:nth-child(2) { animation-delay: 0.2s; }
+  .typing-dots span:nth-child(3) { animation-delay: 0.4s; }
+  @keyframes dotPulse { 0%,80%,100%{opacity:0.3;transform:scale(0.85)} 40%{opacity:1;transform:scale(1)} }
+  .chat-input-bar { border-top: 1px solid var(--blush-deep); padding: 12px 16px; display: flex; align-items: flex-end; gap: 10px; background: white; }
+  .chat-textarea { flex: 1; border: 1.5px solid var(--blush-deep); border-radius: 10px; padding: 10px 14px; font-family: 'DM Sans', sans-serif; font-size: 16px; color: var(--charcoal); background: white; resize: none; min-height: 44px; max-height: 100px; outline: none; transition: border-color 0.2s ease; }
+  .chat-textarea:focus { border-color: var(--clay); }
+  .chat-textarea::placeholder { color: var(--stone); }
+  .chat-send { width: 40px; height: 40px; border-radius: 50%; background: var(--clay); border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: background 0.2s ease; flex-shrink: 0; }
+  .chat-send:hover { background: var(--clay-dark); }
+  .chat-send:disabled { background: var(--blush-deep); cursor: not-allowed; }
+
+  /* Proposed change banner */
+  .change-proposal { background: var(--section-alt); border-radius: 12px; padding: 16px 20px; margin-bottom: 16px; display: none; }
+  .change-proposal.show { display: block; }
+  .change-proposal-label { font-size: 11px; font-weight: 500; text-transform: uppercase; letter-spacing: 0.1em; color: var(--clay); margin-bottom: 6px; }
+  .change-proposal-text { font-size: 14px; color: var(--charcoal); line-height: 1.6; margin-bottom: 14px; }
+  .change-proposal-actions { display: flex; gap: 10px; }
+  .btn-apply { background: var(--clay); color: white; border: none; border-radius: 6px; padding: 12px 20px; font-size: 12px; font-weight: 500; text-transform: uppercase; letter-spacing: 0.1em; cursor: pointer; transition: background 0.2s ease; flex: 1; }
+  .btn-apply:hover { background: var(--clay-dark); }
+  .btn-keep { background: none; border: 1.5px solid var(--blush-deep); color: var(--charcoal-soft); border-radius: 6px; padding: 12px 20px; font-size: 12px; cursor: pointer; transition: border-color 0.2s ease; flex: 1; }
+  .btn-keep:hover { border-color: var(--stone); }
+
+  .btn-done { width: 100%; background: none; border: 1.5px solid var(--blush-deep); color: var(--charcoal-soft); border-radius: 8px; padding: 14px; font-size: 13px; cursor: pointer; transition: border-color 0.2s ease, color 0.2s ease; }
+  .btn-done:hover { border-color: var(--charcoal-soft); color: var(--charcoal); }
+
+  .word { opacity: 0; transition: opacity 0.15s ease; display: inline; }
+  .word.visible { opacity: 1; }
+</style>
+</head>
+<body>
+
+<div class="loading-screen" id="loadingScreen">
+  <div class="loading-logo">Anew</div>
+</div>
+
+<nav class="nav">
+  <a href="/dashboard.html" class="nav-logo">Anew</a>
+  <button class="nav-hamburger" onclick="openMenu()" aria-label="Menu">
+    <svg width="20" height="14" viewBox="0 0 20 14" fill="none"><path d="M0 1h20M0 7h20M0 13h20" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+  </button>
+</nav>
+
+<div class="menu-overlay" id="menuOverlay" onclick="closeMenu()"></div>
+<div class="menu-drawer" id="menuDrawer">
+  <a href="/dashboard.html" class="menu-item">Check-in</a>
+  <a href="/project.html" class="menu-item">My Project</a>
+  <a href="/history.html" class="menu-item">History</a>
+  <a href="/account.html" class="menu-item">Account</a>
+  <div class="menu-divider"></div>
+  <button class="menu-item menu-item-logout" onclick="handleLogout()">Log out</button>
+</div>
+
+<main class="main" id="mainContent" style="display:none">
+
+  <div class="page-eyebrow">Weekly review</div>
+  <div class="page-title">How is your project holding up?</div>
+  <div class="page-sub">Let's take a look at where you are and whether anything needs adjusting.</div>
+
+  <div class="project-card">
+    <div class="project-card-title" id="projTitle"></div>
+    <div class="project-card-summary" id="projSummary"></div>
+  </div>
+
+  <div class="current-phase" id="currentPhaseCard" style="display:none">
+    <div class="current-phase-label">Current phase</div>
+    <div class="current-phase-focus" id="currentFocus"></div>
+    <div class="current-phase-theory" id="currentTheory"></div>
+  </div>
+
+  <div class="review-card">
+    <div class="chat-messages" id="chatMessages"></div>
+    <div class="chat-input-bar">
+      <textarea class="chat-textarea" id="chatInput" placeholder="Share how this phase is going…" rows="1"></textarea>
+      <button class="chat-send" id="sendBtn" onclick="sendMessage()">
+        <svg width="16" height="16" viewBox="0 0 18 18" fill="none">
+          <path d="M3 9H15M15 9L10 4M15 9L10 14" stroke="white" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </button>
+    </div>
+  </div>
+
+  <div class="change-proposal" id="changeProposal">
+    <div class="change-proposal-label">Proposed adjustment</div>
+    <div class="change-proposal-text" id="proposalText"></div>
+    <div class="change-proposal-actions">
+      <button class="btn-apply" onclick="applyChange()">Apply this change</button>
+      <button class="btn-keep" onclick="keepCurrent()">Keep current plan</button>
+    </div>
+  </div>
+
+  <button class="btn-done" onclick="goToDashboard()">Return to dashboard</button>
+
+</main>
+
+<script>
+  const SUPABASE_URL = 'https://hzkkftsihitkvdinydju.supabase.co';
+  const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imh6a2tmdHNpaGl0a3ZkaW55ZGp1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzUyNzUyODksImV4cCI6MjA5MDg1MTI4OX0.D7QBobLt7JhMGJcNNhvlLvKjq2ysozYa2k9Z0Fj8ZGI';
+
+  let sbClient = null, currentUser = null, currentProject = null;
+  let chatHistory = [], isStreaming = false;
+  let pendingChange = null;
+  let reviewSessionId = null, leaving = false;
+
+  const SUMMARY_SYSTEM = `You are Anew. Summarize this weekly project review in 3-4 sentences for the user's own record. Warm, interpretation tone — never diagnosis. Include the user's own words in quotation marks where it feels natural. Write to the user as "you". Output only the summary, no preamble.`;
+
+  const REVIEW_SYSTEM = `You are Anew, an AI relationship coach conducting a weekly project review.
+The user has an active 90-day recovery project. Your role is to:
+1. Ask how the current phase is going
+2. Listen for any friction, challenges, or successes
+3. If the user mentions difficulty, propose ONE specific adjustment to the current phase tasks
+4. Frame proposed adjustments clearly, starting with "PROPOSED CHANGE: " followed by the change
+5. Keep responses short (2-4 sentences)
+6. Be warm, non-judgmental, and encouraging
+7. Only discuss relationship recovery topics
+8. Never use emojis or decorative symbols in replies
+
+SCOPE: Anew only supports relationship reflection and this recovery project. If the user asks you to do anything unrelated — write code, essays, translations, general knowledge, math, etc. — do not do it. In 1-2 warm sentences, gently decline and steer back to their relationship and project. Never perform the unrelated task.
+
+SAFETY PROTOCOL: If the user mentions self-harm, suicidal thoughts, abuse, or violence, stop the regular flow. Respond with warmth, do not minimize, and share: 988 Suicide & Crisis Lifeline (call/text 988) or the National Domestic Violence Hotline (1-800-799-7233), whichever fits. Encourage reaching out to a professional. Do not return to task discussion in the same message.`;
+
+  async function init() {
+    try {
+      sbClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+      const { data: { session } } = await sbClient.auth.getSession();
+      if (!session) { window.location.href = '/app.html'; return; }
+      currentUser = session.user;
+      sbClient.auth.onAuthStateChange((event) => {
+        if (event === 'SIGNED_OUT') window.location.href = '/app.html';
+      });
+      await loadProject();
+    } catch (e) {
+      console.error(e);
+      window.location.href = '/dashboard.html';
+    }
+  }
+
+  async function loadProject() {
+    const { data: projects } = await sbClient
+      .from('projects')
+      .select('*')
+      .eq('user_id', currentUser.id)
+      .eq('status', 'active')
+      .order('created_at', { ascending: false })
+      .limit(1);
+
+    if (!projects || projects.length === 0) {
+      window.location.href = '/project-setup.html';
+      return;
+    }
+
+    currentProject = projects[0];
+    renderProjectInfo();
+    await createReviewSession();
+    document.getElementById('loadingScreen').style.display = 'none';
+    document.getElementById('mainContent').style.display = 'block';
+    showOpeningMessage();
+  }
+
+  // Item 22: every review now has a sessions row so a summary can be stored
+  async function createReviewSession() {
+    try {
+      const { data, error } = await sbClient
+        .from('sessions')
+        .insert({ user_id: currentUser.id, type: 'review' })
+        .select('id')
+        .single();
+      if (!error && data) reviewSessionId = data.id;
+    } catch (_) {}
+  }
+
+  function renderProjectInfo() {
+    document.getElementById('projTitle').textContent = currentProject.project_title || 'Your Recovery Project';
+    document.getElementById('projSummary').textContent = currentProject.project_summary || '';
+
+    const roadmap = currentProject.recovery_plan?.roadmap || [];
+    if (roadmap.length > 0) {
+      const startDate = new Date(currentProject.started_at || currentProject.created_at);
+      const diffDays = Math.floor((Date.now() - startDate) / (1000 * 60 * 60 * 24));
+      const weekIndex = Math.max(0, Math.floor(diffDays / 7));
+      const phase = roadmap[Math.min(weekIndex, roadmap.length - 1)];
+      if (phase) {
+        document.getElementById('currentPhaseCard').style.display = 'block';
+        document.getElementById('currentFocus').textContent = phase.focus || '';
+        document.getElementById('currentTheory').textContent = phase.theory_explanation || phase.theory || '';
+      }
+    }
+  }
+
+  function showOpeningMessage() {
+    const roadmap = currentProject.recovery_plan?.roadmap || [];
+    const startDate = new Date(currentProject.started_at || currentProject.created_at);
+    const diffDays = Math.floor((Date.now() - startDate) / (1000 * 60 * 60 * 24));
+    const weekIndex = Math.max(0, Math.floor(diffDays / 7));
+    const phase = roadmap[Math.min(weekIndex, roadmap.length - 1)];
+    const focusText = phase ? ` — particularly around "${phase.focus}"` : '';
+
+    const opening = `How has this week's work been feeling${focusText}? Any friction, breakthroughs, or moments that stood out?`;
+    appendMessage('ai', opening);
+  }
+
+  function appendMessage(role, text) {
+    const area = document.getElementById('chatMessages');
+    const el = document.createElement('div');
+    if (role === 'ai') {
+      el.className = 'msg-ai';
+      animateWords(el, text);
+    } else {
+      el.className = 'msg-user';
+      el.textContent = text;
+    }
+    area.appendChild(el);
+    area.scrollTop = area.scrollHeight;
+    if (role !== 'ai-no-history') {
+      chatHistory.push({ role: role === 'ai' ? 'assistant' : 'user', content: text });
+    }
+    return el;
+  }
+
+  function animateWords(el, text) {
+    const words = text.split(' ');
+    el.innerHTML = '';
+    words.forEach((w, i) => {
+      const span = document.createElement('span');
+      span.className = 'word';
+      span.textContent = (i === 0 ? '' : ' ') + w;
+      el.appendChild(span);
+    });
+    let i = 0;
+    const spans = el.querySelectorAll('.word');
+    function showNext() {
+      if (i < spans.length) { spans[i].classList.add('visible'); i++; setTimeout(showNext, 22); }
+    }
+    showNext();
+  }
+
+  function showTyping() {
+    const area = document.getElementById('chatMessages');
+    const el = document.createElement('div');
+    el.className = 'typing-dots'; el.id = 'reviewTyping';
+    el.innerHTML = '<span></span><span></span><span></span>';
+    area.appendChild(el);
+    area.scrollTop = area.scrollHeight;
+  }
+  function hideTyping() { document.getElementById('reviewTyping')?.remove(); }
+
+  async function sendMessage() {
+    const input = document.getElementById('chatInput');
+    const text = input.value.trim();
+    if (!text || isStreaming) return;
+    input.value = ''; input.style.height = 'auto';
+    isStreaming = true;
+    document.getElementById('sendBtn').disabled = true;
+
+    appendMessage('user', text);
+    showTyping();
+
+    try {
+      const roadmap = currentProject.recovery_plan?.roadmap || [];
+      const startDate = new Date(currentProject.started_at || currentProject.created_at);
+      const weekIndex = Math.max(0, Math.floor((Date.now() - startDate) / (1000 * 60 * 60 * 24)) / 7);
+      const phase = roadmap[Math.min(Math.floor(weekIndex), roadmap.length - 1)];
+
+      const systemPrompt = REVIEW_SYSTEM + `
+
+Project: "${currentProject.project_title || ''}"
+Current phase: "${phase?.focus || ''}"
+${phase?.theory_explanation ? 'Theory context: ' + phase.theory_explanation : ''}`;
+
+      const res = await fetch('/api/chat', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ model: 'claude-sonnet-4-6', max_tokens: 300, system: systemPrompt, messages: chatHistory })
+      });
+      if (!res.ok) throw new Error(`API error ${res.status}`);
+      const data = await res.json();
+      const reply = data.content[0].text;
+      hideTyping();
+      appendMessage('ai', reply);
+
+      // Check for proposed change
+      if (reply.includes('PROPOSED CHANGE:')) {
+        const changeText = reply.split('PROPOSED CHANGE:')[1].trim();
+        pendingChange = changeText;
+        document.getElementById('proposalText').textContent = changeText;
+        document.getElementById('changeProposal').classList.add('show');
+      }
+    } catch (e) {
+      hideTyping();
+      const el = document.createElement('div');
+      el.className = 'msg-ai';
+      el.textContent = 'Something went wrong. Please try again.';
+      document.getElementById('chatMessages').appendChild(el);
+      console.error('[Anew] review chat error:', e.message);
+    } finally {
+      isStreaming = false;
+      document.getElementById('sendBtn').disabled = false;
+    }
+  }
+
+  async function applyChange() {
+    if (!pendingChange || !currentProject?.id) return;
+    document.getElementById('changeProposal').classList.remove('show');
+
+    const roadmap = currentProject.recovery_plan?.roadmap || [];
+    const startDate = new Date(currentProject.started_at || currentProject.created_at);
+    const weekIndex = Math.max(0, Math.floor((Date.now() - startDate) / (1000 * 60 * 60 * 24)) / 7);
+    const phaseIdx = Math.min(Math.floor(weekIndex), roadmap.length - 1);
+
+    if (roadmap[phaseIdx]) {
+      roadmap[phaseIdx].adjustment_note = pendingChange;
+    }
+
+    try {
+      await sbClient
+        .from('projects')
+        .update({ recovery_plan: { ...currentProject.recovery_plan, roadmap } })
+        .eq('id', currentProject.id);
+      currentProject.recovery_plan = { ...currentProject.recovery_plan, roadmap };
+    } catch (e) {
+      console.error('[Anew] apply change error:', e);
+    }
+
+    const confirmEl = document.createElement('div');
+    confirmEl.className = 'msg-ai';
+    confirmEl.textContent = 'Done — I\'ve updated your current phase. Keep me posted on how it goes.';
+    document.getElementById('chatMessages').appendChild(confirmEl);
+    pendingChange = null;
+  }
+
+  function keepCurrent() {
+    document.getElementById('changeProposal').classList.remove('show');
+    pendingChange = null;
+    const el = document.createElement('div');
+    el.className = 'msg-ai';
+    el.textContent = 'Sounds good. Staying the course is a valid choice. I\'ll check in with you next week.';
+    document.getElementById('chatMessages').appendChild(el);
+  }
+
+  // Item 22: on exit, save a weekly summary if the review had 2+ exchanges
+  async function goToDashboard() {
+    if (leaving) return;
+    leaving = true;
+    const btn = document.querySelector('.btn-done');
+    const userTurns = chatHistory.filter(m => m.role === 'user').length;
+
+    if (userTurns >= 2 && reviewSessionId) {
+      if (btn) { btn.disabled = true; btn.textContent = 'Saving your week…'; }
+      try {
+        const transcript = chatHistory
+          .map(m => `${m.role === 'assistant' ? 'Anew' : 'User'}: ${m.content}`)
+          .join('\n');
+        const res = await fetch('/api/chat', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            model: 'claude-sonnet-4-6', max_tokens: 400,
+            system: SUMMARY_SYSTEM,
+            messages: [{ role: 'user', content: transcript }]
+          })
+        });
+        if (res.ok) {
+          const data = await res.json();
+          const summary = data.content?.[0]?.text?.trim();
+          if (summary) {
+            await sbClient.from('sessions').update({ summary }).eq('id', reviewSessionId);
+          }
+        }
+      } catch (e) {
+        console.error('[Anew] review summary error:', e.message);
+      }
+    }
+    window.location.href = '/dashboard.html';
+  }
+
+  function openMenu() {
+    document.getElementById('menuOverlay').classList.add('open');
+    document.getElementById('menuDrawer').classList.add('open');
+  }
+  function closeMenu() {
+    document.getElementById('menuOverlay').classList.remove('open');
+    document.getElementById('menuDrawer').classList.remove('open');
+  }
+  async function handleLogout() {
+    if (sbClient) await sbClient.auth.signOut();
+    window.location.href = '/app.html';
+  }
+
+  document.addEventListener('DOMContentLoaded', () => {
+    document.getElementById('chatInput').addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage(); }
+    });
+    document.getElementById('chatInput').addEventListener('input', function() {
+      this.style.height = 'auto';
+      this.style.height = Math.min(this.scrollHeight, 100) + 'px';
+    });
+
+    // iOS keyboard (items 15-16): keep the focused chat input above the keyboard
+    const keepInputVisible = () => {
+      const input = document.getElementById('chatInput');
+      if (input && document.activeElement === input) {
+        input.scrollIntoView({ block: 'center', behavior: 'smooth' });
+      }
+    };
+    if (window.visualViewport) window.visualViewport.addEventListener('resize', keepInputVisible);
+    document.getElementById('chatInput').addEventListener('focus', () => setTimeout(keepInputVisible, 250));
+  });
+
+  init();
+
+  /*
+    ── Manual test (item 22) ──
+    1. Open project-review.html with an active project -> a `sessions` row of
+       type='review' is created on load (check the table).
+    2. Exchange at least 2 user messages, then press "Return to dashboard".
+       Button shows "Saving your week…", a 3-4 sentence summary is written to that
+       session's `summary`, then it redirects.
+    3. Press "Return to dashboard" with fewer than 2 user turns -> no summary,
+       immediate redirect.
+  */
+</script>
+</body>
+</html>

@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Anew — History</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;1,400&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --warm-white: #FAF6F1; --clay: #B8704E; --clay-light: #D4906E;
+    --clay-dark: #8C4E32; --charcoal: #1C1614; --charcoal-soft: #5C4D45;
+    --stone: #8A7870; --blush: #EDD4C6; --blush-deep: #DBBAA6;
+    --section-alt: #F5EFE8;
+  }
+  html, body { min-height: 100dvh; font-family: 'DM Sans', sans-serif; background: var(--warm-white); color: var(--charcoal); }
+
+  /* NAV */
+  .nav { position: fixed; top: 0; left: 0; right: 0; height: 56px; background: rgba(250,246,241,0.96); border-bottom: 1px solid var(--blush-deep); display: flex; align-items: center; justify-content: space-between; padding: 0 24px; z-index: 100; backdrop-filter: blur(4px); }
+  .nav-logo { font-family: 'Cormorant Garamond', serif; font-size: 22px; font-weight: 400; color: var(--charcoal); letter-spacing: 0.08em; text-decoration: none; }
+  .nav-hamburger { width: 40px; height: 40px; border-radius: 8px; border: none; background: none; cursor: pointer; display: flex; align-items: center; justify-content: center; color: var(--stone); transition: background 0.2s ease, color 0.2s ease; }
+  .nav-hamburger:hover { background: var(--section-alt); color: var(--clay); }
+
+  /* MENU */
+  .menu-overlay { display: none; position: fixed; inset: 0; background: rgba(28,22,20,0.3); z-index: 999; }
+  .menu-overlay.open { display: block; }
+  .menu-drawer { position: fixed; right: 0; top: 0; width: 240px; height: 100dvh; background: white; z-index: 1000; box-shadow: -4px 0 20px rgba(28,22,20,0.1); transform: translateX(100%); transition: transform 0.25s ease; display: flex; flex-direction: column; }
+  .menu-drawer.open { transform: translateX(0); }
+  .menu-item { display: block; padding: 16px 24px; font-family: 'DM Sans', sans-serif; font-size: 15px; color: var(--charcoal); border-bottom: 1px solid var(--blush-deep); text-decoration: none; background: none; border-left: none; border-right: none; border-top: none; cursor: pointer; text-align: left; width: 100%; transition: background 0.15s ease; }
+  .menu-item:hover { background: var(--section-alt); }
+  .menu-item.active { color: var(--clay); }
+  .menu-divider { height: 1px; background: var(--blush-deep); }
+  .menu-item-logout { color: var(--stone); border-bottom: none; margin-top: auto; }
+
+  /* MAIN */
+  .main { max-width: 680px; margin: 0 auto; padding: 80px 24px 48px; }
+  .page-title { font-family: 'Cormorant Garamond', serif; font-size: 30px; font-weight: 300; color: var(--charcoal); margin-bottom: 28px; }
+  .session-type-label { font-size: 10px; font-weight: 500; text-transform: uppercase; letter-spacing: 0.12em; color: var(--clay); margin-bottom: 4px; }
+  .session-list { display: flex; flex-direction: column; gap: 16px; }
+  .session-card { background: white; border-radius: 16px; padding: 24px 28px; box-shadow: 0 2px 16px rgba(28,22,20,0.06); cursor: pointer; transition: box-shadow 0.2s ease; }
+  .session-card:hover { box-shadow: 0 4px 24px rgba(28,22,20,0.10); }
+  .session-date { font-family: 'Cormorant Garamond', serif; font-size: 18px; color: var(--charcoal); margin-bottom: 4px; }
+  .session-overview { font-size: 14px; color: var(--charcoal-soft); line-height: 1.6; }
+  .session-body { display: none; margin-top: 16px; border-top: 1px solid var(--section-alt); padding-top: 16px; }
+  .session-body.open { display: block; }
+  .session-msg { margin-bottom: 12px; }
+  .session-msg-role { font-size: 10px; font-weight: 500; text-transform: uppercase; letter-spacing: 0.1em; color: var(--stone); margin-bottom: 4px; }
+  .session-msg-content { font-size: 14px; color: var(--charcoal); line-height: 1.6; }
+  .session-msg-content.ai { font-family: 'Cormorant Garamond', serif; font-size: 16px; }
+  .empty-state { text-align: center; padding: 60px 0; }
+  .empty-title { font-family: 'Cormorant Garamond', serif; font-size: 24px; color: var(--charcoal); margin-bottom: 8px; }
+  .empty-sub { font-size: 14px; color: var(--stone); }
+  .loading-screen { position: fixed; inset: 0; background: var(--warm-white); display: flex; align-items: center; justify-content: center; z-index: 200; }
+  .loading-logo { font-family: 'Cormorant Garamond', serif; font-size: 28px; color: var(--charcoal); letter-spacing: 0.1em; }
+</style>
+</head>
+<body>
+
+<div class="loading-screen" id="loadingScreen">
+  <div class="loading-logo">Anew</div>
+</div>
+
+<nav class="nav">
+  <a href="/dashboard.html" class="nav-logo">Anew</a>
+  <button class="nav-hamburger" onclick="openMenu()" aria-label="Menu">
+    <svg width="20" height="14" viewBox="0 0 20 14" fill="none"><path d="M0 1h20M0 7h20M0 13h20" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+  </button>
+</nav>
+
+<div class="menu-overlay" id="menuOverlay" onclick="closeMenu()"></div>
+<div class="menu-drawer" id="menuDrawer">
+  <a href="/dashboard.html" class="menu-item">Check-in</a>
+  <a href="/project.html" class="menu-item">My Project</a>
+  <a href="/history.html" class="menu-item active">History</a>
+  <a href="/account.html" class="menu-item">Account</a>
+  <div class="menu-divider"></div>
+  <button class="menu-item menu-item-logout" onclick="handleLogout()">Log out</button>
+</div>
+
+<main class="main">
+  <h1 class="page-title">Conversation history</h1>
+  <div class="session-list" id="sessionList"></div>
+</main>
+
+<script>
+  const SUPABASE_URL = 'https://hzkkftsihitkvdinydju.supabase.co';
+  const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imh6a2tmdHNpaGl0a3ZkaW55ZGp1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzUyNzUyODksImV4cCI6MjA5MDg1MTI4OX0.D7QBobLt7JhMGJcNNhvlLvKjq2ysozYa2k9Z0Fj8ZGI';
+  let sbClient = null, currentUser = null;
+
+  async function init() {
+    try {
+      sbClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+      const { data: { session } } = await sbClient.auth.getSession();
+      if (!session) { window.location.href = '/app.html'; return; }
+      currentUser = session.user;
+      sbClient.auth.onAuthStateChange((event) => {
+        if (event === 'SIGNED_OUT') window.location.href = '/app.html';
+      });
+      await loadHistory();
+    } catch (e) { window.location.href = '/app.html'; }
+  }
+
+  async function loadHistory() {
+    const { data: sessions } = await sbClient
+      .from('sessions')
+      .select('id, created_at, type, summary')
+      .eq('user_id', currentUser.id)
+      .order('created_at', { ascending: false });
+
+    document.getElementById('loadingScreen').style.display = 'none';
+    const list = document.getElementById('sessionList');
+
+    if (!sessions || sessions.length === 0) {
+      list.innerHTML = `
+        <div class="empty-state">
+          <div class="empty-title">No conversations yet.</div>
+          <div class="empty-sub">Your sessions will appear here once you start talking with Anew.</div>
+        </div>`;
+      return;
+    }
+
+    list.innerHTML = '';
+    sessions.forEach(session => {
+      const d = new Date(session.created_at);
+      const dateStr = d.toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+      const typeLabel = session.type === 'checkin' ? 'Weekly check-in'
+        : session.type === 'review' ? 'Project review' : 'Onboarding';
+      const overview = session.summary
+        ? escHtml(session.summary)
+        : 'Conversation with Anew — tap to read';
+      const card = document.createElement('div');
+      card.className = 'session-card';
+      card.innerHTML = `
+        <div class="session-type-label">${typeLabel}</div>
+        <div class="session-date">${dateStr}</div>
+        <div class="session-overview">${overview}</div>
+        <div class="session-body" id="body-${session.id}"></div>
+      `;
+      card.addEventListener('click', () => toggleSession(session.id));
+      list.appendChild(card);
+    });
+  }
+
+  async function toggleSession(sessionId) {
+    const body = document.getElementById('body-' + sessionId);
+    if (!body) return;
+    if (body.classList.contains('open')) { body.classList.remove('open'); return; }
+    if (body.dataset.loaded) { body.classList.add('open'); return; }
+
+    const { data: msgs } = await sbClient
+      .from('messages')
+      .select('role, content, created_at')
+      .eq('session_id', sessionId)
+      .order('created_at', { ascending: true });
+
+    if (!msgs || msgs.length === 0) {
+      body.innerHTML = '<div style="font-size:13px;color:var(--stone);font-style:italic">No messages found.</div>';
+    } else {
+      body.innerHTML = msgs.map(m => `
+        <div class="session-msg">
+          <div class="session-msg-role">${m.role === 'assistant' ? 'Anew' : 'You'}</div>
+          <div class="session-msg-content ${m.role === 'assistant' ? 'ai' : ''}">${escHtml(m.content)}</div>
+        </div>
+      `).join('');
+    }
+    body.dataset.loaded = '1';
+    body.classList.add('open');
+  }
+
+  function escHtml(str) {
+    return (str || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  }
+
+  function openMenu() {
+    document.getElementById('menuOverlay').classList.add('open');
+    document.getElementById('menuDrawer').classList.add('open');
+  }
+  function closeMenu() {
+    document.getElementById('menuOverlay').classList.remove('open');
+    document.getElementById('menuDrawer').classList.remove('open');
+  }
+  async function handleLogout() {
+    if (sbClient) await sbClient.auth.signOut();
+    window.location.href = '/app.html';
+  }
+
+  init();
+</script>
+</body>
+</html>

@@ -1,0 +1,1222 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, interactive-widget=resizes-content">
+<title>Anew — Dashboard</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;1,400&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --warm-white: #FAF6F1;
+    --clay: #B8704E; --clay-dark: #8C4E32;
+    --charcoal: #1C1614; --charcoal-soft: #5C4D45;
+    --stone: #8A7870; --blush: #EDD4C6; --blush-deep: #DBBAA6;
+    --section-alt: #F5EFE8; --sage: #5E8A60;
+  }
+  html, body { min-height: 100dvh; font-family: 'DM Sans', sans-serif; background: var(--warm-white); color: var(--charcoal); }
+
+  /* ── NAV ── */
+  .nav {
+    position: fixed; top: 0; left: 0; right: 0; height: 56px;
+    background: rgba(250,246,241,0.96); border-bottom: 1px solid var(--blush-deep);
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 0 24px; z-index: 100; backdrop-filter: blur(4px);
+  }
+  .nav-logo { font-family: 'Cormorant Garamond', serif; font-size: 22px; font-weight: 400; color: var(--charcoal); letter-spacing: 0.08em; text-decoration: none; }
+  .nav-hamburger { width: 40px; height: 40px; border-radius: 8px; border: none; background: none; cursor: pointer; display: flex; align-items: center; justify-content: center; color: var(--stone); transition: background 0.2s ease, color 0.2s ease; }
+  .nav-hamburger:hover { background: var(--section-alt); color: var(--clay); }
+
+  /* ── MENU DRAWER ── */
+  .menu-overlay { display: none; position: fixed; inset: 0; background: rgba(28,22,20,0.3); z-index: 999; }
+  .menu-overlay.open { display: block; }
+  .menu-drawer { position: fixed; right: 0; top: 0; width: 240px; height: 100dvh; background: white; z-index: 1000; box-shadow: -4px 0 20px rgba(28,22,20,0.1); transform: translateX(100%); transition: transform 0.25s ease; display: flex; flex-direction: column; }
+  .menu-drawer.open { transform: translateX(0); }
+  .menu-item { display: block; padding: 16px 24px; font-family: 'DM Sans', sans-serif; font-size: 15px; color: var(--charcoal); border-bottom: 1px solid var(--blush-deep); text-decoration: none; background: none; border-left: none; border-right: none; border-top: none; cursor: pointer; text-align: left; width: 100%; transition: background 0.15s ease; }
+  .menu-item:hover { background: var(--section-alt); }
+  .menu-item.active { color: var(--clay); }
+  .menu-divider { height: 1px; background: var(--blush-deep); }
+  .menu-item-logout { color: var(--stone); border-bottom: none; margin-top: auto; }
+
+  /* ── LOADING ── */
+  .loading-screen { position: fixed; inset: 0; background: var(--warm-white); display: flex; align-items: center; justify-content: center; z-index: 200; }
+  .loading-logo { font-family: 'Cormorant Garamond', serif; font-size: 28px; color: var(--charcoal); letter-spacing: 0.1em; }
+
+  /* ── MAIN LAYOUT ── */
+  .main { max-width: 640px; margin: 0 auto; padding: 72px 20px 48px; }
+
+  /* ── GREETING ── */
+  .greeting {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 28px;
+    font-style: italic;
+    font-weight: 400;
+    color: var(--charcoal);
+    margin: 16px 0 24px;
+    line-height: 1.2;
+  }
+
+  /* ── SECTION LABEL ── */
+  .section-label {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 10px;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.14em;
+    color: var(--stone);
+    margin-bottom: 12px;
+  }
+
+  /* ── CHECK-IN CHAT ── */
+  .checkin-card {
+    background: white;
+    border-radius: 16px;
+    box-shadow: 0 2px 20px rgba(28,22,20,0.07);
+    overflow: hidden;
+    margin-bottom: 16px;
+    display: flex;
+    flex-direction: column;
+    min-height: 360px;
+    max-height: calc(100dvh - 56px - 80px - 60px - 80px);
+  }
+
+  .chat-messages {
+    flex: 1;
+    overflow-y: auto;
+    padding: 20px 24px 8px;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    min-height: 200px;
+  }
+  .chat-messages::-webkit-scrollbar { width: 4px; }
+  .chat-messages::-webkit-scrollbar-track { background: transparent; }
+  .chat-messages::-webkit-scrollbar-thumb { background: var(--blush-deep); border-radius: 2px; }
+
+  .msg-ai {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 19px;
+    font-weight: 400;
+    color: var(--charcoal);
+    line-height: 1.65;
+    max-width: 480px;
+  }
+
+  .msg-user {
+    background: var(--blush-deep);
+    border-radius: 14px 14px 4px 14px;
+    padding: 10px 16px;
+    font-size: 14px;
+    color: var(--charcoal);
+    align-self: flex-end;
+    max-width: 360px;
+    line-height: 1.5;
+  }
+
+  .word { opacity: 0; transition: opacity 0.15s ease; display: inline; }
+  .word.visible { opacity: 1; }
+
+  .typing-dots { display: flex; gap: 4px; align-items: center; padding: 4px 0; }
+  .typing-dots span { width: 6px; height: 6px; border-radius: 50%; background: var(--stone); animation: dotPulse 1.2s ease-in-out infinite; }
+  .typing-dots span:nth-child(2) { animation-delay: 0.2s; }
+  .typing-dots span:nth-child(3) { animation-delay: 0.4s; }
+  @keyframes dotPulse { 0%,80%,100%{opacity:0.3;transform:scale(0.85)} 40%{opacity:1;transform:scale(1)} }
+
+  .chat-input-bar {
+    border-top: 1px solid var(--blush-deep);
+    padding: 12px 16px;
+    display: flex;
+    align-items: flex-end;
+    gap: 10px;
+    background: white;
+  }
+
+  .chat-textarea {
+    flex: 1;
+    border: 1.5px solid var(--blush-deep);
+    border-radius: 10px;
+    padding: 10px 14px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 16px;
+    color: var(--charcoal);
+    background: white;
+    resize: none;
+    min-height: 44px;
+    max-height: 100px;
+    line-height: 1.5;
+    outline: none;
+    transition: border-color 0.2s ease;
+  }
+  .chat-textarea:focus { border-color: var(--clay); }
+  .chat-textarea::placeholder { color: var(--stone); }
+
+  .chat-send {
+    width: 40px; height: 40px; border-radius: 50%;
+    background: var(--clay); border: none; cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    transition: background 0.2s ease; flex-shrink: 0;
+  }
+  .chat-send:hover { background: var(--clay-dark); }
+  .chat-send:disabled { background: var(--blush-deep); cursor: not-allowed; }
+
+  /* ── COLLAPSIBLE SECTIONS ── */
+  .collapsible {
+    background: white;
+    border-radius: 14px;
+    box-shadow: 0 2px 12px rgba(28,22,20,0.05);
+    margin-bottom: 12px;
+    overflow: hidden;
+  }
+
+  .collapsible-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 16px 20px;
+    cursor: pointer;
+    transition: background 0.15s ease;
+  }
+  .collapsible-header:hover { background: var(--section-alt); }
+
+  .collapsible-label {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 10px;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.14em;
+    color: var(--stone);
+  }
+
+  .collapsible-value {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 17px;
+    color: var(--charcoal);
+    margin-top: 2px;
+  }
+
+  .collapsible-chevron {
+    color: var(--stone);
+    transition: transform 0.2s ease;
+    flex-shrink: 0;
+  }
+  .collapsible-chevron.open { transform: rotate(180deg); }
+
+  .collapsible-body {
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.25s ease, padding 0.25s ease;
+  }
+  .collapsible-body.open { max-height: 400px; }
+
+  .collapsible-inner {
+    padding: 0 20px 16px;
+    border-top: 1px solid var(--section-alt);
+  }
+
+  .focus-text { font-size: 14px; color: var(--charcoal-soft); line-height: 1.6; padding-top: 12px; }
+  /* Theory info mark (C-2) */
+  .focus-theory-name { font-weight: 500; color: var(--charcoal); }
+  .focus-theory-text { font-size: 14px; color: var(--charcoal-soft); line-height: 1.6; margin-top: 6px; }
+  .theory-info { display: inline-flex; align-items: center; justify-content: center; width: 32px; height: 32px; vertical-align: middle; border: none; background: none; color: var(--clay); cursor: pointer; padding: 0; transition: color 0.2s ease; }
+  .theory-info:hover { color: var(--clay-dark); }
+  .theory-info svg { width: 20px; height: 20px; }
+  /* Always-visible theory chip in the focus header (D-8) */
+  .collapsible-right { display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
+  .theory-chip { display: inline-flex; align-items: center; gap: 6px; min-height: 36px; padding: 6px 12px; border-radius: 100px; border: 1.5px solid var(--clay); background: rgba(184,112,78,0.08); color: var(--clay-dark); font-family: 'DM Sans', sans-serif; font-size: 12px; font-weight: 500; cursor: pointer; transition: background 0.2s ease; }
+  .theory-chip:hover { background: rgba(184,112,78,0.16); }
+  .theory-chip svg { width: 16px; height: 16px; }
+
+  .checkin-row { display: flex; align-items: center; justify-content: space-between; padding-top: 12px; }
+  .checkin-date { font-family: 'Cormorant Garamond', serif; font-size: 18px; color: var(--charcoal); }
+  .btn-link { font-size: 12px; color: var(--clay); background: none; border: none; cursor: pointer; text-decoration: underline; text-underline-offset: 3px; }
+  .btn-link:hover { color: var(--clay-dark); }
+
+  /* ── ACCOUNT MODAL ── */
+  .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(28,22,20,0.4); z-index: 1000; align-items: center; justify-content: center; }
+  .modal-overlay.open { display: flex; }
+  .modal { background: white; border-radius: 16px; padding: 32px 28px; max-width: 400px; width: calc(100% - 48px); }
+  .modal-title { font-family: 'Cormorant Garamond', serif; font-size: 24px; font-weight: 400; color: var(--charcoal); margin-bottom: 12px; }
+  .modal-text { font-size: 14px; color: var(--charcoal-soft); line-height: 1.6; margin-bottom: 24px; }
+  .modal-actions { display: flex; gap: 12px; }
+  .btn-modal-keep { flex: 1; padding: 14px; border: 1.5px solid var(--blush-deep); border-radius: 6px; background: none; cursor: pointer; font-size: 13px; color: var(--charcoal-soft); transition: border-color 0.2s ease; }
+  .btn-modal-keep:hover { border-color: var(--charcoal-soft); }
+
+  /* Purpose header + done state (D-2) */
+  .purpose-header { font-size: 13px; color: var(--charcoal-soft); line-height: 1.55; margin-bottom: 12px; padding: 12px 16px; background: var(--section-alt); border-radius: 10px; }
+  .done-card { background: linear-gradient(135deg, var(--blush) 0%, var(--blush-deep) 100%); border-radius: 16px; padding: 24px 26px; margin-bottom: 16px; }
+  .done-title { font-family: 'Cormorant Garamond', serif; font-size: 22px; color: var(--charcoal); margin-bottom: 8px; }
+  .done-text { font-size: 14px; color: var(--charcoal-soft); line-height: 1.6; }
+  .done-schedule { margin-top: 18px; padding-top: 16px; border-top: 1px solid rgba(140,78,50,0.2); }
+  .done-schedule-text { font-size: 14px; color: var(--charcoal); margin-bottom: 12px; }
+
+  /* Past-due payment banner (item 25) */
+  .paydue-banner { background: rgba(184,112,78,0.08); border: 1px solid var(--blush-deep); border-radius: 12px; padding: 18px 20px; margin-bottom: 24px; }
+  .paydue-title { font-family: 'Cormorant Garamond', serif; font-size: 19px; color: var(--charcoal); margin-bottom: 6px; }
+  .paydue-text { font-size: 14px; color: var(--charcoal-soft); line-height: 1.6; margin-bottom: 14px; }
+  .btn-paydue { display: inline-block; background: var(--clay); color: white; font-size: 12px; font-weight: 500; text-transform: uppercase; letter-spacing: 0.1em; padding: 13px 20px; min-height: 44px; border: none; border-radius: 8px; cursor: pointer; transition: background 0.2s ease; }
+  .btn-paydue:hover { background: var(--clay-dark); }
+  .btn-paydue:disabled { background: var(--blush-deep); cursor: not-allowed; }
+
+  /* Progress — Day X of 90 (item 10) */
+  .progress-block { margin: 0 0 24px; }
+  .progress-day { font-size: 11px; font-weight: 500; text-transform: uppercase; letter-spacing: 0.12em; color: var(--stone); margin-bottom: 8px; }
+  .progress-bar { height: 6px; background: var(--blush); border-radius: 3px; overflow: hidden; }
+  .progress-fill { height: 100%; width: 0; background: var(--clay); border-radius: 3px; transition: width 0.5s ease; }
+
+  /* Wrap-up + session close (item 6) */
+  .wrapup-bar { margin: 12px 0 16px; text-align: center; }
+  .btn-wrapup { background: none; border: 1.5px solid var(--blush-deep); color: var(--charcoal-soft); font-family: 'DM Sans', sans-serif; font-size: 13px; padding: 13px 22px; min-height: 44px; border-radius: 8px; cursor: pointer; transition: border-color 0.2s ease, color 0.2s ease; }
+  .btn-wrapup:hover { border-color: var(--stone); color: var(--charcoal); }
+
+  .summary-card { background: linear-gradient(135deg, var(--blush) 0%, var(--blush-deep) 100%); border-radius: 16px; padding: 22px 24px; margin: 0 0 16px; }
+  .summary-label { font-size: 10px; font-weight: 500; text-transform: uppercase; letter-spacing: 0.14em; color: var(--clay-dark); margin-bottom: 8px; }
+  .summary-body { font-family: 'Cormorant Garamond', serif; font-size: 18px; color: var(--charcoal); line-height: 1.6; }
+
+  /* Partner reaction chooser (item 21) */
+  .reaction-card { background: white; border-radius: 16px; box-shadow: 0 2px 16px rgba(28,22,20,0.06); padding: 22px 24px; margin: 0 0 16px; }
+  .reaction-q { font-family: 'Cormorant Garamond', serif; font-size: 19px; color: var(--charcoal); line-height: 1.5; margin-bottom: 16px; }
+  .reaction-opts { display: flex; flex-direction: column; gap: 10px; }
+  .reaction-btn { width: 100%; text-align: left; background: var(--section-alt); border: 1.5px solid transparent; color: var(--charcoal); font-family: 'DM Sans', sans-serif; font-size: 15px; padding: 14px 16px; min-height: 44px; border-radius: 10px; cursor: pointer; transition: border-color 0.2s ease, background 0.2s ease; }
+  .reaction-btn:hover { border-color: var(--blush-deep); background: white; }
+  .reaction-skip { align-self: center; background: none; border: none; color: var(--stone); font-size: 13px; padding: 12px; min-height: 44px; cursor: pointer; text-decoration: underline; text-underline-offset: 3px; }
+  .reaction-skip:hover { color: var(--charcoal-soft); }
+
+  /* Intro bottom sheet — nickname + anniversary (items 11, 23, 26) */
+  .sheet-overlay { display: none; position: fixed; inset: 0; background: rgba(28,22,20,0.4); z-index: 1100; align-items: flex-end; justify-content: center; }
+  .sheet-overlay.open { display: flex; }
+  .sheet { background: white; border-radius: 20px 20px 0 0; padding: 28px 24px calc(28px + env(safe-area-inset-bottom)); width: 100%; max-width: 640px; box-shadow: 0 -4px 24px rgba(28,22,20,0.12); transform: translateY(0); }
+  .sheet-title { font-family: 'Cormorant Garamond', serif; font-size: 24px; font-weight: 400; color: var(--charcoal); margin-bottom: 6px; }
+  .sheet-intro { font-size: 14px; color: var(--charcoal-soft); line-height: 1.6; margin-bottom: 20px; }
+  .sheet-label { display: block; font-size: 14px; color: var(--charcoal); margin-bottom: 8px; line-height: 1.5; }
+  .sheet-input { width: 100%; border: 1.5px solid var(--blush-deep); border-radius: 10px; padding: 13px 14px; font-family: 'DM Sans', sans-serif; font-size: 16px; color: var(--charcoal); background: white; min-height: 44px; outline: none; margin-bottom: 20px; transition: border-color 0.2s ease; }
+  .sheet-input:focus { border-color: var(--clay); }
+  .sheet-save { width: 100%; background: var(--clay); color: white; font-family: 'DM Sans', sans-serif; font-size: 12px; font-weight: 500; text-transform: uppercase; letter-spacing: 0.12em; padding: 16px; min-height: 44px; border: none; border-radius: 10px; cursor: pointer; transition: background 0.2s ease; }
+  .sheet-save:hover { background: var(--clay-dark); }
+  .preset-row { display: flex; gap: 10px; margin-bottom: 18px; flex-wrap: wrap; }
+  .preset-btn { flex: 1; min-width: 130px; min-height: 44px; background: var(--section-alt); border: 1.5px solid transparent; border-radius: 10px; padding: 12px 14px; font-family: 'DM Sans', sans-serif; font-size: 14px; color: var(--charcoal); cursor: pointer; transition: border-color 0.2s ease, background 0.2s ease; }
+  .preset-btn:hover { border-color: var(--blush-deep); background: white; }
+  .sheet-error { font-size: 13px; color: var(--clay-dark); margin: -10px 0 14px; display: none; }
+  .sheet-error.show { display: block; }
+  .sheet-skip { width: 100%; background: none; border: none; color: var(--stone); font-size: 13px; padding: 14px; min-height: 44px; cursor: pointer; margin-top: 4px; }
+  .sheet-skip:hover { color: var(--charcoal-soft); }
+</style>
+</head>
+<body>
+
+<div class="loading-screen" id="loadingScreen">
+  <div class="loading-logo">Anew</div>
+</div>
+
+<nav class="nav">
+  <a href="/dashboard.html" class="nav-logo">Anew</a>
+  <button class="nav-hamburger" onclick="openMenu()" aria-label="Menu">
+    <svg width="20" height="14" viewBox="0 0 20 14" fill="none"><path d="M0 1h20M0 7h20M0 13h20" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+  </button>
+</nav>
+
+<div class="menu-overlay" id="menuOverlay" onclick="closeMenu()"></div>
+<div class="menu-drawer" id="menuDrawer">
+  <a href="/dashboard.html" class="menu-item active">Check-in</a>
+  <a href="/project.html" class="menu-item">My Project</a>
+  <a href="/history.html" class="menu-item">History</a>
+  <a href="/account.html" class="menu-item">Account</a>
+  <div class="menu-divider"></div>
+  <button class="menu-item menu-item-logout" onclick="handleLogout()">Log out</button>
+</div>
+
+<main class="main" id="mainContent" style="display:none">
+
+  <!-- Greeting -->
+  <div class="greeting" id="greeting">Good morning.</div>
+
+  <!-- Progress: Day X of 90 (item 10) -->
+  <div class="progress-block" id="progressBlock" style="display:none">
+    <div class="progress-day" id="progressDay">Day 1 of 90</div>
+    <div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div>
+  </div>
+
+  <!-- Past-due payment notice (item 25) -->
+  <div class="paydue-banner" id="payDueBanner" style="display:none">
+    <div class="paydue-title">There was a problem with your last payment</div>
+    <div class="paydue-text">Your access is still here for now. To keep it going, please update your payment method — it only takes a moment.</div>
+    <button class="btn-paydue" id="payDueBtn" onclick="updatePayment()">Update payment method</button>
+  </div>
+
+  <!-- Weekly check-in -->
+  <div class="section-label">Your weekly check-in</div>
+  <div class="purpose-header" id="purposeHeader">A ~10 minute weekly review. When we finish, this week's focus and tasks will update.</div>
+  <div class="checkin-card">
+    <div class="chat-messages" id="chatMessages"></div>
+    <div class="chat-input-bar" id="chatInputBar">
+      <textarea class="chat-textarea" id="chatInput" placeholder="Write here..." rows="1"></textarea>
+      <button class="chat-send" id="chatSendBtn" onclick="sendChat()">
+        <svg width="16" height="16" viewBox="0 0 18 18" fill="none">
+          <path d="M3 9H15M15 9L10 4M15 9L10 14" stroke="white" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </button>
+    </div>
+  </div>
+
+  <!-- Done for today (shown after closure, D-2) -->
+  <div class="done-card" id="doneCard" style="display:none">
+    <div class="done-title">Done for today</div>
+    <div class="done-text">You've done what matters this week. You can close the app whenever you're ready.</div>
+    <div class="done-schedule" id="doneSchedule" style="display:none">
+      <div class="done-schedule-text">Want to set your next check-in?</div>
+      <button class="btn-wrapup" onclick="scheduleCheckin()">Schedule your next check-in</button>
+    </div>
+  </div>
+
+  <!-- End check-in affordance — always available so there's a clear exit (items 6, C-3) -->
+  <div class="wrapup-bar" id="wrapUpBar" style="display:none">
+    <button class="btn-wrapup" onclick="startWrapUp()">End check-in</button>
+  </div>
+
+  <!-- Partner reaction chooser (item 21) -->
+  <div class="reaction-card" id="partnerReaction" style="display:none">
+    <div class="reaction-q">How did it go with your partner this week?</div>
+    <div class="reaction-opts">
+      <button class="reaction-btn" onclick="recordReaction('It went better than I expected')">It went better than I expected</button>
+      <button class="reaction-btn" onclick="recordReaction(&quot;They didn't really respond&quot;)">They didn't really respond</button>
+      <button class="reaction-btn" onclick="recordReaction(&quot;It didn't go well&quot;)">It didn't go well</button>
+      <button class="reaction-btn" onclick="recordReaction(&quot;I'm not sure yet&quot;)">I'm not sure yet</button>
+      <button class="reaction-skip" onclick="skipReaction()">Skip</button>
+    </div>
+  </div>
+
+  <!-- This week summary card (item 6) -->
+  <div class="summary-card" id="summaryCard" style="display:none">
+    <div class="summary-label">This week</div>
+    <div class="summary-body" id="summaryBody"></div>
+  </div>
+
+  <!-- This week's focus (collapsible, hidden if no project) -->
+  <div class="collapsible" id="focusCollapsible" style="display:none">
+    <div class="collapsible-header" onclick="toggleCollapsible('focus')">
+      <div>
+        <div class="collapsible-label">This week's focus</div>
+        <div class="collapsible-value" id="focusValuePreview">—</div>
+      </div>
+      <div class="collapsible-right">
+        <button class="theory-chip" id="focusTheoryChip" style="display:none" onclick="event.stopPropagation(); openTheoryInfo(focusTheoryKey)">
+          <span id="focusTheoryChipName"></span>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="9"/><line x1="12" y1="11" x2="12" y2="16"/><circle cx="12" cy="8" r="0.7" fill="currentColor" stroke="none"/></svg>
+        </button>
+        <svg class="collapsible-chevron" id="focusChevron" width="16" height="16" viewBox="0 0 16 16" fill="none">
+          <path d="M4 6l4 4 4-4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </div>
+    </div>
+    <div class="collapsible-body" id="focusBody">
+      <div class="collapsible-inner">
+        <div class="focus-text" id="focusFullText"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Next check-in (collapsible) -->
+  <div class="collapsible">
+    <div class="collapsible-header" onclick="toggleCollapsible('checkin')">
+      <div>
+        <div class="collapsible-label">Next check-in</div>
+        <div class="collapsible-value" id="checkinValuePreview">Not scheduled</div>
+      </div>
+      <svg class="collapsible-chevron" id="checkinChevron" width="16" height="16" viewBox="0 0 16 16" fill="none">
+        <path d="M4 6l4 4 4-4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+    </div>
+    <div class="collapsible-body" id="checkinBody">
+      <div class="collapsible-inner">
+        <div class="checkin-row">
+          <div class="checkin-date" id="checkinDateFull">Not scheduled</div>
+          <button class="btn-link" onclick="scheduleCheckin()">Change</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</main>
+
+<!-- Intro bottom sheet: nickname + anniversary (items 11, 23, 26) -->
+<div class="sheet-overlay" id="introOverlay">
+  <div class="sheet">
+    <div class="sheet-title">Before we begin</div>
+    <div class="sheet-intro">A couple of small things, so this feels like yours. Both are optional.</div>
+    <label class="sheet-label" for="nicknameInput">What should I call you?</label>
+    <input class="sheet-input" id="nicknameInput" type="text" placeholder="Your name or nickname" maxlength="40" autocomplete="given-name" />
+    <label class="sheet-label" for="anniversaryInput">Is there a date that matters to you two? (anniversary, the day you met — optional)</label>
+    <input class="sheet-input" id="anniversaryInput" type="date" />
+    <button class="sheet-save" id="introSaveBtn" onclick="saveIntro()">Save</button>
+    <button class="sheet-skip" onclick="skipIntro()">Skip for now</button>
+  </div>
+</div>
+
+<!-- Check-in scheduler bottom sheet (items 17, C-5, C-6) -->
+<div class="sheet-overlay" id="checkinSheet">
+  <div class="sheet">
+    <div class="sheet-title">Schedule your next check-in</div>
+    <div class="sheet-intro">Most people check in once a week. Pick whatever fits.</div>
+    <div class="preset-row">
+      <button class="preset-btn" type="button" onclick="presetNextWeek()">Same time next week</button>
+      <button class="preset-btn" type="button" onclick="presetSundayEvening()">Sunday evening</button>
+    </div>
+    <label class="sheet-label" for="checkinDate">Date</label>
+    <input class="sheet-input" id="checkinDate" type="date" />
+    <label class="sheet-label" for="checkinTime">Time</label>
+    <select class="sheet-input" id="checkinTime"></select>
+    <div class="sheet-error" id="checkinSheetError"></div>
+    <button class="sheet-save" id="checkinSaveBtn" onclick="saveCheckin()">Save check-in</button>
+    <button class="sheet-skip" onclick="closeCheckinSheet()">Cancel</button>
+  </div>
+</div>
+
+<!-- Theory info modal (C-2) -->
+<div class="modal-overlay" id="theoryInfoModal">
+  <div class="modal">
+    <div class="modal-title" id="theoryInfoTitle"></div>
+    <div class="modal-text" id="theoryInfoText"></div>
+    <div class="modal-actions">
+      <button class="btn-modal-keep" onclick="document.getElementById('theoryInfoModal').classList.remove('open')">Got it</button>
+    </div>
+  </div>
+</div>
+
+<script>
+  const SUPABASE_URL = 'https://hzkkftsihitkvdinydju.supabase.co';
+  const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imh6a2tmdHNpaGl0a3ZkaW55ZGp1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzUyNzUyODksImV4cCI6MjA5MDg1MTI4OX0.D7QBobLt7JhMGJcNNhvlLvKjq2ysozYa2k9Z0Fj8ZGI';
+
+  let sbClient = null, currentUser = null, currentProject = null;
+  let chatHistory = [], chatStreaming = false, checkinSessionId = null;
+  let nicknameValue = null, lastSessionSummary = '', nextCheckinStr = '';
+  let userTurnCount = 0, checkinClosed = false, partnerReactionDone = false;
+
+  const SUMMARY_SYSTEM = `You are Anew. Summarize this weekly check-in in 3-4 sentences for the user's own record. Warm, interpretation tone — never diagnosis. Include the user's own words in quotation marks where it feels natural. Write to the user as "you". Output only the summary, no preamble.`;
+
+  const CHECKIN_SYSTEM = `You are Anew, an AI relationship coach.
+The user has an active recovery project.
+Your role right now is to conduct a warm, focused weekly check-in.
+
+Ask about:
+- How the week's task went
+- How their partner responded
+- How they're feeling about the progress
+
+Keep responses short (1-3 sentences).
+Be warm, non-judgmental.
+Never use emojis or decorative symbols in replies.
+Do not give unsolicited advice.
+Only discuss topics related to their relationship recovery.
+Never answer questions unrelated to relationships or their project.
+
+SCOPE: Anew only supports relationship reflection and the user's recovery project. If the user asks you to do anything unrelated — write code, essays, translations, general knowledge, math, etc. — do not do it. In 1-2 warm sentences, gently decline and steer back to their relationship and project. Never perform the unrelated task.
+
+CLOSURE: If the user gives minimal or stuck replies twice (e.g. "I don't know", one or two words), or after about 6-8 exchanges, do not ask another feelings question. Instead, offer closure: briefly reflect what they shared, tell them this is enough for today, mention when their next check-in is if you know it, and explicitly let them know they can close the app now and come back next time. Never leave the user without a clear way to end the conversation.
+
+SAFETY PROTOCOL: If the user mentions self-harm, suicidal thoughts, abuse, or violence, stop the regular flow. Respond with warmth, do not minimize, and share: 988 Suicide & Crisis Lifeline (call/text 988) or the National Domestic Violence Hotline (1-800-799-7233), whichever fits. Encourage reaching out to a professional. Do not return to task discussion in the same message.`;
+
+  // ── Init ──
+  async function init() {
+    try {
+      sbClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+      const { data: { session } } = await sbClient.auth.getSession();
+      if (!session) { window.location.href = '/app.html'; return; }
+      currentUser = session.user;
+
+      sbClient.auth.onAuthStateChange((event) => {
+        if (event === 'SIGNED_OUT') window.location.href = '/app.html';
+      });
+
+      await loadDashboard();
+    } catch (e) {
+      console.error(e);
+      window.location.href = '/app.html';
+    }
+  }
+
+  function setGreeting() {
+    const hour = new Date().getHours();
+    const period = hour < 12 ? 'morning' : hour < 17 ? 'afternoon' : 'evening';
+    // Priority: nickname (if non-empty) > email local part (item 11/23)
+    const name = (nicknameValue && nicknameValue.trim())
+      ? nicknameValue.trim()
+      : (currentUser.email?.split('@')[0] || '');
+    document.getElementById('greeting').textContent = `Good ${period}${name ? ', ' + name : ''}.`;
+  }
+
+  async function loadDashboard() {
+    setGreeting();
+
+    // Load project
+    const { data: projects } = await sbClient
+      .from('projects')
+      .select('*')
+      .eq('user_id', currentUser.id)
+      .order('created_at', { ascending: false })
+      .limit(1);
+
+    if (projects && projects.length > 0) {
+      currentProject = projects[0];
+      renderProjectInfo(currentProject);
+    }
+
+    // Load subscription status + profile (nickname for greeting, item 11/23)
+    const { data: userData } = await sbClient
+      .from('users')
+      .select('subscription_status, nickname')
+      .eq('id', currentUser.id)
+      .single();
+
+    if (userData) {
+      nicknameValue = userData.nickname; // null = never asked; '' = asked & skipped
+      setGreeting();
+
+      // past_due keeps grace access but sees a payment-update banner (item 25)
+      if (userData.subscription_status === 'past_due') {
+        document.getElementById('payDueBanner').style.display = 'block';
+      }
+
+      // Allow active, trial, canceled, and past_due (grace); redirect others
+      const allowed = ['active', 'trial', 'canceled', 'past_due'];
+      if (userData.subscription_status && !allowed.includes(userData.subscription_status)) {
+        window.location.href = '/app.html';
+        return;
+      }
+    }
+
+    // Load next check-in
+    if (currentProject) {
+      const { data: checkins } = await sbClient
+        .from('checkins')
+        .select('scheduled_at')
+        .eq('project_id', currentProject.id)
+        .gte('scheduled_at', new Date().toISOString())
+        .order('scheduled_at', { ascending: true })
+        .limit(1);
+
+      if (checkins && checkins.length > 0) {
+        const d = new Date(checkins[0].scheduled_at);
+        const str = d.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' }) +
+          ' at ' + d.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
+        nextCheckinStr = str;
+        document.getElementById('checkinValuePreview').textContent = d.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' });
+        document.getElementById('checkinDateFull').textContent = str;
+      }
+    }
+
+    // Load last check-in's summary for continuity (item 5)
+    await loadLastSession();
+
+    // Reveal content
+    document.getElementById('loadingScreen').style.display = 'none';
+    document.getElementById('mainContent').style.display = 'block';
+
+    // D-9: reuse today's open check-in session (with its messages) if one exists.
+    // Otherwise the session row is created lazily on the first user message.
+    const resumed = await resumeTodaySession();
+    if (resumed) {
+      document.getElementById('wrapUpBar').style.display = 'block';
+      maybeShowIntro();
+      return;
+    }
+
+    // Opening message — continues from last week when we have context (item 5).
+    // Not persisted: the session is created only when the user actually replies (D-9).
+    const defaultOpening = "How did it go this week? Tell me what happened — even if it's hard to put into words.";
+    let opening = defaultOpening;
+    if (lastSessionSummary) {
+      showTyping();
+      try {
+        opening = await callAPI(
+          checkinSystemPrompt() + '\n\nThis is the very first message of a new weekly check-in. In 1-2 warm sentences, greet them and gently pick up from where you left off last time. Do not list tasks or ask more than one thing.',
+          [{ role: 'user', content: '(Begin this week\'s check-in.)' }]
+        );
+      } catch (_) { opening = defaultOpening; }
+      hideTyping();
+    }
+    addMessage('ai', opening, false);
+
+    // Always offer a clear exit (C-3)
+    document.getElementById('wrapUpBar').style.display = 'block';
+
+    // First-run profile sheet (items 11, 23, 26)
+    maybeShowIntro();
+  }
+
+  // D-9: reuse today's open (un-summarized) check-in session and replay its messages
+  async function resumeTodaySession() {
+    try {
+      const startToday = new Date(); startToday.setHours(0, 0, 0, 0);
+      const { data } = await sbClient
+        .from('sessions')
+        .select('id, summary, created_at')
+        .eq('user_id', currentUser.id)
+        .eq('type', 'checkin')
+        .gte('created_at', startToday.toISOString())
+        .order('created_at', { ascending: false })
+        .limit(10);
+      const open = (data || []).find(s => !s.summary);
+      if (!open) return false;
+      const { data: msgs } = await sbClient
+        .from('messages')
+        .select('role, content')
+        .eq('session_id', open.id)
+        .order('created_at', { ascending: true });
+      if (!msgs || !msgs.length) return false; // empty row — let lazy-create handle it
+      checkinSessionId = open.id;
+      msgs.forEach(m => {
+        const isAi = m.role === 'assistant';
+        addMessage(isAi ? 'ai' : 'user', m.content, false, true);
+        chatHistory.push({ role: isAi ? 'assistant' : 'user', content: m.content });
+        if (!isAi) userTurnCount++;
+      });
+      return true;
+    } catch (_) { return false; }
+  }
+
+  // Create the session row only when first needed (D-9)
+  async function ensureCheckinSession() {
+    if (checkinSessionId) return checkinSessionId;
+    try {
+      const { data, error } = await sbClient
+        .from('sessions')
+        .insert({ user_id: currentUser.id, type: 'checkin' })
+        .select('id')
+        .single();
+      if (!error && data) checkinSessionId = data.id;
+    } catch (_) {}
+    return checkinSessionId;
+  }
+
+  // Item 5: pull the most recent prior check-in's summary (or last few messages).
+  // Prefer a session that actually has a summary — page reloads create empty
+  // sessions, so the newest row is often not the meaningful "last week".
+  async function loadLastSession() {
+    try {
+      const { data: summarized } = await sbClient
+        .from('sessions')
+        .select('summary')
+        .eq('user_id', currentUser.id)
+        .eq('type', 'checkin')
+        .not('summary', 'is', null)
+        .order('created_at', { ascending: false })
+        .limit(1);
+      if (summarized && summarized.length && summarized[0].summary) {
+        lastSessionSummary = summarized[0].summary;
+        return;
+      }
+
+      // Fallback: latest prior session's last few messages
+      const { data } = await sbClient
+        .from('sessions')
+        .select('id')
+        .eq('user_id', currentUser.id)
+        .eq('type', 'checkin')
+        .order('created_at', { ascending: false })
+        .limit(1);
+      if (!data || !data.length) return;
+      const { data: msgs } = await sbClient
+        .from('messages')
+        .select('role, content')
+        .eq('session_id', data[0].id)
+        .order('created_at', { ascending: false })
+        .limit(6);
+      if (msgs && msgs.length) {
+        lastSessionSummary = msgs.reverse()
+          .map(m => `${m.role === 'assistant' ? 'Anew' : 'User'}: ${m.content}`)
+          .join(' ');
+      }
+    } catch (_) {}
+  }
+
+  function currentWeekIndex() {
+    if (!currentProject) return 0;
+    const startDate = new Date(currentProject.started_at || currentProject.created_at);
+    const diffDays = Math.floor((Date.now() - startDate) / (1000 * 60 * 60 * 24));
+    return Math.max(0, Math.floor(diffDays / 7));
+  }
+
+  // Shared check-in system prompt (project context + last-session injection + close nudge)
+  function checkinSystemPrompt() {
+    const roadmap = currentProject?.recovery_plan?.roadmap || currentProject?.roadmap || [];
+    const phase = roadmap[Math.min(currentWeekIndex(), roadmap.length - 1)];
+    let p = CHECKIN_SYSTEM;
+    if (currentProject) {
+      p += `\n\nUser's project: "${currentProject.project_title || ''}". Current focus: "${phase?.focus || ''}".`;
+    }
+    if (lastSessionSummary) {
+      p += `\n\nLast session the user said: ${lastSessionSummary}`;
+    }
+    if (userTurnCount >= 5) {
+      p += `\n\nThis check-in has covered several exchanges. In your next reply, gently begin bringing the conversation to a warm close — reflect back what they shared and offer encouragement. Do not open a new line of questioning.`;
+    }
+    return p;
+  }
+
+  function renderProjectInfo(project) {
+    const startDate = new Date(project.started_at || project.created_at);
+    const diffDays = Math.floor((Date.now() - startDate) / (1000 * 60 * 60 * 24));
+    const weekIndex = Math.max(0, Math.floor(diffDays / 7));
+    const roadmap = project.recovery_plan?.roadmap || project.roadmap || [];
+    const phase = roadmap[Math.min(weekIndex, roadmap.length - 1)];
+
+    // Day X of 90 progress (item 10)
+    const dayNum = Math.min(90, Math.max(1, diffDays + 1));
+    document.getElementById('progressBlock').style.display = 'block';
+    document.getElementById('progressDay').textContent = `Day ${dayNum} of 90`;
+    document.getElementById('progressFill').style.width = (dayNum / 90 * 100) + '%';
+
+    if (phase) {
+      document.getElementById('focusCollapsible').style.display = 'block';
+      document.getElementById('focusValuePreview').textContent = phase.focus;
+      const ft = document.getElementById('focusFullText');
+      if (phase.theory) {
+        const info = detectTheory(phase.theory);
+        // D-8: surface a clearly visible theory chip in the (always-visible) header
+        if (info) {
+          focusTheoryKey = info.key;
+          document.getElementById('focusTheoryChipName').textContent = THEORY_INFO[info.key].short;
+          document.getElementById('focusTheoryChip').style.display = 'inline-flex';
+        }
+        ft.innerHTML = `<span class="focus-theory-name">${escHtml(phase.theory)}</span>`
+          + (phase.theory_explanation ? `<div class="focus-theory-text">${escHtml(phase.theory_explanation)}</div>` : '');
+      } else {
+        ft.textContent = phase.focus;
+      }
+    }
+  }
+
+  // Static, human-written explanations of each clinical method (C-2)
+  let focusTheoryKey = null;
+  const THEORY_INFO = {
+    eft: { name: 'Emotionally Focused Therapy (EFT)', short: 'EFT', text: 'EFT looks at the emotions underneath your conflicts — the fear, hurt, or longing driving the cycle — so you can respond to what\'s really going on instead of the surface argument. It fits when the core pain is feeling unwanted, unseen, or disconnected.' },
+    gottman: { name: 'The Gottman Method', short: 'Gottman', text: 'Built on decades of research into what keeps couples close, the Gottman Method focuses on everyday habits — how you handle conflict, repair after a fight, and stay connected. It fits when the same arguments keep cycling.' },
+    mi: { name: 'Motivational Interviewing (MI)', short: 'MI', text: 'MI is a gentle way of working through mixed feelings about change, helping you find your own reasons and readiness rather than being pushed. It fits when part of you wants things to change and part of you feels stuck or unsure.' },
+    cbt: { name: 'Cognitive Behavioral Therapy (CBT)', short: 'CBT', text: 'CBT notices the automatic thoughts that shape how you feel and react, and gently tests whether they\'re actually true. It fits when harsh or absolute thoughts ("they\'ll always say no") are getting in the way.' },
+    ibct: { name: 'Integrative Behavioral Couple Therapy (IBCT)', short: 'IBCT', text: 'IBCT blends making real changes with accepting the differences that won\'t fully change — easing the resentment that builds over years. It fits when there\'s a long history of the same hurts.' },
+    sensate: { name: 'Sensate Focus', short: 'Sensate Focus', text: 'Sensate Focus is a slow, pressure-free way to rebuild physical closeness through gentle, structured touch — never rushing intimacy. It\'s introduced only later, once there\'s enough groundwork and safety.' },
+  };
+  function detectTheory(str) {
+    const s = (str || '').toLowerCase();
+    let key = null;
+    if (s.includes('sensate')) key = 'sensate';
+    else if (s.includes('ibct') || s.includes('integrative behavioral')) key = 'ibct';
+    else if (s.includes('eft') || s.includes('emotionally focused')) key = 'eft';
+    else if (s.includes('gottman')) key = 'gottman';
+    else if (s.includes('motivational') || /\bmi\b/.test(s)) key = 'mi';
+    else if (s.includes('cbt') || s.includes('cognitive behavioral')) key = 'cbt';
+    if (!key) return null;
+    return { key, name: THEORY_INFO[key].name };
+  }
+  function openTheoryInfo(key) {
+    const info = THEORY_INFO[key];
+    if (!info) return;
+    document.getElementById('theoryInfoTitle').textContent = info.name;
+    document.getElementById('theoryInfoText').textContent = info.text;
+    document.getElementById('theoryInfoModal').classList.add('open');
+  }
+  function escHtml(s) { return (s || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+  function escAttr(s) { return (s || '').replace(/"/g,'&quot;').replace(/'/g,'&#39;'); }
+
+  async function saveMessage(role, content) {
+    if (!sbClient) return;
+    await ensureCheckinSession(); // lazy-create on first real message (D-9)
+    if (!checkinSessionId) return;
+    try {
+      await sbClient.from('messages').insert({ session_id: checkinSessionId, role, content });
+    } catch (_) {}
+  }
+
+  // ── Chat ──
+  function addMessage(role, text, addToHistory = true, instant = false) {
+    const area = document.getElementById('chatMessages');
+    const el = document.createElement('div');
+    if (role === 'ai') {
+      el.className = 'msg-ai';
+      if (instant) el.textContent = text; else animateWords(el, text);
+    } else {
+      el.className = 'msg-user';
+      el.textContent = text;
+    }
+    area.appendChild(el);
+    area.scrollTop = area.scrollHeight;
+    if (addToHistory) chatHistory.push({ role: role === 'ai' ? 'assistant' : 'user', content: text });
+    return el;
+  }
+
+  function animateWords(el, text) {
+    const words = text.split(' ');
+    el.innerHTML = '';
+    words.forEach((w, i) => {
+      const span = document.createElement('span');
+      span.className = 'word';
+      span.textContent = (i === 0 ? '' : ' ') + w;
+      el.appendChild(span);
+    });
+    let i = 0;
+    const spans = el.querySelectorAll('.word');
+    function showNext() {
+      if (i < spans.length) { spans[i].classList.add('visible'); i++; setTimeout(showNext, 22); }
+    }
+    showNext();
+  }
+
+  function showTyping() {
+    const area = document.getElementById('chatMessages');
+    const el = document.createElement('div');
+    el.className = 'typing-dots'; el.id = 'dashTyping';
+    el.innerHTML = '<span></span><span></span><span></span>';
+    area.appendChild(el);
+    area.scrollTop = area.scrollHeight;
+  }
+  function hideTyping() { document.getElementById('dashTyping')?.remove(); }
+
+  document.getElementById('chatInput').addEventListener('keydown', (e) => {
+    if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); if (!chatStreaming) sendChat(); }
+  });
+  document.getElementById('chatInput').addEventListener('input', function() {
+    this.style.height = 'auto';
+    this.style.height = Math.min(this.scrollHeight, 100) + 'px';
+  });
+
+  // iOS keyboard (items 15-16): keep the focused chat input above the keyboard
+  function keepInputVisible() {
+    const input = document.getElementById('chatInput');
+    if (input && document.activeElement === input) {
+      input.scrollIntoView({ block: 'center', behavior: 'smooth' });
+    }
+  }
+  if (window.visualViewport) window.visualViewport.addEventListener('resize', keepInputVisible);
+  document.getElementById('chatInput').addEventListener('focus', () => setTimeout(keepInputVisible, 250));
+
+  async function callAPI(sys, hist) {
+    const res = await fetch('/api/chat', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ model: 'claude-sonnet-4-6', max_tokens: 300, system: sys, messages: hist })
+    });
+    if (!res.ok) {
+      const errData = await res.json().catch(() => ({}));
+      throw new Error(errData.error || `API error ${res.status}`);
+    }
+    const data = await res.json();
+    return data.content[0].text;
+  }
+
+  async function sendChat() {
+    const input = document.getElementById('chatInput');
+    const text = input.value.trim();
+    if (!text || chatStreaming || checkinClosed) return;
+    input.value = ''; input.style.height = 'auto';
+    chatStreaming = true;
+    document.getElementById('chatSendBtn').disabled = true;
+
+    addMessage('user', text);
+    saveMessage('user', text);
+    userTurnCount++;
+
+    showTyping();
+    try {
+      const reply = await callAPI(checkinSystemPrompt(), chatHistory);
+      hideTyping();
+      addMessage('ai', reply);
+      saveMessage('assistant', reply);
+      // Offer to wrap up once the conversation has run a while (item 6)
+      if (userTurnCount >= 5 && !checkinClosed) {
+        document.getElementById('wrapUpBar').style.display = 'block';
+      }
+    } catch (e) {
+      hideTyping();
+      const area = document.getElementById('chatMessages');
+      const el = document.createElement('div');
+      el.className = 'msg-ai';
+      el.textContent = 'Something went wrong. Please try again.';
+      area.appendChild(el);
+      console.error('[Anew] chat error:', e.message);
+    } finally {
+      chatStreaming = false;
+      document.getElementById('chatSendBtn').disabled = false;
+    }
+  }
+
+  // ── Session close flow (items 6 + 21) ──
+  function startWrapUp() {
+    document.getElementById('wrapUpBar').style.display = 'none';
+    if (!partnerReactionDone && currentProject) {
+      document.getElementById('partnerReaction').style.display = 'block';
+      document.getElementById('partnerReaction').scrollIntoView({ behavior: 'smooth', block: 'center' });
+    } else {
+      finalizeCheckin();
+    }
+  }
+
+  // Record the partner reaction, then let the AI acknowledge it (item 21)
+  async function recordReaction(choice) {
+    partnerReactionDone = true;
+    document.getElementById('partnerReaction').style.display = 'none';
+
+    if (currentProject) {
+      try {
+        await sbClient.from('actions').insert({
+          project_id: currentProject.id,
+          type: 'partner_reaction',
+          description: choice,
+          week_index: currentWeekIndex(),
+        });
+      } catch (e) { console.error('[Anew] reaction save error:', e.message); }
+    }
+
+    // Include the choice in the conversation so the reply lands on it
+    addMessage('user', choice);
+    saveMessage('user', choice);
+    showTyping();
+    try {
+      const reply = await callAPI(
+        checkinSystemPrompt() + '\n\nThe user just shared how it went with their partner this week. Respond in one or two warm sentences that receive what they chose, without judgment. Do not ask a new question.',
+        chatHistory
+      );
+      hideTyping();
+      addMessage('ai', reply);
+      saveMessage('assistant', reply);
+    } catch (e) {
+      hideTyping();
+    }
+    finalizeCheckin();
+  }
+
+  function skipReaction() {
+    partnerReactionDone = true;
+    document.getElementById('partnerReaction').style.display = 'none';
+    finalizeCheckin();
+  }
+
+  // Generate + store the weekly summary and show the card (item 6)
+  async function finalizeCheckin() {
+    if (checkinClosed) return;
+    checkinClosed = true;
+    // D-2: no dangling input — remove the input bar entirely and show a done state
+    document.getElementById('chatInputBar').style.display = 'none';
+    document.getElementById('wrapUpBar').style.display = 'none';
+    document.getElementById('purposeHeader').style.display = 'none';
+    document.getElementById('doneCard').style.display = 'block';
+    if (!nextCheckinStr) document.getElementById('doneSchedule').style.display = 'block';
+
+    // Warm closing message with a clear exit (C-3)
+    const closing = "Thank you for sharing this today — this is enough for now. "
+      + (nextCheckinStr ? `Your next check-in is ${nextCheckinStr}. ` : "I'll be here next week. ")
+      + "You can close the app whenever you're ready; we'll pick this up next time.";
+    addMessage('ai', closing, false);
+    saveMessage('assistant', closing);
+
+    try {
+      const transcript = chatHistory
+        .map(m => `${m.role === 'assistant' ? 'Anew' : 'User'}: ${m.content}`)
+        .join('\n');
+      const summary = await callAPI(SUMMARY_SYSTEM, [{ role: 'user', content: transcript }]);
+      if (summary && checkinSessionId) {
+        try { await sbClient.from('sessions').update({ summary }).eq('id', checkinSessionId); } catch (_) {}
+      }
+      if (summary) {
+        document.getElementById('summaryBody').textContent = summary;
+        document.getElementById('summaryCard').style.display = 'block';
+        document.getElementById('summaryCard').scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }
+    } catch (e) {
+      console.error('[Anew] summary error:', e.message);
+    }
+  }
+
+  // ── Collapsibles ──
+  function toggleCollapsible(id) {
+    const body = document.getElementById(id + 'Body');
+    const chevron = document.getElementById(id + 'Chevron');
+    body.classList.toggle('open');
+    chevron.classList.toggle('open');
+  }
+
+  // ── Check-in scheduling (native picker + presets, items 17/C-5/C-6) ──
+  // E-2: split date + 30-min time select (native step is unreliable)
+  function pad2(n) { return String(n).padStart(2, '0'); }
+  function localDateStr(d) { return `${d.getFullYear()}-${pad2(d.getMonth() + 1)}-${pad2(d.getDate())}`; }
+  function fmtTimeDisplay(h, m) {
+    const ampm = h < 12 ? 'AM' : 'PM'; let hh = h % 12; if (hh === 0) hh = 12;
+    return `${hh}:${pad2(m)} ${ampm}`;
+  }
+  function populateTimeOptions() {
+    const sel = document.getElementById('checkinTime');
+    if (sel.options.length) return;
+    for (let h = 0; h < 24; h++) {
+      for (const m of [0, 30]) {
+        const o = document.createElement('option');
+        o.value = `${pad2(h)}:${pad2(m)}`;
+        o.textContent = fmtTimeDisplay(h, m);
+        sel.appendChild(o);
+      }
+    }
+  }
+  function defaultCheckinDate() {
+    const d = new Date(); d.setDate(d.getDate() + 7); d.setHours(19, 0, 0, 0); return d;
+  }
+  function setSheetDateTime(d) {
+    document.getElementById('checkinDate').value = localDateStr(d);
+    const m = d.getMinutes() < 30 ? 0 : 30;
+    document.getElementById('checkinTime').value = `${pad2(d.getHours())}:${pad2(m)}`;
+  }
+  function scheduleCheckin() {
+    populateTimeOptions();
+    const today = new Date(); today.setHours(0, 0, 0, 0);
+    document.getElementById('checkinDate').min = localDateStr(today); // D-5/E-2
+    setSheetDateTime(defaultCheckinDate());
+    document.getElementById('checkinSheetError').classList.remove('show');
+    document.getElementById('checkinSheet').classList.add('open');
+  }
+  function closeCheckinSheet() {
+    document.getElementById('checkinSheet').classList.remove('open');
+  }
+  function presetNextWeek() { setSheetDateTime(defaultCheckinDate()); }
+  function presetSundayEvening() {
+    const d = new Date();
+    const daysUntilSunday = (7 - d.getDay()) % 7 || 7;
+    d.setDate(d.getDate() + daysUntilSunday);
+    d.setHours(19, 0, 0, 0);
+    setSheetDateTime(d);
+  }
+  async function saveCheckin() {
+    const err = document.getElementById('checkinSheetError');
+    const dateV = document.getElementById('checkinDate').value;
+    const timeV = document.getElementById('checkinTime').value;
+    if (!dateV || !timeV) { err.textContent = 'Please choose a date and time.'; err.classList.add('show'); return; }
+    const [hh, mm] = timeV.split(':').map(Number);
+    if (!(mm === 0 || mm === 30)) { err.textContent = 'Please pick a time on the hour or half-hour.'; err.classList.add('show'); return; }
+    const d = new Date(`${dateV}T${timeV}`);
+    if (isNaN(d.getTime())) { err.textContent = 'That date doesn\'t look right.'; err.classList.add('show'); return; }
+    const yr = d.getFullYear(); const nowYr = new Date().getFullYear();
+    if (yr < nowYr || yr > nowYr + 5) { err.textContent = 'Please choose a valid date.'; err.classList.add('show'); return; }
+    const todayStart = new Date(); todayStart.setHours(0, 0, 0, 0);
+    if (d < todayStart) { err.textContent = 'Please choose today or a future date.'; err.classList.add('show'); return; }
+    if (d.getTime() <= Date.now()) { err.textContent = 'Please choose a time in the future.'; err.classList.add('show'); return; }
+    if (!currentProject) { closeCheckinSheet(); return; }
+
+    const btn = document.getElementById('checkinSaveBtn');
+    btn.disabled = true; btn.textContent = 'Saving…';
+    try {
+      await sbClient.from('checkins').insert({ project_id: currentProject.id, scheduled_at: d.toISOString() });
+      const str = d.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' }) +
+        ' at ' + d.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
+      nextCheckinStr = str;
+      document.getElementById('checkinValuePreview').textContent = d.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' });
+      document.getElementById('checkinDateFull').textContent = str;
+      document.getElementById('doneSchedule').style.display = 'none';
+      closeCheckinSheet();
+    } catch (e) {
+      err.textContent = 'Couldn\'t save just now. Please try again.'; err.classList.add('show');
+    } finally {
+      btn.disabled = false; btn.textContent = 'Save check-in';
+    }
+  }
+  document.getElementById('checkinSheet').addEventListener('click', (e) => {
+    if (e.target === document.getElementById('checkinSheet')) closeCheckinSheet();
+  });
+
+  // ── Hamburger menu ──
+  function openMenu() {
+    document.getElementById('menuOverlay').classList.add('open');
+    document.getElementById('menuDrawer').classList.add('open');
+  }
+  function closeMenu() {
+    document.getElementById('menuOverlay').classList.remove('open');
+    document.getElementById('menuDrawer').classList.remove('open');
+  }
+  async function handleLogout() {
+    if (sbClient) await sbClient.auth.signOut();
+    window.location.href = '/app.html';
+  }
+
+  // Account lives on /account.html now; the theory info modal closes on backdrop tap
+  document.getElementById('theoryInfoModal').addEventListener('click', (e) => {
+    if (e.target === document.getElementById('theoryInfoModal')) e.currentTarget.classList.remove('open');
+  });
+
+  // Past-due recovery: open the Stripe Billing Portal to update payment (item 25)
+  async function updatePayment() {
+    const btn = document.getElementById('payDueBtn');
+    btn.disabled = true; btn.textContent = 'Opening…';
+    try {
+      const { data: { session } } = await sbClient.auth.getSession();
+      const res = await fetch('/api/billing-portal', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${session.access_token}`
+        }
+      });
+      const data = await res.json();
+      if (data.url) { window.location.href = data.url; return; }
+      throw new Error('No portal URL');
+    } catch (e) {
+      btn.disabled = false; btn.textContent = 'Update payment method';
+      document.getElementById('payDueBanner').querySelector('.paydue-text').textContent =
+        'We couldn\'t open the payment page just now. Please try again in a moment.';
+    }
+  }
+
+  // ── First-run profile sheet: nickname + anniversary (items 11, 23, 26) ──
+  function maybeShowIntro() {
+    // null = never asked. '' or a value = already handled, don't re-show.
+    if (nicknameValue === null || typeof nicknameValue === 'undefined') {
+      document.getElementById('introOverlay').classList.add('open');
+      setTimeout(() => document.getElementById('nicknameInput').focus(), 250);
+    }
+  }
+
+  async function saveIntro() {
+    const btn = document.getElementById('introSaveBtn');
+    btn.disabled = true; btn.textContent = 'Saving…';
+    const nick = document.getElementById('nicknameInput').value.trim();
+    const anniversary = document.getElementById('anniversaryInput').value; // '' or YYYY-MM-DD
+    const update = { nickname: nick }; // '' marks it as asked so we don't show again
+    if (anniversary) update.anniversary_date = anniversary;
+    try {
+      await sbClient.from('users').update(update).eq('id', currentUser.id);
+    } catch (e) { console.error('[Anew] intro save error:', e.message); }
+    nicknameValue = nick;
+    setGreeting();
+    closeIntro();
+  }
+
+  async function skipIntro() {
+    // Mark as asked (empty string) so it never reappears
+    try { await sbClient.from('users').update({ nickname: '' }).eq('id', currentUser.id); } catch (_) {}
+    nicknameValue = '';
+    closeIntro();
+  }
+
+  function closeIntro() {
+    document.getElementById('introOverlay').classList.remove('open');
+    const btn = document.getElementById('introSaveBtn');
+    btn.disabled = false; btn.textContent = 'Save';
+  }
+
+  init();
+
+  /*
+    ── Manual test (Batch B) ──
+    Item 5:  Complete a check-in (so a session summary exists), reload. The opening
+             AI message should reference last week instead of the generic greeting.
+    Item 6:  Send 5+ messages -> "Wrap up this week" appears. Finishing writes a
+             3-4 sentence summary to sessions.summary and shows the "This week" card;
+             input becomes disabled.
+    Item 10: With an active project, "Day X of 90" + clay progress bar show under the
+             greeting (scales with days since started_at). Hidden with no project.
+    Item 11/23/26: First load with users.nickname = null opens the bottom sheet.
+             Save stores nickname (+ anniversary_date if set); greeting updates.
+             Skip stores nickname='' and the sheet never returns. Inputs are 16px / 44px.
+    Item 21: During wrap-up, the 4-choice partner-reaction card appears. Choosing inserts
+             an actions row (type='partner_reaction', week_index) and the AI acknowledges
+             it; "Skip" proceeds without recording. Neither blocks finishing.
+  */
+</script>
+</body>
+</html>
