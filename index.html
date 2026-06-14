@@ -185,6 +185,34 @@ nav {
 .step-body { font-size: 14px; line-height: 1.75; color: var(--charcoal-soft); }
 .step-body strong { font-weight: 500; color: var(--charcoal); }
 
+/* THE DIFFERENCE */
+.section-difference { background: var(--section-alt); padding: 96px 48px; }
+.difference-inner { max-width: 920px; margin: 0 auto; }
+.diff-headers { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; margin-bottom: 14px; }
+.diff-h { font-size: 11px; font-weight: 500; letter-spacing: 0.16em; text-transform: uppercase; padding: 0 4px 12px; border-bottom: 1px solid var(--blush-deep); }
+.diff-h-generic { color: var(--stone); }
+.diff-h-anew { color: var(--clay); }
+.diff-rows { display: flex; flex-direction: column; gap: 14px; }
+.diff-row { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
+.diff-cell { padding: 22px 24px; border-radius: 14px; }
+.diff-generic { background: rgba(138,120,112,0.07); }
+.diff-anew { background: white; box-shadow: 0 2px 16px rgba(28,22,20,0.05); }
+.diff-cell p { font-size: 14.5px; line-height: 1.6; margin: 0; }
+.diff-generic p { color: var(--charcoal-soft); }
+.diff-anew p { color: var(--charcoal); }
+.diff-tag { display: none; font-size: 10px; font-weight: 500; letter-spacing: 0.14em; text-transform: uppercase; margin-bottom: 8px; }
+.difference-close { font-family: 'Cormorant Garamond', serif; font-size: clamp(22px, 2.6vw, 30px); font-weight: 300; font-style: italic; color: var(--clay-dark); text-align: center; line-height: 1.35; margin-top: 56px; }
+
+@media (max-width: 768px) {
+  .section-difference { padding: 72px 24px; }
+  .diff-headers { display: none; }
+  .diff-row { grid-template-columns: 1fr; gap: 12px; }
+  .diff-tag { display: block; }
+  .diff-generic .diff-tag { color: var(--stone); }
+  .diff-anew .diff-tag { color: var(--clay); }
+  .difference-close { margin-top: 44px; }
+}
+
 /* PEOPLE LIKE YOU */
 .section-people { background: var(--section-alt); padding: 96px 48px; }
 .people-inner { max-width: 920px; margin: 0 auto; }
@@ -354,7 +382,7 @@ footer { background: var(--charcoal); padding: 44px 48px; display: flex; justify
 <body>
 
 <nav>
-  <a href="#" class="nav-logo">Anew</a>
+  <a href="/" class="nav-logo">Anew</a>
   <a href="/onboarding.html" class="nav-cta">Start privately</a>
 </nav>
 
@@ -452,6 +480,37 @@ footer { background: var(--charcoal); padding: 44px 48px; display: flex; justify
   </div>
 </section>
 
+<!-- 5. THE DIFFERENCE -->
+<section class="section-difference">
+  <div class="difference-inner">
+    <p class="section-label reveal">The difference</p>
+    <h2 class="section-headline reveal">Why not just ask a chatbot?</h2>
+    <div class="diff-headers reveal">
+      <div class="diff-h diff-h-generic">A generic AI</div>
+      <div class="diff-h diff-h-anew">Anew</div>
+    </div>
+    <div class="diff-rows">
+      <div class="diff-row reveal">
+        <div class="diff-cell diff-generic"><span class="diff-tag">A generic AI</span><p>Sympathizes and says what sounds comforting.</p></div>
+        <div class="diff-cell diff-anew"><span class="diff-tag">Anew</span><p>Grounded in the Gottman Method &mdash; responses trace back to clinical research, not guesswork.</p></div>
+      </div>
+      <div class="diff-row reveal">
+        <div class="diff-cell diff-generic"><span class="diff-tag">A generic AI</span><p>Forgets you the moment you close it.</p></div>
+        <div class="diff-cell diff-anew"><span class="diff-tag">Anew</span><p>Remembers your story &mdash; your patterns, what you've tried, what happened last week.</p></div>
+      </div>
+      <div class="diff-row reveal">
+        <div class="diff-cell diff-generic"><span class="diff-tag">A generic AI</span><p>Drifts into anything you ask.</p></div>
+        <div class="diff-cell diff-anew"><span class="diff-tag">Anew</span><p>Stays on one thing: moving your relationship forward.</p></div>
+      </div>
+      <div class="diff-row reveal">
+        <div class="diff-cell diff-generic"><span class="diff-tag">A generic AI</span><p>Leaves you feeling heard, but still stuck.</p></div>
+        <div class="diff-cell diff-anew"><span class="diff-tag">Anew</span><p>Helps you take the actual next step.</p></div>
+      </div>
+    </div>
+    <p class="difference-close reveal">A knowledgeable partner who walks through it with you.</p>
+  </div>
+</section>
+
 <!-- 6. FAQ -->
 <section class="section-faq">
   <div class="faq-inner">
@@ -510,7 +569,6 @@ footer { background: var(--charcoal); padding: 44px 48px; display: flex; justify
   <div class="footer-links">
     <a href="/privacy.html" class="footer-link">Privacy</a>
     <a href="/terms.html" class="footer-link">Terms</a>
-    <a href="#" class="footer-link">Contact</a>
   </div>
   <span class="footer-note">&copy; 2026 Anew &middot; anewapp.net</span>
 </footer>
