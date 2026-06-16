@@ -236,10 +236,11 @@
   const SEED_MESSAGE = "Before I build this, it would help to understand a little more — what everyday life together has felt like lately, what you've already tried, and what you're most worried about. There's no rush; share whatever feels true, and tap the Build my project button below whenever you're ready.";
 
   const INTAKE_SYSTEM = `You are Anew, a warm relationship support guide. The user has just paid and started building their 90-day project, but a little more context will make it fit their situation.
-Ask gentle follow-up questions, one at a time, to understand: what daily life together looks like, what they have already tried, and what they are most worried about.
+The earlier messages in this conversation are what the user already shared during onboarding. Treat ALL of it as already known: never re-ask anything they have already answered (for example how long it has been going on, the partner's reaction, what they have already tried, or their stated fear), and never apologise for repeating. Only ask about details that are genuinely still missing.
+Ask gentle follow-up questions, one at a time, to fill only the real gaps in: what daily life together looks like, what they have already tried, and what they are most worried about.
 Keep replies to 1-2 warm, plain sentences. One question at a time. No lists. Never use emojis or decorative symbols.
 Only discuss their relationship. If asked to do anything unrelated, gently decline in one sentence and steer back.
-When you sense you have enough, warmly let them know they can tap "Build my project" whenever they're ready. Do not claim to have built anything.`;
+When you judge you have enough detail, do not ask another question. Instead, give a brief warm closing, and your closing message MUST end with a clear one-line nudge to tap the "Build my project" button below — for example: When you're ready, tap "Build my project" below. Always include that nudge on the closing turn. Keep it warm, not pushy. Do not claim to have built anything.`;
 
   async function init() {
     try {
@@ -394,7 +395,7 @@ When you sense you have enough, warmly let them know they can tap "Build my proj
 
   // F-1: gather the missing context in ONE inline conversation via /api/chat
   // (no per-turn re-generation). generate-project runs only on "Build my project".
-  function enterNeedsMoreChat() {
+  async function enterNeedsMoreChat() {
     document.getElementById('loadingScreen').style.display = 'none';
     document.getElementById('mainContent').style.display = 'block';
     document.getElementById('projectView').style.display = 'none';
@@ -405,9 +406,35 @@ When you sense you have enough, warmly let them know they can tap "Build my proj
 
     if (!nmActive) {
       nmActive = true;
+      await loadOnboardingContext();   // give the intake AI the onboarding transcript first
       appendNmAssistant(SEED_MESSAGE); // one warm, pre-framing message (no bullets)
     }
     document.getElementById('nmInput').focus();
+  }
+
+  // Feed the prior onboarding transcript into the needs_more chat so the intake AI
+  // can SEE what was already covered and doesn't re-ask. In-memory only — these turns
+  // are already persisted to this session, so we never re-save them (no double-write).
+  async function loadOnboardingContext() {
+    if (!sbClient || !onboardingSessionId) return;
+    try {
+      const { data } = await sbClient
+        .from('messages')
+        .select('role, content')
+        .eq('session_id', onboardingSessionId)
+        .order('created_at', { ascending: true });
+      if (!data || !data.length) return;
+      let prev = null;
+      for (const m of data) {
+        const role = m.role === 'assistant' ? 'assistant' : 'user';
+        const content = (m.content || '').trim();
+        if (!content) continue;
+        // dedupe identical consecutive turns (harmless reload artifact); keep all facts
+        if (prev && prev.role === role && prev.content === content) continue;
+        nmHistory.push({ role, content });
+        prev = { role, content };
+      }
+    } catch (_) {}
   }
 
   function appendNmAssistant(text) {
